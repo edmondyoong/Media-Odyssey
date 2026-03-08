@@ -1,0 +1,72 @@
+body {
+    background-color: #1E1E1E;
+} 
+
+header {
+    background-color: #26054B;
+    position: fixed; 
+    top: 0px; 
+    left: 0px;
+    right: 0px; 
+    
+}
+
+.logo {
+    width: 90px;
+    height: 40px;
+    left: 15px;
+    top: 15px;
+}
+
+.home-btn{
+    width: 90px;
+    height: 40px;
+}
+
+.home-btn:hover{
+    cursor: pointer; 
+}
+
+.search-bar {
+    width: 500px;
+    height: 40px;
+    left: 250px;
+    top: 15px;
+
+    background: rgba(173, 163, 192, 0.5);
+    padding: 4px;
+    padding-left: 20px;
+    border-radius: 65px;
+    line-height: 20px;
+} 
+
+.search-bar::placeholder{
+    font-family: 'Space Grotesk';
+    color: #999; 
+    font-style: normal;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.board {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 2rem;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    text-decoration: none; 
+    color: #333;     
+    transition: all 0.2s;
+}
+
+.board:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
+}
