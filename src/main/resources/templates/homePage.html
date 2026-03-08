@@ -21,10 +21,27 @@
              </div>
         </header>
 
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded -->
+        <aside class="side-bar">
+            <div class="sidebar-content">
+                <ul class="features-list">
+                    <li></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- User side....?-->
+
+        <!-- This div contains the display of boards user have joined and recommendations boards -->
         <div id="mainContent" class="main-content">
-            <div id=""></div>
-            <div id="personalBoardsDisplay" class="personal-boards-display">
-                <a href="/createBoard" class="board create-board">+</a>
+
+            <h3 id="personalBoardTitle" class="personal-boards-title">
+                Journeys you've joined:
+            </h3>
+            <div id="personalBoardsContainer" class="personal-boards-container">
+                <div>
+                    <a href="/createBoard" class="board create-board">+</a>
+                </div>
             </div>
 
             <div id="recommendationDisplay" class="recommendation-display"></div>

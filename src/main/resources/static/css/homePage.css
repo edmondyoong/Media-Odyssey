@@ -55,8 +55,17 @@ header {
 
 /* BODY ///////////////////////////////////////// */ 
 .main-content {
-    padding-top: 80px;
+    padding-top: 95px;
     padding-left: 25px;
+
+    font-family: 'Space Grotesk';
+}
+
+.personal-boards-title{
+    font-size: 30px;
+    color: white;
+
+    margin: 13px;
 }
 
 .board {
