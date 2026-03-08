@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <head>
+        <meta charset="UTF-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Song's name</title>
+        <link rel="stylesheet" th:href="@{/css/homePage.css}">
+    </head>
+    <body>
+        <!--This html will show when user click on any movies. A webpage that shows ....-->
+        <header>
+            <!--LOGO-->
+            <img th:src="@{/images/MO.svg}" alt="Logo" class="logo">
+
+            <!--Home Button (returns to the landing page)-->
+            <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
+
+            <!-- Search bar -->
+             <div>
+                <input type="text"  id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
+             </div>
+        </header>
+        <main>
+            <div class="songAvt"></div>
+            <h4 class="songTitle"></h4>
+
+            <p class="description"></p>
+            <p class="lyric-box"></p>
+        </main>
+    </body>
+</html>
