@@ -21,9 +21,6 @@ public class RecommendationService {
     for (UserInteraction interaction : allUserInteractions) {
         if (interaction.getMediaType().equals(mediaType)) {
 
-            // TODO: replace with actual API call using interaction.getMediaApiId() to get genre
-            String genre = "PLACEHOLDER_GENRE";
-
             int points = 0;
             switch (interaction.getInteractionType()) {
                 case "VIEW": points = 1; break;
@@ -32,7 +29,10 @@ public class RecommendationService {
                 default: points = 0; break;
             }
 
-            genreScores.put(genre, genreScores.getOrDefault(genre, 0) + points);
+            for (String genre : interaction.getGenres()) {
+                // if genre already exists in map, add points to its current score; if not, start it at 0 then add points
+                genreScores.put(genre, genreScores.getOrDefault(genre, 0) + points);
+            }
         }
     }
 
@@ -51,6 +51,7 @@ public class RecommendationService {
 
     public List<RecommendationResponse> getRecommendations(Long userId, String mediaType) {
     // logic here
+    // userFavoriteGenre(userId, mediaType) find best media within genre and recommend to user
 
     return null;
 }
