@@ -4,6 +4,7 @@ body {
 
 header {
     background-color: #26054B;
+
     position: fixed; 
     top: 0px; 
     left: 0px;
@@ -14,6 +15,7 @@ header {
     display: flex;
     align-items: center;
     gap: 5px; 
+    padding: 0 20px;
 }
 
 .logo {
@@ -60,10 +62,15 @@ header {
 }
 
 .avatar-display{
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
 
-    font-family: 'Space Grotesk';
-    color: white;
-    font-style: bold;
+    margin-left: auto;
+    border: white;
+    background-color: white;
+    cursor: pointer; 
 }
 
 /* BODY ///////////////////////////////////////// */ 
