@@ -19,13 +19,13 @@
 
         <!-- main content starts here -->
         <main class="form-container">
-            <form action="#" method="post" class="create-board-form">
+            <form th:action="@{/boards/create}" method="post" th:object="${boards}" class="create-board-form">
                 <div class="form-leftside">
-                    <input type="text" name="boardName" placeholder="Your adventure's name" class="name-input-box">
+                    <input type="text" th:field="*{board_name}" placeholder="Your adventure's name" class="name-input-box">
 
-                    <input type="text" name="boardDescription" placeholder="Describe your adventure" class="desc-input-box">
+                    <input type="text" th:field="*{board_description}" placeholder="Describe your adventure" class="desc-input-box">
 
-                    <select name="boardTypes" id="boardType" class="board-type">
+                    <select th:field="board_type" id="boardType" class="board-type">
                         <option value="Public">Public</option>
                         <option value="Private">Private</option>
                     </select>
