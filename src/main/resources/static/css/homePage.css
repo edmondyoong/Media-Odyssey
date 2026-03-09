@@ -2,6 +2,7 @@ body {
     background-color: #1E1E1E;
 } 
 
+/* HEADER */ 
 header {
     background-color: #26054B;
 
@@ -23,6 +24,8 @@ header {
     height: 40px;
     left: 15px;
     top: 15px;
+
+    cursor: pointer;
 }
 
 .home-btn{
@@ -71,6 +74,59 @@ header {
     border: white;
     background-color: white;
     cursor: pointer; 
+}
+
+/* SIDE BAR*/ 
+
+.side-bar {
+    position: fixed;
+    top: 80px;
+    left: 0;
+
+    width: 220px;
+    height: 100vh;
+
+    background-color: #290f67;
+
+    transition: width 0.3s ease;
+}
+
+.side-bar.collapsed {
+    width: 0px;
+}
+
+.side-bar.side-bar.collapsed .menu-items {
+    display: none;
+}
+
+.side-bar a {
+    text-decoration: none;
+    font-family: 'Space Grostesk';
+    font-size: 30px;
+}
+
+.side-bar li a {
+    display: block;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0; 
+    margin: 0;
+}
+
+.menu-items{
+    margin: 14px 20px;
+    padding: 6px 10px;
+    
+    color: white;
+    font-weight: 450;
+
+    transition: background 0.2s ease;
+}
+
+.menu-items:hover{
+    background-color: #341381;
 }
 
 /* BODY ///////////////////////////////////////// */ 
