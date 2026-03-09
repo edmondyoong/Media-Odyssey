@@ -37,13 +37,13 @@ public class Media {
     // ── Computed fields (not stored in DB) ────────────────────────────────────
 
     /**
-     * Point System:  totalScore = (views * 1) + (likes * 5)
-     * Likes are weighted 5x because they indicate stronger interest than a passive view.
+     * Point System:  totalScore = (views * 1) + (likes * 10)
+     * Likes are weighted 10x because they indicate stronger interest than a passive view.
      * This score is what drives the Top 10 ranking order.
      */
     @Transient
     public int getTotalScore() {
-        return (views * 1) + (likes * 5);
+        return (views * 1) + (likes * 10);
     }
 
     /**

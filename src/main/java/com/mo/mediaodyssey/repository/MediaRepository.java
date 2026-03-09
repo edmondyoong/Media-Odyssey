@@ -16,17 +16,17 @@ public interface MediaRepository extends JpaRepository<Media, Long> {
     List<Media> findAllByOrderByViewsDesc();
 
     /**
-     * Top 10 by Point System: (views * 1) + (likes * 5)
+     * Top 10 by Point System: (views * 1) + (likes * 10)
      * Used for the main ranked list when no category filter is applied.
      */
-    @Query("SELECT m FROM Media m ORDER BY (m.views * 1 + m.likes * 5) DESC LIMIT 10")
+    @Query("SELECT m FROM Media m ORDER BY (m.views * 1 + m.likes * 10) DESC LIMIT 10")
     List<Media> findTop10ByScore();
 
     /**
      * Top 10 by Point System filtered by a specific category (Game / Movie / Song).
      * Used when the user clicks a tab on the community page.
      */
-    @Query("SELECT m FROM Media m WHERE m.category = :category ORDER BY (m.views * 1 + m.likes * 5) DESC LIMIT 10")
+    @Query("SELECT m FROM Media m WHERE m.category = :category ORDER BY (m.views * 1 + m.likes * 10) DESC LIMIT 10")
     List<Media> findTop10ByScoreAndCategory(@Param("category") String category);
 
     /**
