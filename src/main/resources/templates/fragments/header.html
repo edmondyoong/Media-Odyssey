@@ -1,0 +1,13 @@
+<header th:fragment="header">
+    <img th:src="@{/images/MO.svg}" alt="Logo" class="logo">
+    <a href="/homeReturn">
+        <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
+    </a>
+    <div>
+        <input type="text" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
+    </div>
+    <div class="user">
+        <p class="username-display">username</p>
+        <img th:src="@{/images/Avatar.png}" alt="Avatar" class="avatar-display">
+    </div>
+</header>

@@ -61,7 +61,7 @@ public class CommunityController {
         model.addAttribute("currentSort", sort);
         model.addAttribute("currentCat",  category);
 
-        return "community";
+        return "trending";
     }
 
     // ── 2. Add Media Form ─────────────────────────────────────────────────────
