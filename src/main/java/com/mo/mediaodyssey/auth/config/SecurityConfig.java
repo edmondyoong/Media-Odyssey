@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.config;
+package com.mo.mediaodyssey.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +15,11 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers("/auth/**", "/error").permitAll()
+                        .anyRequest().authenticated())
+                .formLogin((form) -> form
+                        .loginPage("/auth/login")
+                        .permitAll());
         return http.build();
     }
 }

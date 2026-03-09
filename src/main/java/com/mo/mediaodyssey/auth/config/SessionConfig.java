@@ -1,10 +1,9 @@
-package com.mo.mediaodyssey.config;
+package com.mo.mediaodyssey.auth.config;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -12,42 +11,34 @@ import org.springframework.core.serializer.Deserializer;
 import org.springframework.core.serializer.Serializer;
 import org.springframework.core.serializer.support.DeserializingConverter;
 import org.springframework.core.serializer.support.SerializingConverter;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.session.config.SessionRepositoryCustomizer;
 import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
 
-// import tools.jackson.databind.ObjectMapper;
-// import tools.jackson.databind.Module;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableJdbcHttpSession
-public class SessionConfig implements BeanClassLoaderAware {
+public class SessionConfig {
     // Some portions originate from:
     // https://docs.spring.io/spring-session/reference/configuration/jdbc.html#session-attributes-as-json
+    // Debugging assisted by AI
 
-    private ClassLoader classLoader;
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 
     @Bean("springSessionConversionService")
     public GenericConversionService springSessionConversionService(ObjectMapper objectMapper) {
-        ObjectMapper copy = objectMapper.copy();
-        copy.registerModules(SecurityJackson2Modules.getModules(this.classLoader));
         GenericConversionService converter = new GenericConversionService();
-        converter.addConverter(Object.class, byte[].class, new SerializingConverter(new JsonSerializer(copy)));
-        converter.addConverter(byte[].class, Object.class, new DeserializingConverter(new JsonDeserializer(copy)));
+        converter.addConverter(Object.class, byte[].class, new SerializingConverter(new JsonSerializer(objectMapper)));
+        converter.addConverter(byte[].class, Object.class,
+                new DeserializingConverter(new JsonDeserializer(objectMapper)));
         return converter;
     }
 
-    @Override
-    public void setBeanClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
-
     static class JsonSerializer implements Serializer<Object> {
-
         private final ObjectMapper objectMapper;
 
         JsonSerializer(ObjectMapper objectMapper) {
@@ -58,11 +49,9 @@ public class SessionConfig implements BeanClassLoaderAware {
         public void serialize(Object object, OutputStream outputStream) throws IOException {
             this.objectMapper.writeValue(outputStream, object);
         }
-
     }
 
     static class JsonDeserializer implements Deserializer<Object> {
-
         private final ObjectMapper objectMapper;
 
         JsonDeserializer(ObjectMapper objectMapper) {
@@ -73,7 +62,6 @@ public class SessionConfig implements BeanClassLoaderAware {
         public Object deserialize(InputStream inputStream) throws IOException {
             return this.objectMapper.readValue(inputStream, Object.class);
         }
-
     }
 
     private static final String CREATE_SESSION_ATTRIBUTE_QUERY = """
@@ -89,11 +77,10 @@ public class SessionConfig implements BeanClassLoaderAware {
             """;
 
     @Bean
-    SessionRepositoryCustomizer<JdbcIndexedSessionRepository> customizer() {
+    public SessionRepositoryCustomizer<JdbcIndexedSessionRepository> customizer() {
         return (sessionRepository) -> {
             sessionRepository.setCreateSessionAttributeQuery(CREATE_SESSION_ATTRIBUTE_QUERY);
             sessionRepository.setUpdateSessionAttributeQuery(UPDATE_SESSION_ATTRIBUTE_QUERY);
         };
     }
-
 }
