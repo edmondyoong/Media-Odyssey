@@ -1,3 +1,4 @@
+/* Functions to fold and unfold side bar + the logo changes everytime actions are made */
 const logoToggle = document.getElementById("logo");
 const sideBar = document.getElementById("sideBar"); 
 
