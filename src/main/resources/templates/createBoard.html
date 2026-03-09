@@ -11,8 +11,13 @@
         <!--This html will show elments to create a board. 
         This is just to set a board titles and avatar. Objects like movies, games, and songs
         will be added or searched in the boardDisplay.html-->
+
+        <!-- headers and side bar -->
         <div th:replace="fragments/header :: header"></div>
 
+        <div th:replace="fragments/sidebar :: sideBar"></div>
+
+        <!-- main content starts here -->
         <main class="form-container">
             <form action="#" method="post" class="create-board-form">
                 <div class="form-leftside">
@@ -37,5 +42,6 @@
             </form>
         </main>
         
+        <script th:src="@{/js/homePage.js}"></script>
     </body>
 </html>

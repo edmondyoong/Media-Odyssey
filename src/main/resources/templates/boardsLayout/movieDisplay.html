@@ -9,7 +9,11 @@
     </head>
     <body>
         <!--This html will show when user click on any movies. A webpage that shows ....-->
+        
+        <!-- header + side bar  -->
         <div th:replace="fragments/header :: header"></div>
+
+        <div th:replace="fragments/sidebar :: sideBar"></div>
 
         <main>
             <div class="movieAvt"></div>
@@ -17,5 +21,7 @@
 
             <p class="description"></p>
         </main>
+
+        <script th:src="@{/js/homePage.js}"></script>
     </body>
 </html>

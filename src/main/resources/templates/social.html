@@ -8,10 +8,13 @@
         <link rel="stylesheet" th:href="@{/css/homePage.css}">
     </head>
     <body>
-        <!-- header space for logo, home return icon, search bar and username + avatar display -->
+        <!-- header + side bar  -->
         <div th:replace="fragments/header :: header"></div>
+
+        <div th:replace="fragments/sidebar :: sideBar"></div>
 
         <!-- Implement what you want from here -->
 
+        <script th:src="@{/js/homePage.js}"></script>
     </body> 
 </html>
