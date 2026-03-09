@@ -137,6 +137,7 @@ header {
     font-family: 'Space Grotesk';
 }
 
+/* PERSONAL BOARDS DISPLAY */ 
 .personal-boards-title{
     font-size: 30px;
     color: white;
@@ -162,6 +163,35 @@ header {
 }
 
 .board:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
+}
+
+.personal-boards-container{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.board-card{
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 2rem;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    text-decoration: none; 
+    color: #333;     
+    transition: all 0.2s;
+}
+
+.board-card.board-card:hover {
     background-color: #e0e0e0;
     border-color: #999;
 }
