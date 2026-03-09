@@ -16,9 +16,9 @@
             <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
 
             <!-- Search bar -->
-             <div>
-                <input type="text"  id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
-             </div>
+             <form action="/search" method="GET">
+                <input type="text"  name="title" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
+            </form>
         </header>
 
         <!-- A side bar that contains features (can be discussed). Side bar can be folded -->
@@ -35,6 +35,8 @@
 
         <!-- This div contains the display of boards user have joined and recommendations boards -->
         <div id="mainContent" class="main-content">
+
+            <div></div>
 
             <h3 id="personalBoardTitle" class="personal-boards-title">
                 Journeys you've joined:
