@@ -34,17 +34,24 @@
         <!-- This div contains the display of boards user have joined and recommendations boards -->
         <div id="mainContent" class="main-content">
 
+            <!--Leave for display trending music, song, movies-->
             <div></div>
 
             <h3 id="personalBoardTitle" class="personal-boards-title">
                 Journeys you've joined:
             </h3>
             <div id="personalBoardsContainer" class="personal-boards-container">
+
+                <!-- Create board element-->
                 <div>
                     <a href="/createBoard" class="board create-board">+</a>
                 </div>
+
+                <!-- Already joined boards will be shown here -->
+                <div></div>
             </div>
 
+            <!-- Recommendation boards display (horizontally)-->
             <div id="recommendationDisplay" class="recommendation-display"></div>
         </div>
         <script th:src="@{/js/homePage.js}"></script>
