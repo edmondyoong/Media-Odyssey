@@ -53,6 +53,19 @@ header {
     font-size: 18px;
 }
 
+.username-display {
+    font-family: 'Space Grotesk';
+    color: white;
+    font-style: bold;
+}
+
+.avatar-display{
+
+    font-family: 'Space Grotesk';
+    color: white;
+    font-style: bold;
+}
+
 /* BODY ///////////////////////////////////////// */ 
 .main-content {
     padding-top: 95px;
