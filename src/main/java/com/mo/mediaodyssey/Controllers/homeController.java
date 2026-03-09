@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.Controllers;
+package com.mo.mediaodyssey.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
