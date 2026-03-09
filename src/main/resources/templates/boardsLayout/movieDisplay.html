@@ -9,18 +9,8 @@
     </head>
     <body>
         <!--This html will show when user click on any movies. A webpage that shows ....-->
-        <header>
-            <!--LOGO-->
-            <img th:src="@{/images/MO.svg}" alt="Logo" class="logo">
-
-            <!--Home Button (returns to the landing page)-->
-            <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
-
-            <!-- Search bar -->
-             <div>
-                <input type="text"  id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
-             </div>
-        </header>
+        <div th:replace="fragments/header :: header"></div>
+        
         <main>
             <div class="movieAvt"></div>
             <h4 class="movieTitle"></h4>

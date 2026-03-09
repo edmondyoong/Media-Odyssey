@@ -1,0 +1,16 @@
+<header th:fragment="header">
+    <!--LOGO-->
+    <img th:src="@{/images/MO.svg}" alt="Logo" class="logo">
+
+    <!--Home Button (returns to the landing page)-->
+    <a href="/homeReturn">
+        <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
+    </a>
+
+    <!-- Search bar -->
+    <div>
+        <input type="text"  id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
+    </div>
+
+    <!-- Avatar -->
+</header>

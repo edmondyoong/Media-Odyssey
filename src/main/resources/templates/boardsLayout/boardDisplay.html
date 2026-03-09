@@ -12,18 +12,7 @@
          seperate sections for music, game, movies. Those objects will be clickable for users to click on
          for more specific informations
         -->
-        <header>
-            <!--LOGO-->
-            <img th:src="@{/images/MO.svg}" alt="Logo" class="logo">
-
-            <!--Home Button (returns to the landing page)-->
-            <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
-
-            <!-- Search bar -->
-             <div>
-                <input type="text"  id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
-             </div>
-        </header>
+        <div th:replace="fragments/header :: header"></div>
 
         <main>
             <div id="banner" class="banner"></div>

@@ -5,8 +5,37 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Media Odyssey - board creating</title>
-        <link rel="stylesheet" th:href="@{/css}">
+        <link rel="stylesheet" th:href="@{/css/createBoard.css}">
     </head>
     <body>
+        <!--This html will show elments to create a board. 
+        This is just to set a board titles and avatar. Objects like movies, games, and songs
+        will be added or searched in the boardDisplay.html-->
+        <div th:replace="fragments/header :: header"></div>
+
+        <main class="form-container">
+            <form action="#" method="post" class="create-board-form">
+                <div class="form-leftside">
+                    <input type="text" name="boardName" placeholder="Your adventure's name" class="name-input-box">
+
+                    <input type="text" name="boardDescription" placeholder="Describe your adventure" class="desc-input-box">
+
+                    <select name="boardTypes" id="boardType" class="board-type">
+                        <option value="Public">Public</option>
+                        <option value="Private">Private</option>
+                    </select>
+
+                    <button type="submit" class="create-board">Create</button>
+
+                </div>
+
+                <div class="form-rightside">
+                    <div class="avatar-input">
+                        <p>Avatar</p>
+                    </div>
+                </div>
+            </form>
+        </main>
+        
     </body>
 </html>

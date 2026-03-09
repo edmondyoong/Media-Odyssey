@@ -8,18 +8,7 @@
         <link rel="stylesheet" th:href="@{/css/homePage.css}">
     </head>
     <body>
-        <header>
-            <!--LOGO-->
-            <img th:src="@{/images/MO.svg}" alt="Logo" class="logo">
-
-            <!--Home Button (returns to the landing page)-->
-            <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
-
-            <!-- Search bar -->
-             <form action="/search" method="GET">
-                <input type="text"  name="title" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
-            </form>
-        </header>
+        <div th:replace="fragments/header :: header"></div>
 
         <!-- A side bar that contains features (can be discussed). Side bar can be folded -->
         <aside class="side-bar">
