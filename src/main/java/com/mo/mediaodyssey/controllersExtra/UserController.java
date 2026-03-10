@@ -1,8 +1,8 @@
 package com.mo.mediaodyssey.controllersExtra;
 
+import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.FriendRequestDTO;
-import com.mo.mediaodyssey.models.User;
 import com.mo.mediaodyssey.services.CommuService;
 import com.mo.mediaodyssey.services.FriendshipService;
 import com.mo.mediaodyssey.services.PermissionService;
@@ -28,26 +28,20 @@ public class UserController {
 
     public UserController(UserService userService,
                           CommuService commuService,
-                          FriendshipService friendshipService, PermissionService permissionService){
+                          FriendshipService friendshipService,
+                          PermissionService permissionService) {
         this.userService = userService;
         this.commuService = commuService;
         this.friendshipService = friendshipService;
         this.permissionService = permissionService;
     }
 
-    // Show login page
     @GetMapping("/login")
-    public String showLoginPage() {
-        return "users/login";
-    }
+    public String showLoginPage() { return "users/login"; }
 
-    // Show register page
     @GetMapping("/register")
-    public String showRegisterPage() {
-        return "users/register";
-    }
+    public String showRegisterPage() { return "users/register"; }
 
-    // Register user
     @PostMapping("/register")
     public String registerUser(@RequestParam String username,
                                @RequestParam String email,
@@ -63,7 +57,6 @@ public class UserController {
         }
     }
 
-    // Login
     @PostMapping("/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
@@ -71,7 +64,7 @@ public class UserController {
                         RedirectAttributes redirectAttributes) {
         try {
             User user = userService.loginUser(username, password);
-            session.setAttribute("userId", user.getId());
+            session.setAttribute("userId", user.getId()); // stored as Long
             return "redirect:/users/dashboard";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -79,39 +72,27 @@ public class UserController {
         }
     }
 
-    // Dashboard
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) return "redirect:/users/login";
 
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            return "redirect:/users/login";
-        }
-
-        // Communities
-        List<Community> communities = commuService.getUserCommunities(userId);
+        List<Community> communities = commuService.getUserCommunities(userId.intValue());
         model.addAttribute("myCommunities", communities);
 
-
         Map<Integer, Boolean> moderationMap = new HashMap<>();
-
         for (Community community : communities) {
-            boolean canModerate =
-                    permissionService.canModerateCommunity(userId, community.getId());
-
-            moderationMap.put(community.getId(), canModerate);
+            moderationMap.put(community.getId(),
+                    permissionService.canModerateCommunity(userId.intValue(), community.getId()));
         }
-
         model.addAttribute("moderationMap", moderationMap);
-        // Friends
-        List<User> friends = friendshipService.getFriends(userId);
+
+        List<User> friends = friendshipService.getFriends(userId.intValue());
         model.addAttribute("friends", friends);
 
-        // Incoming friend requests
-        List<FriendRequestDTO> requests = friendshipService.getIncomingRequests(userId);
+        List<FriendRequestDTO> requests = friendshipService.getIncomingRequests(userId.intValue());
         model.addAttribute("requests", requests);
 
-        // Suggested friends
         List<User> suggested = friendshipService.getSuggestedFriends(userId);
         model.addAttribute("suggested", suggested);
 
@@ -119,21 +100,19 @@ public class UserController {
     }
 
     @PostMapping("/friends/request")
-    public String sendFriendRequest(@RequestParam Integer friendId, HttpSession session, RedirectAttributes redirectAttributes) {
-        Integer userId = (Integer) session.getAttribute("userId");
+    public String sendFriendRequest(@RequestParam Integer friendId, HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) return "redirect:/users/login";
-
-        friendshipService.sendFriendRequest(userId, friendId);
-        redirectAttributes.addFlashAttribute("success",
-                "Friend request sent");
+        friendshipService.sendFriendRequest(userId.intValue(), friendId);
+        redirectAttributes.addFlashAttribute("success", "Friend request sent");
         return "redirect:/users/dashboard";
     }
 
     @PostMapping("/friends/accept")
     public String acceptFriendRequest(@RequestParam Integer requestId, HttpSession session) {
-        Integer userId = (Integer) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) return "redirect:/users/login";
-
         friendshipService.acceptFriendRequest(requestId);
         return "redirect:/users/dashboard";
     }

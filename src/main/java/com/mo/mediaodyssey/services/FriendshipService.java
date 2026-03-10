@@ -1,11 +1,11 @@
 package com.mo.mediaodyssey.services;
 
+import com.mo.mediaodyssey.auth.model.User;
+import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.FriendRequestDTO;
 import com.mo.mediaodyssey.models.Friendship;
-import com.mo.mediaodyssey.models.User;
 import com.mo.mediaodyssey.repositories.FriendshipRepository;
-import com.mo.mediaodyssey.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +29,8 @@ public class FriendshipService {
         this.userRepo = userRepo;
     }
 
-    /** Send a friend request */
     public void sendFriendRequest(Integer fromUserId, Integer toUserId) {
-        if(friendshipRepo.existsByUserIdAndFriendId(fromUserId, toUserId) ||
+        if (friendshipRepo.existsByUserIdAndFriendId(fromUserId, toUserId) ||
                 friendshipRepo.existsByFriendIdAndUserId(fromUserId, toUserId)) {
             throw new IllegalStateException("Friend request already exists");
         }
@@ -39,7 +38,6 @@ public class FriendshipService {
         friendshipRepo.save(request);
     }
 
-    /** Accept a friend request */
     public void acceptFriendRequest(Integer requestId) {
         Friendship request = friendshipRepo.findById(requestId)
                 .orElseThrow(() -> new IllegalStateException("Friend request not found"));
@@ -47,37 +45,33 @@ public class FriendshipService {
         friendshipRepo.save(request);
     }
 
-    /** Get friends as User objects */
     public List<User> getFriends(Integer userId) {
         List<Friendship> friendships = friendshipRepo.findByUserIdOrFriendIdAndAcceptedTrue(userId, userId);
 
         return friendships.stream()
                 .map(f -> {
                     Integer otherId = f.getUserId().equals(userId) ? f.getFriendId() : f.getUserId();
-                    return userRepo.findById(otherId).orElse(null);
+                    return userRepo.findById(otherId.longValue()).orElse(null);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
-
     public List<FriendRequestDTO> getIncomingRequests(Integer userId) {
         return friendshipRepo.findIncomingRequests(userId);
     }
 
-
-    public List<User> getSuggestedFriends(Integer userId) {
-        List<Integer> communityIds = commuService.getUserCommunities(userId).stream()
+    public List<User> getSuggestedFriends(Long userId) {
+        List<Integer> communityIds = commuService.getUserCommunities(userId.intValue()).stream()
                 .map(Community::getId)
                 .collect(Collectors.toList());
 
-        List<User> candidates =
-                userRepo.findUsersInCommunitiesExcludingFriends(userId, communityIds);
+        List<User> candidates = userRepo.findUsersInCommunitiesExcludingFriends(userId, communityIds);
 
         return candidates.stream()
                 .filter(u ->
-                        !friendshipRepo.existsByUserIdAndFriendId(userId, u.getId()) &&
-                                !friendshipRepo.existsByFriendIdAndUserId(userId, u.getId())
+                        !friendshipRepo.existsByUserIdAndFriendId(userId.intValue(), u.getId().intValue()) &&
+                        !friendshipRepo.existsByFriendIdAndUserId(userId.intValue(), u.getId().intValue())
                 )
                 .toList();
     }

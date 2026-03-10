@@ -1,12 +1,12 @@
 package com.mo.mediaodyssey.controllersExtra;
 
+import com.mo.mediaodyssey.auth.model.User;
+import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.enums.RoleType;
 import com.mo.mediaodyssey.models.CommunityRole;
 import com.mo.mediaodyssey.models.DTO.CommentDTO;
 import com.mo.mediaodyssey.models.Post;
-import com.mo.mediaodyssey.models.User;
 import com.mo.mediaodyssey.repositories.CommunityRoleRepository;
-import com.mo.mediaodyssey.repositories.UserRepository;
 import com.mo.mediaodyssey.services.CommentService;
 import com.mo.mediaodyssey.services.PostService;
 import jakarta.servlet.http.HttpSession;
@@ -26,111 +26,89 @@ public class PostController {
     private final CommentService commentService;
     private final CommunityRoleRepository communityRoleRepo;
     private final UserRepository userRepo;
-    public PostController(PostService postService, CommentService commentService, CommunityRoleRepository communityRoleRepo, UserRepository userRepo){
+
+    public PostController(PostService postService, CommentService commentService,
+                          CommunityRoleRepository communityRoleRepo, UserRepository userRepo) {
         this.postService = postService;
         this.commentService = commentService;
         this.communityRoleRepo = communityRoleRepo;
         this.userRepo = userRepo;
     }
 
-    // Show the Create Post Form
     @GetMapping("/create/{communityId}")
-    public String showCreatePostForm(@PathVariable Integer communityId, Model model){
+    public String showCreatePostForm(@PathVariable Integer communityId, Model model) {
         model.addAttribute("communityId", communityId);
-        return "posts/create-post"; //
+        return "posts/create-post";
     }
 
-    // Handle Post Submission
     @PostMapping("/create/{communityId}")
     public String createPost(@PathVariable Integer communityId,
                              @RequestParam String title,
                              @RequestParam String content,
                              HttpSession session,
-                             RedirectAttributes redirectAttributes){
-
-        Integer userId = (Integer) session.getAttribute("userId");
-        if(userId == null){
-            redirectAttributes.addFlashAttribute("error","Please login to create a post");
+                             RedirectAttributes redirectAttributes) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            redirectAttributes.addFlashAttribute("error", "Please login to create a post");
             return "redirect:/users/login";
         }
-
-        postService.createPost(userId, communityId, title, content);
-        redirectAttributes.addFlashAttribute("success","Post created successfully");
-
-        // Redirect back to the community page
+        postService.createPost(userId.intValue(), communityId, title, content);
+        redirectAttributes.addFlashAttribute("success", "Post created successfully");
         return "redirect:/communities/" + communityId;
     }
 
     @GetMapping("/{postId}/edit")
-    public String showEditPostForm(@PathVariable Integer postId,
-                                   HttpSession session,
-                                   Model model,
-                                   RedirectAttributes redirectAttributes){
-
-        Integer userId = (Integer) session.getAttribute("userId");
-        if(userId == null){
-            redirectAttributes.addFlashAttribute("error","Please login to edit posts");
+    public String showEditPostForm(@PathVariable Integer postId, HttpSession session,
+                                    Model model, RedirectAttributes redirectAttributes) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            redirectAttributes.addFlashAttribute("error", "Please login to edit posts");
             return "redirect:/users/login";
         }
-
         Post post = postService.getPostById(postId);
-
-        if(!post.getAuthorId().equals(userId)){
-            redirectAttributes.addFlashAttribute("error","You can only edit your own posts");
+        if (!post.getAuthorId().equals(userId.intValue())) {
+            redirectAttributes.addFlashAttribute("error", "You can only edit your own posts");
             return "redirect:/posts/" + postId;
         }
-
         model.addAttribute("post", post);
-
         return "posts/view-post";
     }
 
-
-    // Delete a post
     @PostMapping("/{postId}/delete")
-    public String deletePost(@PathVariable Integer postId,
-                             HttpSession session,
-                             RedirectAttributes redirectAttributes){
-
-        Integer userId = (Integer) session.getAttribute("userId");
-        if(userId == null){
-            redirectAttributes.addFlashAttribute("error","Please login to delete posts");
+    public String deletePost(@PathVariable Integer postId, HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            redirectAttributes.addFlashAttribute("error", "Please login to delete posts");
             return "redirect:/users/login";
         }
-
         try {
-            postService.deletePost(userId, postId);
-            redirectAttributes.addFlashAttribute("success","Post deleted successfully");
-
-            // Redirect back to the community page
+            postService.deletePost(userId.intValue(), postId);
+            redirectAttributes.addFlashAttribute("success", "Post deleted successfully");
             Post post = postService.getPostById(postId);
             return "redirect:/communities/" + post.getCommunityId();
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             Post post = postService.getPostById(postId);
             return "redirect:/communities/" + post.getCommunityId();
         }
     }
 
-
-
-    //view post
     @GetMapping("/{postId}")
-    public String viewPost(@PathVariable Integer postId, Model model, HttpSession session){
+    public String viewPost(@PathVariable Integer postId, Model model, HttpSession session) {
         Post post = postService.getPostById(postId);
-        String username = userRepo.findById(post.getAuthorId())
+        String username = userRepo.findById((long) post.getAuthorId())
                 .map(User::getUsername)
                 .orElse("Unknown");
 
-
         List<CommentDTO> comments = commentService.getCommentsWithDepth(postId);
-        Integer currentUserId = (Integer) session.getAttribute("userId");
+        Long currentUserId = (Long) session.getAttribute("userId");
         RoleType currentUserRole = null;
 
-        if(currentUserId != null){
+        if (currentUserId != null) {
             Optional<CommunityRole> roleOpt = communityRoleRepo
-                    .findByUserIdAndCommunityId(currentUserId, post.getCommunityId());
-            if(roleOpt.isPresent()){
+                    .findByUserIdAndCommunityId(currentUserId.intValue(), post.getCommunityId());
+            if (roleOpt.isPresent()) {
                 currentUserRole = roleOpt.get().getRoleType();
             }
         }
@@ -143,5 +121,4 @@ public class PostController {
 
         return "posts/view-post";
     }
-
 }
