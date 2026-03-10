@@ -39,6 +39,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/test/user/**").hasRole("USER")
+                        .requestMatchers("/test/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin((form) -> form.disable())
                 .httpBasic((basic) -> basic.disable())
