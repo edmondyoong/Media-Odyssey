@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Odyssey - Login</title>
+    <!--Bootstrap 5.3.8-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"
+        defer></script>
+    <link rel="stylesheet" href="/auth/auth-styles.css">
+</head>
+
+<body class="bg-black text-white">
+    <main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+        <section class="card auth-card border-0 shadow-lg w-100" style="max-width: 520px;">
+            <div class="card-body p-4 p-md-5">
+                <header class="text-center mb-4">
+                    <h1 class="h3 fw-bold text-white mb-2 mo-brand">MEDIA ODYSSEY</h1>
+                    <p class="text-white-50 mb-0">Welcome back</p>
+                </header>
+
+                <form id="loginForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="email" class="form-label text-white">Email address</label>
+                        <input type="email" class="form-control form-control-lg bg-black text-white border-secondary"
+                            id="email" name="email" autocomplete="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label text-white">Password</label>
+                        <input type="password" class="form-control form-control-lg bg-black text-white border-secondary"
+                            id="password" name="password" autocomplete="current-password" required>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-info btn-lg fw-semibold text-dark">Log In</button>
+                        <a href="/auth/signup" class="btn btn-outline-light">Create account</a>
+                    </div>
+                </form>
+
+                <!-- Bootstrap status modal -->
+                <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content bg-dark text-white border-secondary">
+                            <div class="modal-header border-secondary">
+                                <h5 class="modal-title" id="statusModalLabel">Media Odyssey</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="statusModalBody"></div>
+                            <div class="modal-footer border-secondary">
+                                <button type="button" class="btn btn-info text-dark fw-semibold" data-bs-dismiss="modal">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    const statusModalEl = document.getElementById("statusModal");
+                    const statusModalBody = document.getElementById("statusModalBody");
+                    const statusModal = new bootstrap.Modal(statusModalEl);
+
+                    let redirectAfterClose = null;
+
+                    function showStatusModal(message, redirectUrl = null) {
+                        statusModalBody.textContent = message;
+                        redirectAfterClose = redirectUrl;
+                        statusModal.show();
+                    }
+
+                    statusModalEl.addEventListener("hidden.bs.modal", () => {
+                        if (redirectAfterClose) {
+                            window.location.href = redirectAfterClose;
+                        }
+                    });
+
+                    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+                        e.preventDefault();
+
+                        const payload = {
+                            email: document.getElementById("email").value.trim(),
+                            password: document.getElementById("password").value
+                        };
+
+                        const res = await fetch("/api/auth/login", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (res.ok) {
+                            showStatusModal("Login successful.", "/");
+                        } else {
+                            const msg = await res.text();
+                            showStatusModal(msg || "Login failed");
+                        }
+                    });
+                </script>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

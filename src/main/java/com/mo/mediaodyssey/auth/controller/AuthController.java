@@ -1,6 +1,9 @@
 package com.mo.mediaodyssey.auth.controller;
 
+import java.net.URI;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -71,10 +74,14 @@ public class AuthController {
 
     @GetMapping(value = "/verify")
     @Transactional
-    public ResponseEntity<String> verify(@Valid @RequestParam("token") String token) {
+    public ResponseEntity<Void> verify(@Valid @RequestParam("token") String token) {
         VerifyTokenDto dto = new VerifyTokenDto(token);
         verificationService.verifyUser(dto);
-        return ResponseEntity.ok("User confirmed. Thank you!");
+
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create("/auth/login"))
+                .build();
     }
 
     @PostMapping(value = "/resend", consumes = MediaType.APPLICATION_JSON_VALUE)

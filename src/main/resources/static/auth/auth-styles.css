@@ -1,0 +1,77 @@
+:root {
+  --mo-bg-top: #1b2230;
+  --mo-bg-bottom: #0b0f16;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+
+body {
+  background: radial-gradient(900px 420px at 50% -10%, #1d2735 0%, #0f141d 45%, #090b10 100%);
+}
+
+.mo-brand {
+  font-family: 'Cinzel Decorative', serif;
+  letter-spacing: 0.06em;
+}
+
+.auth-card {
+  background: rgba(137, 195, 239, 0.47) !important;
+  opacity: 0.85;
+  border-radius: 39px;
+  backdrop-filter: blur(4px);
+}
+
+.form-control {
+  background-color: #0b0f16 !important;
+  color: #fff !important;
+  border-color: #6c757d !important;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.form-control:focus {
+  border-color: #8ec5ff !important;
+  box-shadow: 0 0 0 .2rem rgba(142, 197, 255, .25) !important;
+}
+
+.btn {
+  border-radius: 0.7rem;
+}
+.mo-brand {
+  font-family: 'Cinzel Decorative', serif;
+  letter-spacing: 0.06em;
+}
+
+.auth-card {
+  background: rgba(137, 195, 239, 0.47) !important;
+  opacity: 0.85;
+  border-radius: 39px;
+  backdrop-filter: blur(4px);
+}
+
+body {
+  background: radial-gradient(900px 420px at 50% -10%, var(--mo-bg-top), var(--mo-bg-bottom));
+}
+
+.card {
+  border-radius: 1rem;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-control:focus {
+  border-color: #6ea8fe;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn {
+  border-radius: 0.65rem;
+}
+
+a.link-info:hover {
+  text-decoration: underline;
+}
