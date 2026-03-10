@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.mo.mediaodyssey.auth.model.VerificationToken;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
@@ -26,21 +27,39 @@ public class VerificationService {
     private final int tokenExpiryInMinutes;
     private final VerificationTokenRepository verificationTokenRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
+
+    @Value("${APP_NAME:App}")
+    private String appName;
 
     public VerificationService(VerificationTokenRepository verificationTokenRepository,
-            @Value("${VERIFY_TOKEN_EXPIRY_IN_MINUTES:60}") int tokenExpiryInMinutes, UserRepository userRepository) {
+            @Value("${VERIFY_TOKEN_EXPIRY_IN_MINUTES:60}") int tokenExpiryInMinutes, UserRepository userRepository,
+            EmailService emailService) {
         this.tokenExpiryInMinutes = tokenExpiryInMinutes;
         this.verificationTokenRepository = verificationTokenRepository;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
     public void createVerification(User user) {
+        // Create verification token
         String token = UUID.randomUUID().toString();
         VerificationToken vt = new VerificationToken(token, user, tokenExpiryInMinutes);
+
+        // Save verification token
         verificationTokenRepository.save(vt);
 
-        // TODO: send email with token via Resend
+        // Build verification token email
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .build()
+                .toUriString();
+        String to = user.getEmail();
+        String subject = "Confirm Registration to " + this.appName;
+        String message = "Confirm registration by clicking this link: " + baseUrl + "/api/auth/verify?token=" + token;
+
+        // Send verification token email
+        emailService.sendEmail(to, subject, message);
     }
 
     @Transactional
