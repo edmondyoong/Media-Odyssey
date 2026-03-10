@@ -1,6 +1,9 @@
 package com.mo.mediaodyssey.auth.controller;
 
+import java.net.URI;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -9,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mo.mediaodyssey.auth.dto.ResendVerifyTokenDto;
@@ -21,6 +25,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -67,11 +72,16 @@ public class AuthController {
         return ResponseEntity.ok("Successfully registered. Please check your email.");
     }
 
-    @PostMapping(value = "/verify", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/verify")
     @Transactional
-    public ResponseEntity<String> verify(@Valid @RequestBody VerifyTokenDto dto) {
+    public ResponseEntity<Void> verify(@Valid @RequestParam("token") String token) {
+        VerifyTokenDto dto = new VerifyTokenDto(token);
         verificationService.verifyUser(dto);
-        return ResponseEntity.ok("User confirmed. Thank you!");
+
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create("/auth/login"))
+                .build();
     }
 
     @PostMapping(value = "/resend", consumes = MediaType.APPLICATION_JSON_VALUE)

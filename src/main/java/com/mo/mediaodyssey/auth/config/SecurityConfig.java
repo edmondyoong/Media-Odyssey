@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
 import com.mo.mediaodyssey.auth.security.MOAuthenticationProvider;
@@ -34,6 +35,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**", "/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/test/user/**").hasRole("USER")
+                        .requestMatchers("/test/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/auth/**",
                                 "/api/auth/**",
@@ -46,6 +50,8 @@ public class SecurityConfig {
                                 "/images/**"
                         ).permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/auth")))
                 .formLogin((form) -> form.disable())
                 .httpBasic((basic) -> basic.disable())
                 .exceptionHandling(ex -> ex
