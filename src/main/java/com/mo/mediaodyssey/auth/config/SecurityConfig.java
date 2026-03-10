@@ -20,16 +20,12 @@ import com.mo.mediaodyssey.auth.security.MOAuthenticationProvider;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Debugging assisted by AI.
-
     @Bean
     public AuthenticationManager authManager(HttpSecurity http, MOAuthenticationProvider moAuthenticationProvider)
             throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http
                 .getSharedObject(AuthenticationManagerBuilder.class);
-
         authenticationManagerBuilder.authenticationProvider(moAuthenticationProvider);
-
         return authenticationManagerBuilder.build();
     }
 
@@ -42,11 +38,26 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**", "/api/auth/**", "/error").permitAll()
                         .requestMatchers("/test/user/**").hasRole("USER")
                         .requestMatchers("/test/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/auth/**",
+                                "/api/auth/**",
+                                "/search",
+                                "/error",
+                                "/users/login",
+                                "/users/register",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/auth")))
                 .formLogin((form) -> form.disable())
                 .httpBasic((basic) -> basic.disable())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/users/login");
+                        }))
                 .logout((logout) -> logout
                         .logoutUrl("/api/auth/logout")
                         .invalidateHttpSession(true)
