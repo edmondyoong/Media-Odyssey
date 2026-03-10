@@ -47,8 +47,8 @@ public class SecurityConfig {
                                 "/users/register",
                                 "/css/**",
                                 "/js/**",
-                                "/images/**"
-                        ).permitAll()
+                                "/images/**")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/auth")))
@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .httpBasic((basic) -> basic.disable())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.sendRedirect("/users/login");
+                            response.sendRedirect("/auth");
                         }))
                 .logout((logout) -> logout
                         .logoutUrl("/api/auth/logout")
