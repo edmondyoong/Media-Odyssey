@@ -88,8 +88,6 @@
 			<version>LATEST</version>
 		</dependency>
 	</dependencies>
-    </dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
