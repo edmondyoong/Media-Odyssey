@@ -9,12 +9,12 @@
 
     <!-- Search bar -->
     <div>
-        <input type="text"  id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
+        <input type="text" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
     </div>
 
     <!-- Avatar -->
-     <div class="user">
+    <div class="user">
         <p class="username-display">username</p>
-        <img th:src="@{/images/Avatar.png}" alt="Avatar" class="avatar-display">
-     </div>
+        <a href="/api/auth/logout"><img th:src="@{/images/Avatar.png}" alt="Avatar" class="avatar-display"></a>
+    </div>
 </header>
