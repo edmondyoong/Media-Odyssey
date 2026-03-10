@@ -41,8 +41,23 @@
 
             </div>
 
-            <!-- Recommendation boards display (horizontally)-->
-            <div id="recommendationDisplay" class="recommendation-display"></div>
+            <!-- Recommendations Section -->
+            <div id="recommendationsSection" class="recommendations-section">
+                <h3 class="personal-boards-title">Recommended For You:</h3>
+
+                <!-- Media type tabs -->
+                <div class="rec-tabs">
+                    <button class="rec-tab active" data-type="MOVIE">🎬 Movies</button>
+                    <button class="rec-tab" data-type="GAME">🎮 Games</button>
+                    <button class="rec-tab" data-type="SONG">🎵 Songs</button>
+                </div>
+
+                <!-- Status message (loading / no data yet) -->
+                <p id="recStatus" class="rec-status"></p>
+
+                <!-- Cards render here -->
+                <div id="recCards" class="rec-cards"></div>
+            </div>
         </div>
 
         <!-- ADMINS ALLOWANCE TO VIEW USERS DATABASE -->
