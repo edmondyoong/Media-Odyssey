@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.controls;
+package com.mo.mediaodyssey.controllersExtra;
 
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.CommunityDTO;

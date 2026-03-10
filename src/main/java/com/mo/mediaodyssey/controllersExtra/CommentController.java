@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.controls;
+package com.mo.mediaodyssey.controllersExtra;
 
 import com.mo.mediaodyssey.services.CommentService;
 import com.mo.mediaodyssey.services.CommunityService;
