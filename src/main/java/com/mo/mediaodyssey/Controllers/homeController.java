@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.controllers;
+package com.mo.mediaodyssey.Controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

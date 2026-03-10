@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.controllers;
+package com.mo.mediaodyssey.Controllers;
 
 import java.util.List;
 
