@@ -1,86 +1,12 @@
 package com.mo.mediaodyssey.auth.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.serializer.Deserializer;
-import org.springframework.core.serializer.Serializer;
-import org.springframework.core.serializer.support.DeserializingConverter;
-import org.springframework.core.serializer.support.SerializingConverter;
-import org.springframework.session.config.SessionRepositoryCustomizer;
-import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
-
-import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableJdbcHttpSession
 public class SessionConfig {
-    // Some portions originate from:
-    // https://docs.spring.io/spring-session/reference/configuration/jdbc.html#session-attributes-as-json
-    // Debugging assisted by AI
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
-
-    @Bean("springSessionConversionService")
-    public GenericConversionService springSessionConversionService(ObjectMapper objectMapper) {
-        GenericConversionService converter = new GenericConversionService();
-        converter.addConverter(Object.class, byte[].class, new SerializingConverter(new JsonSerializer(objectMapper)));
-        converter.addConverter(byte[].class, Object.class,
-                new DeserializingConverter(new JsonDeserializer(objectMapper)));
-        return converter;
-    }
-
-    static class JsonSerializer implements Serializer<Object> {
-        private final ObjectMapper objectMapper;
-
-        JsonSerializer(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-        }
-
-        @Override
-        public void serialize(Object object, OutputStream outputStream) throws IOException {
-            this.objectMapper.writeValue(outputStream, object);
-        }
-    }
-
-    static class JsonDeserializer implements Deserializer<Object> {
-        private final ObjectMapper objectMapper;
-
-        JsonDeserializer(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-        }
-
-        @Override
-        public Object deserialize(InputStream inputStream) throws IOException {
-            return this.objectMapper.readValue(inputStream, Object.class);
-        }
-    }
-
-    private static final String CREATE_SESSION_ATTRIBUTE_QUERY = """
-            INSERT INTO %TABLE_NAME%_ATTRIBUTES (SESSION_PRIMARY_ID, ATTRIBUTE_NAME, ATTRIBUTE_BYTES)
-            VALUES (?, ?, convert_from(?, 'UTF8')::jsonb)
-            """;
-
-    private static final String UPDATE_SESSION_ATTRIBUTE_QUERY = """
-            UPDATE %TABLE_NAME%_ATTRIBUTES
-            SET ATTRIBUTE_BYTES = convert_from(?, 'UTF8')::jsonb
-            WHERE SESSION_PRIMARY_ID = ?
-            AND ATTRIBUTE_NAME = ?
-            """;
-
-    @Bean
-    public SessionRepositoryCustomizer<JdbcIndexedSessionRepository> customizer() {
-        return (sessionRepository) -> {
-            sessionRepository.setCreateSessionAttributeQuery(CREATE_SESSION_ATTRIBUTE_QUERY);
-            sessionRepository.setUpdateSessionAttributeQuery(UPDATE_SESSION_ATTRIBUTE_QUERY);
-        };
-    }
 }
+
+// TODO: In a future iteration, consider storing JSON instead of Binary into
+// Postgres.
