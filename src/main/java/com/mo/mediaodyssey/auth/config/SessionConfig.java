@@ -1,12 +1,9 @@
 package com.mo.mediaodyssey.auth.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
 
 @Configuration
-@EnableJdbcHttpSession
 public class SessionConfig {
+    // Using default servlet HTTP session (in-memory)
+    // Spring Session JDBC removed — SPRING_SESSION table not needed
 }
-
-// TODO: In a future iteration, consider storing JSON instead of Binary into
-// Postgres.
