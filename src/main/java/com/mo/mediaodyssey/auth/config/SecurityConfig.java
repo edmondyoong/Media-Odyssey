@@ -19,16 +19,12 @@ import com.mo.mediaodyssey.auth.security.MOAuthenticationProvider;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Debugging assisted by AI.
-
     @Bean
     public AuthenticationManager authManager(HttpSecurity http, MOAuthenticationProvider moAuthenticationProvider)
             throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http
                 .getSharedObject(AuthenticationManagerBuilder.class);
-
         authenticationManagerBuilder.authenticationProvider(moAuthenticationProvider);
-
         return authenticationManagerBuilder.build();
     }
 
@@ -38,7 +34,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/auth/**", "/api/auth/**", "/search", "/error").permitAll()
                         .anyRequest().authenticated())
                 .formLogin((form) -> form.disable())
                 .httpBasic((basic) -> basic.disable())
