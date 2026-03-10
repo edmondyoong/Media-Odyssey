@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head>
         <meta charset="UTF-8"> 
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
@@ -42,6 +44,16 @@
             <!-- Recommendation boards display (horizontally)-->
             <div id="recommendationDisplay" class="recommendation-display"></div>
         </div>
+
+        <!-- ADMINS ALLOWANCE TO VIEW USERS DATABASE -->
+
+        <!--
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/users}" class="admin-btn">
+                View Users Database
+            </a>
+        </div> --> 
+
         <script th:src="@{/js/homePage.js}"></script>
     </body>
 </html>
