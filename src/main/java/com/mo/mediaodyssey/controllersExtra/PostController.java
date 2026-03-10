@@ -1,7 +1,6 @@
-package com.mo.mediaodyssey.controllers;
+package com.mo.mediaodyssey.controllersExtra;
 
 import com.mo.mediaodyssey.enums.RoleType;
-import com.mo.mediaodyssey.models.Comment;
 import com.mo.mediaodyssey.models.CommunityRole;
 import com.mo.mediaodyssey.models.DTO.CommentDTO;
 import com.mo.mediaodyssey.models.Post;

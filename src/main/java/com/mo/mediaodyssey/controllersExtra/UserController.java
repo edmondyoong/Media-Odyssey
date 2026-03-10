@@ -1,8 +1,7 @@
-package com.mo.mediaodyssey.controllers;
+package com.mo.mediaodyssey.controllersExtra;
 
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.FriendRequestDTO;
-import com.mo.mediaodyssey.models.Friendship;
 import com.mo.mediaodyssey.models.User;
 import com.mo.mediaodyssey.services.CommunityService;
 import com.mo.mediaodyssey.services.FriendshipService;
