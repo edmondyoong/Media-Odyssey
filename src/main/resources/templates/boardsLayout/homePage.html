@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+        <meta charset="UTF-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Media Odyssey-Home</title>
+        <link rel="stylesheet" th:href="@{/css/homePage.css}">
+    </head>
+    <body>
+        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <div th:replace="fragments/header :: header"></div>
+
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded -->
+        <div th:replace="fragments/sidebar :: sideBar"></div>
+        
+        <!-- User side (to be implemented)-->
+
+        <!-- This div contains the display of boards user have joined and recommendations boards -->
+        <div id="mainContent" class="main-content">
+
+            <!--Leave for display trending music, song, movies-->
+            <div></div>
+
+            <h3 id="personalBoardTitle" class="personal-boards-title">
+                Journeys you've joined:
+            </h3>
+            <div id="personalBoardsContainer" class="personal-boards-container">
+
+                <!-- Create board element-->
+                <div>
+                    <a th:href="@{boards/create}" class="board create-board">+</a>
+                </div>
+
+                <!-- Already joined boards will be shown here (for now, only creaeted boards) -->
+                <div th:each="board : ${boards}" class="board-card">
+                    <h3 th:text="${board.board_name}" class="personal-boards-titles"></h3>
+                </div>
+
+            </div>
+
+            <!-- Recommendation boards display (horizontally)-->
+            <div id="recommendationDisplay" class="recommendation-display"></div>
+        </div>
+
+        <!-- ADMINS ALLOWANCE TO VIEW USERS DATABASE -->
+
+        <!--
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/users}" class="admin-btn">
+                View Users Database
+            </a>
+        </div> --> 
+
+        <script th:src="@{/js/homePage.js}"></script>
+    </body>
+</html>
