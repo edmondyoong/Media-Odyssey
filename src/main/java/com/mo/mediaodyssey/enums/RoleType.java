@@ -6,12 +6,16 @@ public enum RoleType {
 
     MEMBER(Set.of(
             Permission.CREATE_POST,
-            Permission.CREATE_COMMENT
+            Permission.CREATE_COMMENT,
+            Permission.EDIT_COMMENT,
+            Permission.DELETE_COMMENT
     )),
 
     MODERATOR(Set.of(
             Permission.CREATE_POST,
             Permission.CREATE_COMMENT,
+            Permission.EDIT_COMMENT,
+            Permission.DELETE_COMMENT,
             Permission.DELETE_POST,
             Permission.KICK_MEMBER
     )),

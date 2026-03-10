@@ -1,11 +1,9 @@
-package com.mo.mediaodyssey.controllers;
+package com.mo.mediaodyssey.controls;
 
 import com.mo.mediaodyssey.models.Community;
-import com.mo.mediaodyssey.models.CommunityRole;
 import com.mo.mediaodyssey.models.DTO.CommunityDTO;
 import com.mo.mediaodyssey.models.DTO.CommunityMemberDTO;
 import com.mo.mediaodyssey.models.DTO.PostDTO;
-import com.mo.mediaodyssey.models.Post;
 import com.mo.mediaodyssey.services.CommunityService;
 
 import com.mo.mediaodyssey.services.PostService;
@@ -20,12 +18,12 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/communities")
-public class CommunityController {
+public class CommController {
 
     private final CommunityService communityService;
     private final PostService postService;
 
-    public CommunityController(
+    public CommController(
             CommunityService communityService,
             PostService postService) {
         this.communityService = communityService;

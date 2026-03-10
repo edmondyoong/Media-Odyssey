@@ -98,8 +98,10 @@
           th:action="@{/comments/{id}/edit(id=${comment.id})}"
           method="post">
 
-        <input type="text" name="newContent"
-               th:value="${comment.content}" required>
+        <input type="text"
+               name="newContent"
+               th:value="${comment.content}"
+               required>
 
         <button>Edit</button>
     </form>
@@ -114,8 +116,10 @@
     <form th:action="@{/comments/reply/{id}(id=${comment.id})}"
           method="post">
 
-        <input type="text" name="content"
-               placeholder="Reply..." required>
+        <input type="text"
+               name="content"
+               placeholder="Reply..."
+               required>
 
         <button>Reply</button>
     </form>

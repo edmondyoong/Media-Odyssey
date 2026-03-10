@@ -1,15 +1,11 @@
-package com.mo.mediaodyssey.controllers;
+package com.mo.mediaodyssey.controls;
 
-import com.mo.mediaodyssey.models.Comment;
 import com.mo.mediaodyssey.services.CommentService;
 import com.mo.mediaodyssey.services.CommunityService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/comments")
