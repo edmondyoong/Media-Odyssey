@@ -2,6 +2,7 @@ package com.mo.mediaodyssey.controllers;
 
 import com.mo.mediaodyssey.models.Comment;
 import com.mo.mediaodyssey.services.CommentService;
+import com.mo.mediaodyssey.services.CommunityService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,9 +16,11 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
+    private final CommunityService communityService;
 
-    public CommentController(CommentService commentService){
+    public CommentController(CommentService commentService, CommunityService communityService){
         this.commentService = commentService;
+        this.communityService = communityService;
     }
 
     // Add a top-level comment
@@ -32,8 +35,13 @@ public class CommentController {
             redirectAttributes.addFlashAttribute("error","Please login to comment");
             return "redirect:/users/login";
         }
+        try {
+            communityService.createComment(userId, postId, content); // uses permission check
+            redirectAttributes.addFlashAttribute("success", "Comment added!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
 
-        commentService.createComment(userId, postId, content);
 
         // Redirect back to post page
         return "redirect:/posts/" + postId;
@@ -52,7 +60,12 @@ public class CommentController {
             return "redirect:/users/login";
         }
 
-        commentService.replyToComment(userId, commentId, content);
+        try {
+            communityService.replyToComment(userId, commentId, content); // permission-aware
+            redirectAttributes.addFlashAttribute("success", "Reply added!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
 
         // Find the parent post id
         Integer postId = commentService.getParentPostId(commentId);
@@ -61,11 +74,50 @@ public class CommentController {
         return "redirect:/posts/" + postId;
     }
 
+    @PostMapping("/{commentId}/edit")
+    public String editComment(@PathVariable Integer commentId,
+                              @RequestParam String newContent,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
 
-//    @GetMapping("/post/{postId}")
-//    public String getPostComments(@PathVariable Integer postId, Model model){
-//        List<Comment> comments = commentService.getAllCommentsForPost(postId);
-//        model.addAttribute("comments", comments);
-//        return "posts/view-post :: comment-list"; // optional fragment
-//    }
+        Integer userId = (Integer) session.getAttribute("userId");
+        if(userId == null){
+            redirectAttributes.addFlashAttribute("error","Please login to edit comments");
+            return "redirect:/users/login";
+        }
+
+        try {
+            communityService.editComment(userId, commentId, newContent);
+            redirectAttributes.addFlashAttribute("success", "Comment edited successfully");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        Integer postId = commentService.getParentPostId(commentId);
+        return "redirect:/posts/" + postId;
+    }
+
+    @PostMapping("/{commentId}/delete")
+    public String deleteComment(@PathVariable Integer commentId,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        if(userId == null){
+            redirectAttributes.addFlashAttribute("error","Please login to delete comments");
+            return "redirect:/users/login";
+        }
+
+        try {
+            communityService.deleteComment(userId, commentId);
+            redirectAttributes.addFlashAttribute("success", "Comment deleted successfully");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        Integer postId = commentService.getParentPostId(commentId);
+        return "redirect:/posts/" + postId;
+    }
+
+
 }

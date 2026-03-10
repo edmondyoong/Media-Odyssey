@@ -1,7 +1,10 @@
 package com.mo.mediaodyssey.services;
 
 import com.mo.mediaodyssey.models.Comment;
+import com.mo.mediaodyssey.models.DTO.CommentDTO;
+import com.mo.mediaodyssey.models.User;
 import com.mo.mediaodyssey.repositories.CommentRepository;
+import com.mo.mediaodyssey.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +17,7 @@ public class CommentService {
 
     private final CommentRepository commentRepo;
 
-    public CommentService(CommentRepository commentRepo){
+    public CommentService(CommentRepository commentRepo, UserRepository userRepository){
         this.commentRepo = commentRepo;
     }
 
@@ -31,6 +34,14 @@ public class CommentService {
         commentRepo.save(reply);
     }
 
+    public void updateCommentContent(Integer commentId, String newContent){
+        Comment comment = commentRepo.findById(commentId)
+                .orElseThrow(() -> new IllegalStateException("Comment not found"));
+
+        comment.setContent(newContent);
+        commentRepo.save(comment);
+    }
+
     public Integer getParentPostId(Integer commentId){
         return commentRepo.findById(commentId)
                 .orElseThrow(() -> new IllegalStateException("Comment not found"))
@@ -38,44 +49,40 @@ public class CommentService {
     }
 
 
-    public List<CommentWithDepth> getCommentsWithDepth(Integer postId){
-        List<Comment> allComments = commentRepo.findByPostIdOrderByCreatedAtAsc(postId);
-        Map<Integer, List<Comment>> repliesMap = allComments.stream()
+    public List<CommentDTO> getCommentsWithDepth(Integer postId){
+
+        List<CommentDTO> comments = commentRepo.findCommentsWithUser(postId);
+
+        Map<Integer, List<CommentDTO>> repliesMap = comments.stream()
                 .filter(c -> c.getParentId() != null)
-                .collect(Collectors.groupingBy(Comment::getParentId));
+                .collect(Collectors.groupingBy(CommentDTO::getParentId));
 
-        List<CommentWithDepth> result = new ArrayList<>();
+        List<CommentDTO> result = new ArrayList<>();
 
-
-        for (Comment c : allComments){
-            if (c.getParentId() == null){
-                appendCommentWithReplies(c, 0, repliesMap, result);
+        for(CommentDTO c : comments){
+            if(c.getParentId() == null){
+                appendReplies(c, 0, repliesMap, result);
             }
         }
 
         return result;
     }
 
-    private void appendCommentWithReplies(Comment comment, int depth,
-                                          Map<Integer, List<Comment>> repliesMap,
-                                          List<CommentWithDepth> result){
-        result.add(new CommentWithDepth(comment, depth));
-        List<Comment> replies = repliesMap.getOrDefault(comment.getId(), Collections.emptyList());
-        for (Comment reply : replies){
-            appendCommentWithReplies(reply, depth + 1, repliesMap, result);
+    private void appendReplies(CommentDTO comment,
+                               int depth,
+                               Map<Integer,List<CommentDTO>> repliesMap,
+                               List<CommentDTO> result){
+
+        comment.setDepth(depth);
+        result.add(comment);
+
+        List<CommentDTO> replies =
+                repliesMap.getOrDefault(comment.getId(), Collections.emptyList());
+
+        for(CommentDTO reply : replies){
+            appendReplies(reply, depth + 1, repliesMap, result);
         }
     }
 
-    public static class CommentWithDepth {
-        private final Comment comment;
-        private final int depth;
 
-        public CommentWithDepth(Comment comment, int depth){
-            this.comment = comment;
-            this.depth = depth;
-        }
-
-        public Comment getComment() { return comment; }
-        public int getDepth() { return depth; }
-    }
 }

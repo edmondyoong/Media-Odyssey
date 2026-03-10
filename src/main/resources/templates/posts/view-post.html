@@ -1,52 +1,139 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${post.title}">Post Title</title>
+    <title th:text="${post.title}">Post</title>
+
     <style>
-        .comment {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
+        body{
+            font-family: Arial;
+            width:70%;
+            margin:auto;
         }
-        textarea { width: 100%; height: 60px; margin-top:5px; margin-bottom:5px;}
-        button { margin-top:5px;}
+
+        .post-box{
+            border:1px solid #ccc;
+            padding:15px;
+            margin-top:20px;
+        }
+
+        .comment{
+            border:1px solid #ddd;
+            padding:10px;
+            margin-top:10px;
+        }
+
+        .comment-actions{
+            margin-top:5px;
+        }
+
+        textarea{
+            width:100%;
+            height:70px;
+        }
+
+
+        button{
+            margin-top:5px;
+        }
     </style>
 </head>
+
 <body>
 
-<div>
-    <h1 th:text="${post.title}">Post Title</h1>
-    <p><b>Author ID:</b> <span th:text="${post.authorId}">Author</span></p>
-    <p th:text="${post.content}">Full post content</p>
+<!-- POST -->
+<div class="post-box">
+
+    <h2 th:text="${post.title}">Post title</h2>
+
+    <p>
+        <b>Author:</b>
+        <span th:text="${postUsername}"></span>
+    </p>
+
+    <p th:text="${post.content}"></p>
+
+    <!-- POST ACTIONS -->
+    <div th:if="${currentUserId != null}" class="comment-actions">
+
+        <!-- EDIT POST -->
+        <form th:if="${post.authorId == currentUserId}"
+              th:action="@{/posts/{id}/edit(id=${post.id})}"
+              method="get">
+
+            <button type="submit">Edit</button>
+
+        </form>
+
+        <!-- DELETE POST -->
+        <form th:action="@{/posts/{id}/delete(id=${post.id})}"
+              method="post">
+
+            <button type="submit">Delete</button>
+
+        </form>
+
+    </div>
+
 </div>
 
-<hr>
-<h2>Comments</h2>
 
-<div th:each="cwd : ${comments}"
-     th:style="'margin-left:' + ${cwd.depth * 30} + 'px;'"
+<hr>
+
+<h3>Comments</h3>
+
+
+<!-- COMMENT LIST -->
+<div th:each="comment : ${comments}"
+     th:style="'margin-left:' + ${comment.depth * 30} + 'px;'"
      class="comment">
 
-    <p><b th:text="${cwd.comment.authorId}">Author</b></p>
-    <p th:text="${cwd.comment.content}">Comment text</p>
+    <p>
+        <b th:text="${comment.username}"></b>
+    </p>
 
-    <!-- Reply form -->
-    <form th:action="@{/comments/reply/{id}(id=${cwd.comment.id})}" method="post">
-        <input type="text" name="content" placeholder="Reply..." required>
-        <button type="submit">Reply</button>
+    <p th:text="${comment.content}"></p>
+
+    <!-- edit -->
+    <form th:if="${comment.authorId == currentUserId}"
+          th:action="@{/comments/{id}/edit(id=${comment.id})}"
+          method="post">
+
+        <input type="text" name="newContent"
+               th:value="${comment.content}" required>
+
+        <button>Edit</button>
+    </form>
+
+    <!-- delete -->
+    <form th:action="@{/comments/{id}/delete(id=${comment.id})}"
+          method="post">
+        <button>Delete</button>
+    </form>
+
+    <!-- reply -->
+    <form th:action="@{/comments/reply/{id}(id=${comment.id})}"
+          method="post">
+
+        <input type="text" name="content"
+               placeholder="Reply..." required>
+
+        <button>Reply</button>
     </form>
 
 </div>
+<!-- ADD COMMENT TO POST -->
+<div th:if="${currentUserId != null}" class="add-comment">
+    <h4>Leave a comment:</h4>
+    <form th:action="@{/comments/post/{postId}(postId=${post.id})}" method="post">
+        <textarea name="content" rows="3" placeholder="Write your comment here..." required
+                  style="width:100%; padding:8px;"></textarea>
+        <br>
+        <button type="submit">Post Comment</button>
+    </form>
+</div>
 
-<hr>
-<h3>Add a Comment</h3>
-<form th:action="@{/comments/post/{postId}(postId=${post.id})}" method="post">
-    <textarea name="content" placeholder="Write your comment..." required></textarea>
-    <br>
-    <button type="submit">Comment</button>
-</form>
+
+
+
 </body>
 </html>

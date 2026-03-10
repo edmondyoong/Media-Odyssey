@@ -13,7 +13,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User registerUser(String username, String email, String password){
+    public void registerUser(String username, String email, String password){
 
         if(userRepository.existsByUsername(username)){
             throw new IllegalStateException("Username already exists");
@@ -21,7 +21,7 @@ public class UserService {
 
         User user = new User(username,email,password);
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     public User loginUser(String username, String password){

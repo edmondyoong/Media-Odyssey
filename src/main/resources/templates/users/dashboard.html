@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -41,39 +41,91 @@
 </div>
 
 <div class="section">
-    <h3>Friends</h3>
+    <h3>Moderation</h3>
+
+    <a th:href="@{/communities/mod-community}">
+        <button>Moderation Panel</button>
+    </a>
+
+</div>
+
+<!-- FRIEND LIST -->
+<div class="section">
+    <h3>Your Friends</h3>
+
     <ul>
-        <li th:each="f : ${friends}" th:text="${f.username}" class="friend-name"></li>
-        <li th:if="${#lists.isEmpty(friends)}">You have no friends yet.</li>
+
+        <li th:each="friend : ${friends}">
+            <span th:text="${friend.username}"></span>
+        </li>
+
+        <li th:if="${#lists.isEmpty(friends)}">
+            You don't have any friends yet.
+        </li>
+
     </ul>
 </div>
 
+
+<!-- INCOMING FRIEND REQUESTS -->
 <div class="section">
     <h3>Incoming Friend Requests</h3>
+
     <ul>
+
         <li th:each="r : ${requests}">
-            <span th:text="${r.username}"></span>
+
+            <span th:text="${r.senderUsername}"></span>
+
             <form th:action="@{/users/friends/accept}" method="post">
-                <input type="hidden" th:name="requestId" th:value="${r.id}" />
+
+                <input type="hidden"
+                       name="requestId"
+                       th:value="${r.requestId}" />
+
                 <button type="submit">Accept</button>
+
             </form>
+
         </li>
-        <li th:if="${#lists.isEmpty(requests)}">No incoming friend requests.</li>
+
+        <li th:if="${#lists.isEmpty(requests)}">
+            No incoming friend requests.
+        </li>
+
     </ul>
+
 </div>
 
+
+<!-- SUGGESTED FRIENDS -->
 <div class="section">
     <h3>Suggested Friends</h3>
+
     <ul>
-        <li th:each="s : ${suggested}">
-            <span th:text="${s.username}"></span>
+
+        <li th:each="user : ${suggested}">
+
+            <span th:text="${user.username}"></span>
+
             <form th:action="@{/users/friends/request}" method="post">
-                <input type="hidden" th:name="friendId" th:value="${s.id}" />
+
+                <input type="hidden"
+                       name="friendId"
+                       th:value="${user.id}" />
+
                 <button type="submit">Add Friend</button>
+
             </form>
+
         </li>
-        <li th:if="${#lists.isEmpty(suggested)}">No suggested friends at the moment.</li>
+
+        <li th:if="${#lists.isEmpty(suggested)}">
+            No suggestions right now.
+        </li>
+
     </ul>
+
 </div>
 
 </body>

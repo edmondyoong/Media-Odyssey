@@ -1,6 +1,7 @@
 package com.mo.mediaodyssey.services;
 
 import com.mo.mediaodyssey.models.Community;
+import com.mo.mediaodyssey.models.DTO.FriendRequestDTO;
 import com.mo.mediaodyssey.models.Friendship;
 import com.mo.mediaodyssey.models.User;
 import com.mo.mediaodyssey.repositories.FriendshipRepository;
@@ -29,12 +30,13 @@ public class FriendshipService {
     }
 
     /** Send a friend request */
-    public Friendship sendFriendRequest(Integer fromUserId, Integer toUserId) {
-        if(friendshipRepo.findByUserIdAndFriendId(fromUserId, toUserId).isPresent()) {
+    public void sendFriendRequest(Integer fromUserId, Integer toUserId) {
+        if(friendshipRepo.existsByUserIdAndFriendId(fromUserId, toUserId) ||
+                friendshipRepo.existsByFriendIdAndUserId(fromUserId, toUserId)) {
             throw new IllegalStateException("Friend request already exists");
         }
         Friendship request = new Friendship(fromUserId, toUserId);
-        return friendshipRepo.save(request);
+        friendshipRepo.save(request);
     }
 
     /** Accept a friend request */
@@ -59,11 +61,8 @@ public class FriendshipService {
     }
 
 
-    public List<User> getIncomingRequests(Integer userId) {
-        return friendshipRepo.findByFriendIdAndAcceptedFalse(userId).stream()
-                .map(f -> userRepo.findById(f.getUserId()).orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    public List<FriendRequestDTO> getIncomingRequests(Integer userId) {
+        return friendshipRepo.findIncomingRequests(userId);
     }
 
 
@@ -72,6 +71,14 @@ public class FriendshipService {
                 .map(Community::getId)
                 .collect(Collectors.toList());
 
-        return userRepo.findUsersInCommunitiesExcludingFriends(userId, communityIds);
+        List<User> candidates =
+                userRepo.findUsersInCommunitiesExcludingFriends(userId, communityIds);
+
+        return candidates.stream()
+                .filter(u ->
+                        !friendshipRepo.existsByUserIdAndFriendId(userId, u.getId()) &&
+                                !friendshipRepo.existsByFriendIdAndUserId(userId, u.getId())
+                )
+                .toList();
     }
 }

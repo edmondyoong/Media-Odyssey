@@ -14,27 +14,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByUsername(String username);
 
-    @Query("""
-SELECT u FROM User u
-WHERE u.id IN (
-    SELECT r.userId
-    FROM CommunityRole r
-    WHERE r.communityId IN (
-        SELECT r2.communityId
-        FROM CommunityRole r2
-        WHERE r2.userId = :userId
-    )
-)
-AND u.id <> :userId
-AND u.id NOT IN (
-    SELECT f.friendId
-    FROM Friendship f
-    WHERE f.userId = :userId
-    AND f.accepted = true
-)
-""")
-    List<User> findSuggestedFriends(@Param("userId") Integer userId);
-
 
     @Query("""
         SELECT u

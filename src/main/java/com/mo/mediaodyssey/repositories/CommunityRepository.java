@@ -15,4 +15,6 @@ public interface CommunityRepository extends JpaRepository<Community,Integer> {
 
     boolean existsByName(String name);
 
+
+
 }

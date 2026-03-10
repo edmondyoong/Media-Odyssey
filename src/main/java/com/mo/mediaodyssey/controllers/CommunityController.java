@@ -1,6 +1,10 @@
 package com.mo.mediaodyssey.controllers;
 
 import com.mo.mediaodyssey.models.Community;
+import com.mo.mediaodyssey.models.CommunityRole;
+import com.mo.mediaodyssey.models.DTO.CommunityDTO;
+import com.mo.mediaodyssey.models.DTO.CommunityMemberDTO;
+import com.mo.mediaodyssey.models.DTO.PostDTO;
 import com.mo.mediaodyssey.models.Post;
 import com.mo.mediaodyssey.services.CommunityService;
 
@@ -68,7 +72,7 @@ public class CommunityController {
 
         Community community = communityService.getCommunityById(id);
         Integer memberCount = communityService.getMemberCount(id);
-        List<Post> posts = postService.getPostsByCommunityId(id);
+        List<PostDTO> posts = postService.getPostsByCommunityId(id);
 
 
         model.addAttribute("community",community);
@@ -102,29 +106,164 @@ public class CommunityController {
         return "redirect:/communities/" + communityId;
     }
 
-
-
-
-    // Promote member to moderator
-    @PostMapping("/{communityId:\\d+}/promote")
-    public String promote(
+    // Leave community
+    @PostMapping("/{communityId}/leave")
+    public String leaveCommunity(
             @PathVariable Integer communityId,
-            @RequestParam Integer actingUserId,
-            @RequestParam Integer targetUserId,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        communityService.promoteToModerator(
-                actingUserId,
-                targetUserId,
-                communityId
-        );
+        Integer userId = (Integer) session.getAttribute("userId");
 
-        redirectAttributes.addFlashAttribute(
-                "success",
-                "Member Promoted Successfully"
-        );
+        if (userId == null) {
+            return "redirect:/users/login";
+        }
+
+        try {
+            communityService.leaveCommunity(userId, communityId);
+            redirectAttributes.addFlashAttribute("success", "You left the community");
+            return "redirect:/communities";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/communities/" + communityId;
+        }
+    }
+
+    @GetMapping("/mod-community")
+    public String modCommunity(
+            @SessionAttribute("userId") Integer userId,
+            @RequestParam(required = false) Integer communityId,
+            Model model) {
+
+        List<CommunityDTO> communities = communityService.getOwnedCommunities(userId);
+        model.addAttribute("communities", communities);
+
+        if (communityId != null) {
+            // Fetch ALL members for this community
+            List<CommunityMemberDTO> members = communityService.getCommunityMembers(communityId);
+            model.addAttribute("members", members);
+            model.addAttribute("communityId", communityId);
+        }
+
+        return "communities/mod-community";
+    }
+
+    @PostMapping("/{communityId}/promote")
+    public String promoteMember(
+            @PathVariable Integer communityId,
+            @RequestParam Integer targetUserId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Integer actingUserId = (Integer) session.getAttribute("userId");
+
+        try {
+            communityService.promoteMember(actingUserId, targetUserId, communityId);
+            redirectAttributes.addFlashAttribute("success", "Member promoted to moderator");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        // Pass communityId as query parameter
+        return "redirect:/communities/mod-community?communityId=" + communityId;
+    }
+
+    @PostMapping("/{communityId}/demote")
+    public String demoteModerator(
+            @PathVariable Integer communityId,
+            @RequestParam Integer targetUserId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Integer actingUserId = (Integer) session.getAttribute("userId");
+
+        try {
+            communityService.demoteModerator(actingUserId, targetUserId, communityId);
+            redirectAttributes.addFlashAttribute("success", "Moderator demoted to member");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/communities/mod-community?communityId=" + communityId;
+    }
+
+    @PostMapping("/{communityId}/kick")
+    public String kickMember(
+            @PathVariable Integer communityId,
+            @RequestParam Integer targetUserId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Integer actingUserId = (Integer) session.getAttribute("userId");
+
+        try {
+            communityService.kickMember(actingUserId, targetUserId, communityId);
+            redirectAttributes.addFlashAttribute("success", "Member kicked from community");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/communities/mod-community?communityId=" + communityId;
+    }
+
+    @PostMapping("/{communityId}/transfer")
+    public String transferOwnership(
+            @PathVariable Integer communityId,
+            @RequestParam Integer targetUserId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Integer actingUserId = (Integer) session.getAttribute("userId");
+
+        try {
+            communityService.transferOwnership(actingUserId, targetUserId, communityId);
+            redirectAttributes.addFlashAttribute("success", "Ownership transferred");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/communities/mod-community?communityId=" + communityId;
+    }
+
+    @PostMapping("/{communityId}/edit")
+    public String editCommunity(
+            @PathVariable Integer communityId,
+            @RequestParam String name,
+            @RequestParam String description,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Integer actingUserId = (Integer) session.getAttribute("userId");
+
+        try {
+            communityService.editCommunity(actingUserId, communityId, name, description);
+            redirectAttributes.addFlashAttribute("success", "Community updated");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
 
         return "redirect:/communities/" + communityId;
     }
+
+
+    @PostMapping("/{communityId}/delete")
+    public String deleteCommunity(
+            @PathVariable Integer communityId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Integer actingUserId = (Integer) session.getAttribute("userId");
+
+        try {
+            communityService.deleteCommunity(actingUserId, communityId);
+            redirectAttributes.addFlashAttribute("success", "Community deleted");
+            return "redirect:/communities";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/communities/" + communityId;
+        }
+    }
+
+
 }
 

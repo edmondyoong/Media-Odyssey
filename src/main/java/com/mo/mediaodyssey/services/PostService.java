@@ -2,6 +2,7 @@ package com.mo.mediaodyssey.services;
 
 import com.mo.mediaodyssey.enums.RoleType;
 import com.mo.mediaodyssey.models.CommunityRole;
+import com.mo.mediaodyssey.models.DTO.PostDTO;
 import com.mo.mediaodyssey.models.Post;
 import com.mo.mediaodyssey.repositories.CommunityRoleRepository;
 import com.mo.mediaodyssey.repositories.PostRepository;
@@ -55,8 +56,8 @@ public class PostService {
     }
 
 
-    public List<Post> getPostsByCommunityId(Integer communityId){
-        return postRepo.findByCommunityId(communityId);
+    public List<PostDTO> getPostsByCommunityId(Integer communityId){
+        return postRepo.findPostsWithUserByCommunityId(communityId);
     }
 
 
@@ -66,12 +67,12 @@ public class PostService {
     }
 
 
-    public List<Post> getPostsByAuthorId(Integer authorId){
-        return postRepo.findByAuthorId(authorId);
-    }
-
-
-    public boolean existsByIdAndAuthorId(Integer postId, Integer authorId){
-        return postRepo.existsByIdAndAuthorId(postId, authorId);
-    }
+//    public List<Post> getPostsByAuthorId(Integer authorId){
+//        return postRepo.findByAuthorId(authorId);
+//    }
+//
+//
+//    public boolean existsByIdAndAuthorId(Integer postId, Integer authorId){
+//        return postRepo.existsByIdAndAuthorId(postId, authorId);
+//    }
 }
