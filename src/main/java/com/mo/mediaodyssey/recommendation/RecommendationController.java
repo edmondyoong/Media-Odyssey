@@ -1,0 +1,64 @@
+package com.mo.mediaodyssey.recommendation;
+
+import com.mo.mediaodyssey.auth.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/recommendations")
+public class RecommendationController {
+
+    private final RecommendationService recommendationService;
+    private final UserRepository userRepository;
+
+    public RecommendationController(RecommendationService recommendationService,
+                                    UserRepository userRepository) {
+        this.recommendationService = recommendationService;
+        this.userRepository = userRepository;
+    }
+
+    // gets the logged-in user's ID by looking up their email in the database
+    // auth.getName() returns the username field, which defaults to email at registration
+    private Long getUserIdFromSession(Authentication auth) {
+        return userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"))
+                .getId();
+    }
+
+    // POST /api/recommendations/interactions
+    // body: { "mediaApiId": "...", "interactionType": "VIEW", "mediaType": "MOVIE", "genres": ["Action"] }
+    @PostMapping("/interactions")
+    public ResponseEntity<Void> recordInteraction(@RequestBody InteractionRequest request,
+                                                   Authentication auth) {
+        Long userId = getUserIdFromSession(auth);
+        recommendationService.recordInteraction(userId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    // GET /api/recommendations?mediaType=MOVIE
+    @GetMapping
+    public ResponseEntity<List<RecommendationResponse>> getRecommendations(@RequestParam String mediaType,
+                                                                            Authentication auth) {
+        Long userId = getUserIdFromSession(auth);
+        List<RecommendationResponse> recommendations = recommendationService.getRecommendations(userId, mediaType);
+        return ResponseEntity.ok(recommendations);
+    }
+
+    // POST /api/recommendations/admin/ban?mediaApiId=123&mediaType=MOVIE
+    @PostMapping("/admin/ban")
+    public ResponseEntity<Void> banMedia(@RequestParam String mediaApiId,
+                                          @RequestParam String mediaType) {
+        recommendationService.banMedia(mediaApiId, mediaType);
+        return ResponseEntity.ok().build();
+    }
+
+    // DELETE /api/recommendations/admin/ban?mediaApiId=123
+    @DeleteMapping("/admin/ban")
+    public ResponseEntity<Void> unbanMedia(@RequestParam String mediaApiId) {
+        recommendationService.unbanMedia(mediaApiId);
+        return ResponseEntity.ok().build();
+    }
+}
