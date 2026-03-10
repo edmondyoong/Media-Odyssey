@@ -11,7 +11,7 @@
 	<groupId>com.mo</groupId>
 	<artifactId>mediaodyssey</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<n>mediaodyssey</n>
+	<name>mediaodyssey</name>
 	<description>Media Odyssey Project</description>
 	<url/>
 	<licenses><license/></licenses>
