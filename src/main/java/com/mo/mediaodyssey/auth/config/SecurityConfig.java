@@ -34,10 +34,24 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/api/auth/**", "/search", "/error").permitAll()
+                        .requestMatchers(
+                                "/auth/**",
+                                "/api/auth/**",
+                                "/search",
+                                "/error",
+                                "/users/login",
+                                "/users/register",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
                         .anyRequest().authenticated())
                 .formLogin((form) -> form.disable())
                 .httpBasic((basic) -> basic.disable())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/users/login");
+                        }))
                 .logout((logout) -> logout
                         .logoutUrl("/api/auth/logout")
                         .invalidateHttpSession(true)
