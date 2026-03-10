@@ -19,7 +19,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public class CommService {
+public class CommuService {
 
     private final CommunityRepository communityRepository;
     private final CommunityRoleRepository roleRepository;
@@ -28,8 +28,8 @@ public class CommService {
     private final PermissionService permissionService;
     private final CommentService commentService;
 
-    public CommService(CommunityRepository communityRepository,
-                       CommunityRoleRepository roleRepository, PermissionService permissionService, PostRepository postRepository, CommentRepository commentRepository, CommentService commentService
+    public CommuService(CommunityRepository communityRepository,
+                        CommunityRoleRepository roleRepository, PermissionService permissionService, PostRepository postRepository, CommentRepository commentRepository, CommentService commentService
     ) {
         this.communityRepository = communityRepository;
         this.roleRepository = roleRepository;

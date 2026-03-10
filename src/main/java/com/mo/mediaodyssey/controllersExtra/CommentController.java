@@ -1,7 +1,7 @@
 package com.mo.mediaodyssey.controllersExtra;
 
 import com.mo.mediaodyssey.services.CommentService;
-import com.mo.mediaodyssey.services.CommService;
+import com.mo.mediaodyssey.services.CommuService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +12,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CommentController {
 
     private final CommentService commentService;
-    private final CommService commService;
+    private final CommuService commuService;
 
-    public CommentController(CommentService commentService, CommService commService){
+    public CommentController(CommentService commentService, CommuService commuService){
         this.commentService = commentService;
-        this.commService = commService;
+        this.commuService = commuService;
     }
 
     // Add a top-level comment
@@ -32,7 +32,7 @@ public class CommentController {
             return "redirect:/users/login";
         }
         try {
-            commService.createComment(userId, postId, content); // uses permission check
+            commuService.createComment(userId, postId, content); // uses permission check
             redirectAttributes.addFlashAttribute("success", "Comment added!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -57,7 +57,7 @@ public class CommentController {
         }
 
         try {
-            commService.replyToComment(userId, commentId, content); // permission-aware
+            commuService.replyToComment(userId, commentId, content); // permission-aware
             redirectAttributes.addFlashAttribute("success", "Reply added!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -83,7 +83,7 @@ public class CommentController {
         }
 
         try {
-            commService.editComment(userId, commentId, newContent);
+            commuService.editComment(userId, commentId, newContent);
             redirectAttributes.addFlashAttribute("success", "Comment edited successfully");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -105,7 +105,7 @@ public class CommentController {
         }
 
         try {
-            commService.deleteComment(userId, commentId);
+            commuService.deleteComment(userId, commentId);
             redirectAttributes.addFlashAttribute("success", "Comment deleted successfully");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
