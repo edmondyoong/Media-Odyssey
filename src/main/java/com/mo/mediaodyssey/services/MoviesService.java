@@ -20,6 +20,9 @@ public class MoviesService {
 
         MoviesResponse response = restTemplate.getForObject(url, MoviesResponse.class); 
 
+        if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
+            return null;
+        }
         return response.getResults().get(0); 
     }
 }
