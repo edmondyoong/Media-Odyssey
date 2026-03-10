@@ -4,7 +4,7 @@ import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.CommunityDTO;
 import com.mo.mediaodyssey.models.DTO.CommunityMemberDTO;
 import com.mo.mediaodyssey.models.DTO.PostDTO;
-import com.mo.mediaodyssey.services.CommunityService;
+import com.mo.mediaodyssey.services.CommuService;
 
 import com.mo.mediaodyssey.services.PostService;
 import jakarta.servlet.http.HttpSession;
@@ -20,13 +20,13 @@ import java.util.List;
 @RequestMapping("/communities")
 public class CommController {
 
-    private final CommunityService communityService;
+    private final CommuService commuService;
     private final PostService postService;
 
     public CommController(
-            CommunityService communityService,
+            CommuService commuService,
             PostService postService) {
-        this.communityService = communityService;
+        this.commuService = commuService;
         this.postService = postService;
     }
 
@@ -50,7 +50,7 @@ public class CommController {
             return "redirect:/users/login";
         }
 
-        communityService.createCommunity(userId, name, description);
+        commuService.createCommunity(userId, name, description);
         redirectAttributes.addFlashAttribute("success", "Community Created Successfully");
         return "redirect:/communities";
     }
@@ -58,7 +58,7 @@ public class CommController {
     // Show all communities
     @GetMapping
     public String listCommunities(Model model) {
-        List<Community> communities = communityService.getAllCommunities();
+        List<Community> communities = commuService.getAllCommunities();
         model.addAttribute("communities", communities);
         return "communities/join-community";
     }
@@ -68,8 +68,8 @@ public class CommController {
     @GetMapping("/{id}")
     public String viewCommunity(@PathVariable Integer id, Model model){
 
-        Community community = communityService.getCommunityById(id);
-        Integer memberCount = communityService.getMemberCount(id);
+        Community community = commuService.getCommunityById(id);
+        Integer memberCount = commuService.getMemberCount(id);
         List<PostDTO> posts = postService.getPostsByCommunityId(id);
 
 
@@ -95,7 +95,7 @@ public class CommController {
         }
 
         try {
-            communityService.joinCommunity(userId, communityId);
+            commuService.joinCommunity(userId, communityId);
             redirectAttributes.addFlashAttribute("success", "You joined the community!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -118,7 +118,7 @@ public class CommController {
         }
 
         try {
-            communityService.leaveCommunity(userId, communityId);
+            commuService.leaveCommunity(userId, communityId);
             redirectAttributes.addFlashAttribute("success", "You left the community");
             return "redirect:/communities";
         } catch (Exception e) {
@@ -133,12 +133,12 @@ public class CommController {
             @RequestParam(required = false) Integer communityId,
             Model model) {
 
-        List<CommunityDTO> communities = communityService.getOwnedCommunities(userId);
+        List<CommunityDTO> communities = commuService.getOwnedCommunities(userId);
         model.addAttribute("communities", communities);
 
         if (communityId != null) {
             // Fetch ALL members for this community
-            List<CommunityMemberDTO> members = communityService.getCommunityMembers(communityId);
+            List<CommunityMemberDTO> members = commuService.getCommunityMembers(communityId);
             model.addAttribute("members", members);
             model.addAttribute("communityId", communityId);
         }
@@ -156,7 +156,7 @@ public class CommController {
         Integer actingUserId = (Integer) session.getAttribute("userId");
 
         try {
-            communityService.promoteMember(actingUserId, targetUserId, communityId);
+            commuService.promoteMember(actingUserId, targetUserId, communityId);
             redirectAttributes.addFlashAttribute("success", "Member promoted to moderator");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -176,7 +176,7 @@ public class CommController {
         Integer actingUserId = (Integer) session.getAttribute("userId");
 
         try {
-            communityService.demoteModerator(actingUserId, targetUserId, communityId);
+            commuService.demoteModerator(actingUserId, targetUserId, communityId);
             redirectAttributes.addFlashAttribute("success", "Moderator demoted to member");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -195,7 +195,7 @@ public class CommController {
         Integer actingUserId = (Integer) session.getAttribute("userId");
 
         try {
-            communityService.kickMember(actingUserId, targetUserId, communityId);
+            commuService.kickMember(actingUserId, targetUserId, communityId);
             redirectAttributes.addFlashAttribute("success", "Member kicked from community");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -214,7 +214,7 @@ public class CommController {
         Integer actingUserId = (Integer) session.getAttribute("userId");
 
         try {
-            communityService.transferOwnership(actingUserId, targetUserId, communityId);
+            commuService.transferOwnership(actingUserId, targetUserId, communityId);
             redirectAttributes.addFlashAttribute("success", "Ownership transferred");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -234,7 +234,7 @@ public class CommController {
         Integer actingUserId = (Integer) session.getAttribute("userId");
 
         try {
-            communityService.editCommunity(actingUserId, communityId, name, description);
+            commuService.editCommunity(actingUserId, communityId, name, description);
             redirectAttributes.addFlashAttribute("success", "Community updated");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -253,7 +253,7 @@ public class CommController {
         Integer actingUserId = (Integer) session.getAttribute("userId");
 
         try {
-            communityService.deleteCommunity(actingUserId, communityId);
+            commuService.deleteCommunity(actingUserId, communityId);
             redirectAttributes.addFlashAttribute("success", "Community deleted");
             return "redirect:/communities";
         } catch (Exception e) {

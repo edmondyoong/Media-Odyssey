@@ -3,7 +3,7 @@ package com.mo.mediaodyssey.controllersExtra;
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.FriendRequestDTO;
 import com.mo.mediaodyssey.models.User;
-import com.mo.mediaodyssey.services.CommunityService;
+import com.mo.mediaodyssey.services.CommuService;
 import com.mo.mediaodyssey.services.FriendshipService;
 import com.mo.mediaodyssey.services.PermissionService;
 import com.mo.mediaodyssey.services.UserService;
@@ -22,15 +22,15 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final CommunityService communityService;
+    private final CommuService commuService;
     private final FriendshipService friendshipService;
     private final PermissionService permissionService;
 
     public UserController(UserService userService,
-                          CommunityService communityService,
+                          CommuService commuService,
                           FriendshipService friendshipService, PermissionService permissionService){
         this.userService = userService;
-        this.communityService = communityService;
+        this.commuService = commuService;
         this.friendshipService = friendshipService;
         this.permissionService = permissionService;
     }
@@ -89,7 +89,7 @@ public class UserController {
         }
 
         // Communities
-        List<Community> communities = communityService.getUserCommunities(userId);
+        List<Community> communities = commuService.getUserCommunities(userId);
         model.addAttribute("myCommunities", communities);
 
 
