@@ -98,7 +98,7 @@ public class User implements UserDetails {
         this.email = email;
         this.username = email;
         this.password = password;
-        this.isEnabled = false;
+        this.isEnabled = true;
         this.isAccountNonLocked = true;
         this.role = "ROLE_USER";
     }
