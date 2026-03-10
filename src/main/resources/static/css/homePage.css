@@ -1,5 +1,16 @@
 body {
     background-color: #1E1E1E;
+    color: white;
+}
+
+header {
+    background-color: #26054B;
+
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 80px;
 } 
 
 /* HEADER */ 
@@ -15,6 +26,7 @@ header {
 
     display: flex;
     align-items: center;
+    gap: 5px;
     gap: 5px; 
     padding: 0 20px;
 }
@@ -34,6 +46,7 @@ header {
 }
 
 .home-btn:hover{
+    cursor: pointer;
     cursor: pointer; 
 }
 
@@ -48,6 +61,11 @@ header {
     padding-left: 20px;
     border-radius: 65px;
     line-height: 20px;
+}
+
+.search-bar::placeholder{
+    font-family: 'Space Grotesk';
+    color: #999;
 } 
 
 .search-bar::placeholder{
@@ -73,6 +91,10 @@ header {
     margin-left: auto;
     border: white;
     background-color: white;
+    cursor: pointer;
+}
+
+/* BODY ///////////////////////////////////////// */
     cursor: pointer; 
 }
 
@@ -157,6 +179,8 @@ header {
     font-size: 2rem;
     background-color: #f8f8f8;
     border: 1px solid #ccc;
+    text-decoration: none;
+    color: #333;
     text-decoration: none; 
     color: #333;     
     transition: all 0.2s;

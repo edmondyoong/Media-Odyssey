@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<htm lang="en"> 
     <head>
         <meta charset="UTF-8"> 
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
@@ -8,13 +8,176 @@
         <link rel="stylesheet" th:href="@{/css/homePage.css}">
     </head>
     <body>
-        <!-- header + side bar  -->
+        <!-- header space for logo, home return icon, search bar and username + avatar display -->
         <div th:replace="fragments/header :: header"></div>
 
-        <div th:replace="fragments/sidebar :: sideBar"></div>
-
         <!-- Implement what you want from here -->
+         <!-- ── Main Content ── -->
+        <main>
 
-        <script th:src="@{/js/homePage.js}"></script>
+            <h1>Community Favourites</h1>
+
+            <!-- Sort Links -->
+            <div>
+                <a href="/community">Top 10 (Score)</a> |
+                <a href="/community?sort=likes">Most Liked</a> |
+                <a href="/community?sort=views">Most Viewed</a>
+            </div>
+
+            <!-- Category Tabs: filters Top 10 by category without page reload -->
+            <div>
+                <button class="tab-btn active" data-cat="ALL">All</button>
+                <button class="tab-btn" data-cat="Movie">Movies</button>
+                <button class="tab-btn" data-cat="Game">Games</button>
+                <button class="tab-btn" data-cat="Song">Songs</button>
+            </div>
+
+            <hr/>
+
+            <!-- ── Fast-Rising Top 5 ───────────────────────────────────────── -->
+            <!--
+                Sorted by weekly like growth: (likes - likesLastWeek).
+                Badge shows growth % when isTrending() >= 10%.
+                likesLastWeek is auto-updated every Sunday by TrendingScheduler.
+            -->
+            <section>
+                <h2>Fast-Rising This Week (Top 5)</h2>
+                <div id="trendingGrid">
+                    <div th:each="m : ${trending}">
+                        <strong th:text="${m.title}">Title</strong>
+                        <em th:text="'[' + ${m.category} + ']'">[Category]</em>
+
+                        <!-- Trending badge: only shown when growth >= 10% -->
+                        <span th:if="${m.trending}"
+                              th:text="'▲ ' + ${#numbers.formatDecimal(m.trendingGrowth, 1, 0)} + '%'">
+                        </span>
+
+                        <p>
+                            Views: <span th:text="${m.views}">0</span> |
+                            Likes: <span th:text="${m.likes}">0</span> |
+                            Score: <span th:text="${m.totalScore}">0</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <hr/>
+
+            <!-- ── Top 10 Ranked ──────────────────────────────────────────── -->
+            <!--
+                Ranked by Point System: totalScore = (views * 1) + (likes * 10).
+                data-cat and data-title used by JS for client-side filtering.
+            -->
+            <section>
+                <h2>Top 10 Ranked</h2>
+                <div id="top10Grid">
+                    <div th:each="m, stat : ${mediaList}"
+                         th:attr="data-cat=${m.category}, data-title=${m.title}">
+
+                        <strong th:text="${stat.index + 1} + '. ' + ${m.title}">1. Title</strong>
+                        <em th:text="'[' + ${m.category} + ']'">[Category]</em>
+
+                        <!-- Trending badge if this item is also fast-rising -->
+                        <span th:if="${m.trending}"
+                              th:text="'▲ ' + ${#numbers.formatDecimal(m.trendingGrowth, 1, 0)} + '%'">
+                        </span>
+
+                        <p>
+                            Views: <span class="views-cnt" th:text="${m.views}">0</span> |
+                            Likes: <span class="likes-cnt" th:text="${m.likes}">0</span> |
+                            Score: <span class="score-val" th:text="${m.totalScore}">0</span>
+                        </p>
+
+                        <!-- Like button: one per session, optimistic UI -->
+                        <button class="like-btn" th:attr="data-id=${m.id}">
+                            Like (<span class="like-count" th:text="${m.likes}">0</span>)
+                        </button>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ── JavaScript ─────────────────────────────────────────────────── -->
+        <script>
+
+            // ── Auto view count on page load ────────────────────────────────
+            // Sends POST /community/view/{id} for each card once per session.
+            // Server uses HttpSession to prevent duplicate counts on refresh.
+            document.querySelectorAll('#top10Grid > div[data-id]').forEach(card => {
+                fetch(`/community/view/${card.dataset.id}`, { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        const viewEl = card.querySelector('.views-cnt');
+                        if (viewEl) viewEl.textContent = data.views;
+                        card.querySelector('.score-val').textContent = data.totalScore;
+                    })
+                    .catch(() => {});
+            });
+
+            // ── Tab switching — no page reload ──────────────────────────────
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const cards   = document.querySelectorAll('#top10Grid > div');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    applyFilters(btn.dataset.cat, document.getElementById('searchBar').value.trim());
+                });
+            });
+
+            // ── Live search — filters as the user types ─────────────────────
+            document.getElementById('searchBar').addEventListener('input', e => {
+                const activeCat = document.querySelector('.tab-btn.active').dataset.cat;
+                applyFilters(activeCat, e.target.value.trim());
+            });
+
+            // Show/hide cards based on active tab and search query
+            function applyFilters(cat, query) {
+                cards.forEach(card => {
+                    const matchCat   = (cat === 'ALL') || (card.dataset.cat === cat);
+                    const matchQuery = !query ||
+                        (card.dataset.title || '').toLowerCase().includes(query.toLowerCase());
+                    card.style.display = (matchCat && matchQuery) ? '' : 'none';
+                });
+            }
+
+            // ── Like button — Optimistic UI ─────────────────────────────────
+            // Session-based: server blocks duplicate likes via HttpSession.
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.disabled) return;
+                    btn.disabled = true;
+
+                    const id      = btn.dataset.id;
+                    const card    = btn.closest('div');
+                    const countEl = btn.querySelector('.like-count');
+                    const scoreEl = card.querySelector('.score-val');
+                    const cntEl   = card.querySelector('.likes-cnt');
+
+                    // Optimistic increment
+                    const newLikes = parseInt(countEl.textContent) + 1;
+                    countEl.textContent          = newLikes;
+                    if (cntEl) cntEl.textContent = newLikes;
+
+                    fetch(`/community/like/${id}`, { method: 'POST' })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (!data.liked) btn.textContent = 'Already liked';
+                            countEl.textContent          = data.likes;
+                            if (cntEl) cntEl.textContent = data.likes;
+                            scoreEl.textContent          = data.totalScore;
+                        })
+                        .catch(() => {
+                            btn.disabled = false;
+                            countEl.textContent = parseInt(countEl.textContent) - 1;
+                            if (cntEl) cntEl.textContent = parseInt(cntEl.textContent) - 1;
+                        });
+                });
+            });
+
+        </script>
     </body> 
 </html>
