@@ -11,11 +11,23 @@ header {
     left: 0px;
     right: 0px;
     height: 80px;
+} 
+
+/* HEADER */ 
+header {
+    background-color: #26054B;
+
+    position: fixed; 
+    top: 0px; 
+    left: 0px;
+    right: 0px; 
+    height: 80px; 
     z-index: 1000;
 
     display: flex;
     align-items: center;
     gap: 5px;
+    gap: 5px; 
     padding: 0 20px;
 }
 
@@ -24,6 +36,8 @@ header {
     height: 40px;
     left: 15px;
     top: 15px;
+
+    cursor: pointer;
 }
 
 .home-btn{
@@ -33,6 +47,7 @@ header {
 
 .home-btn:hover{
     cursor: pointer;
+    cursor: pointer; 
 }
 
 .search-bar {
@@ -51,6 +66,11 @@ header {
 .search-bar::placeholder{
     font-family: 'Space Grotesk';
     color: #999;
+} 
+
+.search-bar::placeholder{
+    font-family: 'Space Grotesk';
+    color: #999; 
     font-style: normal;
     font-weight: 700;
     font-size: 18px;
@@ -75,6 +95,63 @@ header {
 }
 
 /* BODY ///////////////////////////////////////// */
+    cursor: pointer; 
+}
+
+/* SIDE BAR*/ 
+
+.side-bar {
+    position: fixed;
+    top: 80px;
+    left: 0;
+
+    width: 220px;
+    height: 100vh;
+
+    background-color: #290f67;
+
+    transition: width 0.3s ease;
+}
+
+.side-bar.collapsed {
+    width: 0px;
+}
+
+.side-bar.side-bar.collapsed .menu-items {
+    display: none;
+}
+
+.side-bar a {
+    text-decoration: none;
+    font-family: 'Space Grostesk';
+    font-size: 30px;
+}
+
+.side-bar li a {
+    display: block;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0; 
+    margin: 0;
+}
+
+.menu-items{
+    margin: 14px 20px;
+    padding: 6px 10px;
+    
+    color: white;
+    font-weight: 450;
+
+    transition: background 0.2s ease;
+}
+
+.menu-items:hover{
+    background-color: #341381;
+}
+
+/* BODY ///////////////////////////////////////// */ 
 .main-content {
     padding-top: 95px;
     padding-left: 25px;
@@ -82,6 +159,7 @@ header {
     font-family: 'Space Grotesk';
 }
 
+/* PERSONAL BOARDS DISPLAY */ 
 .personal-boards-title{
     font-size: 30px;
     color: white;
@@ -103,10 +181,46 @@ header {
     border: 1px solid #ccc;
     text-decoration: none;
     color: #333;
+    text-decoration: none; 
+    color: #333;     
     transition: all 0.2s;
 }
 
 .board:hover {
     background-color: #e0e0e0;
     border-color: #999;
+}
+
+.personal-boards-container{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.board-card{
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 2rem;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    text-decoration: none; 
+    color: #333;     
+    transition: all 0.2s;
+}
+
+.board-card.board-card:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
+}
+
+.personal-boards-titles{
+    color: rgb(217, 0, 255);
+    font-family: 'Space Grotesk';
 }

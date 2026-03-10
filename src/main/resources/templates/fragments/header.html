@@ -1,13 +1,20 @@
 <header th:fragment="header">
-    <img th:src="@{/images/MO.svg}" alt="Logo" class="logo">
+    <!--LOGO that control the side bar (fold and unfold)-->
+    <img th:src="@{/images/closeLogo.svg}" alt="Logo" class="logo" id="logo">
+
+    <!--Home Button (returns to the landing page)-->
     <a href="/homeReturn">
         <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
     </a>
+
+    <!-- Search bar -->
     <div>
-        <input type="text" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
+        <input type="text"  id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
     </div>
-    <div class="user">
+
+    <!-- Avatar -->
+     <div class="user">
         <p class="username-display">username</p>
         <img th:src="@{/images/Avatar.png}" alt="Avatar" class="avatar-display">
-    </div>
+     </div>
 </header>

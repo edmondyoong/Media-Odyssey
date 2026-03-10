@@ -12,7 +12,7 @@
 	<artifactId>mediaodyssey</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>mediaodyssey</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Media Odyssey Project</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -46,7 +46,6 @@
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -83,6 +82,17 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-session-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 	</dependencies>
 
