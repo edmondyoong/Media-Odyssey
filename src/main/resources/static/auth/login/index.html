@@ -37,28 +37,26 @@
                         <a href="/auth/signup" class="btn btn-outline-light">Create account</a>
                     </div>
                 </form>
-
-                <!-- Bootstrap status modal -->
-                <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content bg-dark text-white border-secondary">
-                            <div class="modal-header border-secondary">
-                                <h5 class="modal-title" id="statusModalLabel">Media Odyssey</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body" id="statusModalBody"></div>
-                            <div class="modal-footer border-secondary">
-                                <button type="button" class="btn btn-info text-dark fw-semibold"
-                                    data-bs-dismiss="modal">OK</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
+
+    <!-- Bootstrap status modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="statusModalLabel">Media Odyssey</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="statusModalBody"></div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-info text-dark fw-semibold" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
@@ -84,26 +82,34 @@
 
             document.getElementById("loginForm").addEventListener("submit", async (e) => {
                 e.preventDefault();
+                try {
+                    const email = document.getElementById("email").value.trim();
+                    const password = document.getElementById("password").value;
 
-                const email = document.getElementById("email").value.trim();
-                const password = document.getElementById("password").value;
+                    const payload = {
+                        email: email,
+                        password: password
+                    };
 
-                const payload = {
-                    email: email,
-                    password: password
-                };
+                    const res = await fetch("/api/auth/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify(payload)
+                    });
 
-                const res = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify(payload)
-                });
+                    const resText = await res.text();
 
-                if (res.ok) {
-                    showStatusModal("Login successful.", "/");
-                } else {
-                    showStatusModal((await res.text()) || "Login failed");
+                    // If successful, responds with "OK". Otherwise, attempts default behavior of redirecting (failed).
+                    if (resText === "OK") {
+                        // If successful login, tell the User. Also automatically redirect shortly. User can choose to skip the delay by closing pop up.
+                        showStatusModal("Login successful.", "/");
+                        setTimeout(() => window.location.replace("/"), 500);
+                    } else {
+                        showStatusModal("Login failed");
+                    }
+                } catch (error) {
+                    showStatusModal("Login failed");
                 }
             });
         });

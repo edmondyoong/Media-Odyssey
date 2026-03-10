@@ -46,7 +46,6 @@ body {
 
 .auth-card {
   background: rgba(137, 195, 239, 0.47) !important;
-  opacity: 0.85;
   border-radius: 39px;
   backdrop-filter: blur(4px);
 }

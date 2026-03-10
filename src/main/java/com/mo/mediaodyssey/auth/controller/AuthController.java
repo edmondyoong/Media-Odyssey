@@ -61,15 +61,17 @@ public class AuthController {
 
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
-        // Return OK
-        return ResponseEntity.ok("Login successful");
+        // Return OK - successfully logged in
+        return ResponseEntity.ok("OK");
     }
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity<String> register(@Valid @RequestBody UserDto dto) {
         authService.registerUser(dto);
-        return ResponseEntity.ok("Successfully registered. Please check your email.");
+
+        // Return OK - successfully registered
+        return ResponseEntity.ok("OK");
     }
 
     @GetMapping(value = "/verify")
@@ -88,7 +90,9 @@ public class AuthController {
     @Transactional
     public ResponseEntity<String> resend(@Valid @RequestBody ResendVerifyTokenDto dto) {
         verificationService.resendVerification(dto);
-        return ResponseEntity.ok("Verification email resent.");
+
+        // Return OK - successfully resent
+        return ResponseEntity.ok("OK");
     }
 
     // TODO: AuthService, AuthController, GrantedAuthorities (Roles), Email

@@ -63,7 +63,14 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID", "SESSION")
-                        .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            if ("POST".equalsIgnoreCase(request.getMethod())) {
+                                new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK).onLogoutSuccess(request,
+                                        response, authentication);
+                            } else {
+                                response.sendRedirect("/auth");
+                            }
+                        })
                         .permitAll());
         return http.build();
     }

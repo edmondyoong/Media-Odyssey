@@ -43,28 +43,26 @@
                         <a href="/auth/login" class="btn btn-outline-light">Already have an account? Log In</a>
                     </div>
                 </form>
-
-                <!-- Bootstrap status modal -->
-                <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content bg-dark text-white border-secondary">
-                            <div class="modal-header border-secondary">
-                                <h5 class="modal-title" id="statusModalLabel">Media Odyssey</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body" id="statusModalBody"></div>
-                            <div class="modal-footer border-secondary">
-                                <button type="button" class="btn btn-info text-dark fw-semibold"
-                                    data-bs-dismiss="modal">OK</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
+
+    <!-- Bootstrap status modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="statusModalLabel">Media Odyssey</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="statusModalBody"></div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-info text-dark fw-semibold" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
@@ -91,29 +89,42 @@
             document.getElementById("signupForm").addEventListener("submit", async (e) => {
                 e.preventDefault();
 
-                const email = document.getElementById("email").value.trim();
-                const password = document.getElementById("password").value;
-                const confirmPassword = document.getElementById("confirmPassword").value;
+                try {
 
-                if (password !== confirmPassword) {
-                    showStatusModal("Passwords do not match.");
-                    return;
+                    const email = document.getElementById("email").value.trim();
+                    const password = document.getElementById("password").value;
+                    const confirmPassword = document.getElementById("confirmPassword").value;
+
+                    if (password !== confirmPassword) {
+                        showStatusModal("Passwords do not match.");
+                        return;
+                    }
+
+                    const payload = {
+                        email: email,
+                        password: password
+                    };
+
+                    const res = await fetch("/api/auth/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify(payload)
+                    });
+
+                    const resText = await res.text();
+
+                    // If successful, responds with "OK". Otherwise, attempts default behavior of redirecting (failed).
+                    if (resText === "OK") {
+                        // If successful signup, tell the User. Do not automatically redirect. User needs to be informed to check their email. User can choose to be redirected by closing pop up.
+                        showStatusModal("Account created successfully. Please check your email to verify your account.", "/auth/login");
+                    }
+                    else {
+                        showStatusModal("Registration failed");
+                    }
+                } catch (error) {
+                    showStatusModal("Registration failed");
                 }
-
-                const payload = {
-                    email: email,
-                    password: password
-                };
-
-                const res = await fetch("/api/auth/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) showStatusModal("Account created successfully. Please check your email to verify your account.", "/auth/login");
-                else showStatusModal((await res.text()) || "Registration failed");
             });
         });
     </script>
