@@ -1,15 +1,19 @@
 package com.mo.mediaodyssey.auth.services;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mo.mediaodyssey.auth.model.VerificationToken;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.auth.repository.VerificationTokenRepository;
+import com.mo.mediaodyssey.auth.dto.ResendVerifyTokenDto;
+import com.mo.mediaodyssey.auth.dto.VerifyTokenDto;
 import com.mo.mediaodyssey.auth.model.User;
 
 @Service
@@ -40,7 +44,8 @@ public class VerificationService {
     }
 
     @Transactional
-    public Boolean verifyUser(String token) {
+    public Boolean verifyUser(VerifyTokenDto dto) {
+        String token = dto.token();
         return verificationTokenRepository.findByToken(token)
                 .filter(item -> item.getExpiryDate().after(new Date()))
                 .map(item -> {
@@ -50,5 +55,19 @@ public class VerificationService {
                     verificationTokenRepository.delete(item);
                     return true;
                 }).orElse(false);
+    }
+
+    @Transactional
+    public void resendVerification(ResendVerifyTokenDto dto) {
+        try {
+            User user = userRepository.findByEmail(dto.email()).orElseThrow();
+            if (user.isEnabled()) { // If User is already email verified.
+                throw new BadCredentialsException("User is already verified.");
+            }
+            createVerification(user);
+        } catch (NoSuchElementException e) {
+            throw new BadCredentialsException("User does not exist.");
+        }
+
     }
 }

@@ -8,10 +8,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
 @Entity
+@Table(name = "verification_tokens")
 public class VerificationToken {
     // Inspiried by: https://www.baeldung.com/registration-verify-user-by-email
     // Debugging assisted by AI.
