@@ -4,8 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name="boards")
 public class Boards {
 
     @Id
@@ -15,15 +17,13 @@ public class Boards {
     private String board_name; 
     private String board_description; 
     private String board_type;
-    private String board_avatar; 
 
     public Boards(){}
 
-    public Boards (Long id, String board_name, String board_description, String board_avatar) {
+    public Boards (Long id, String board_name, String board_description) {
         this.id = id; 
         this.board_name = board_name;
         this.board_description = board_description; 
-        this.board_avatar = board_avatar; 
     }
 
     public Long getId() {
@@ -56,13 +56,5 @@ public class Boards {
 
     public void setBoard_type(String board_type) {
         this.board_type = board_type;
-    }
-
-    public String getBoard_avatar() {
-        return board_avatar;
-    }
-
-    public void setBoard_avatar(String board_avatar) {
-        this.board_avatar = board_avatar;
     }
 }

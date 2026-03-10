@@ -14,13 +14,7 @@ public class MappingController {
     public String homeReturn() {
         return "/boardsLayout/homePage";
     }
-
-    /* HOMEPAGE BODY ELEMENTS */
-    @GetMapping("/createBoard")
-    public String createBoard() {
-        return "createBoard";
-    }
-
+    
     /* SIDE BAR ELEMENTS */
 
     @GetMapping("/socialTab")

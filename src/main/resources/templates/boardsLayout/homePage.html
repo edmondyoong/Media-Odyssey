@@ -29,15 +29,14 @@
 
                 <!-- Create board element-->
                 <div>
-                    <a href="/createBoard" class="board create-board">+</a>
+                    <a th:href="@{boards/create}" class="board create-board">+</a>
                 </div>
 
                 <!-- Already joined boards will be shown here (for now, only creaeted boards) -->
-                <div class="personal-boards-container">
-                    <div th:each="board : ${boards}" class="board-card">
-                        <h3 th:text="${board.board_name}"></h3>
-                    </div>
+                <div th:each="board : ${boards}" class="board-card">
+                    <h3 th:text="${board.board_name}" class="personal-boards-titles"></h3>
                 </div>
+
             </div>
 
             <!-- Recommendation boards display (horizontally)-->

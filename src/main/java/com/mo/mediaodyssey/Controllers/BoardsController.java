@@ -1,5 +1,7 @@
 package com.mo.mediaodyssey.controllers;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,16 +37,10 @@ public class BoardsController {
     }
 
     @PostMapping("/create")
-    public String createBoard (@ModelAttribute Boards board) {
+    public String createBoard (@ModelAttribute("board") Boards board) {
+
         boardsService.createBoard(board);
         
-        return "/boardsLayout/homePage";
-    }
-    
-    @GetMapping("/homePageDisplay")
-    public String displayBoards(Model model) {
-        model.addAttribute("boards", boardsService.findAllBoards()); 
-
-        return "/boardsLayout/homePage"; 
+        return "redirect:/";
     }
 }
