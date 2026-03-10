@@ -10,17 +10,17 @@ import com.mo.mediaodyssey.services.BoardsService;
 public class homeController {
 
     /* MAP THE INITIAL LOCALHOST:8080 DIRECTLY TO HOMEPAGE (WILL NEED REDIRECT) */
-    
+
     private final BoardsService boardsService;
 
-    public homeController (BoardsService boardsService) {
+    public homeController(BoardsService boardsService) {
         this.boardsService = boardsService;
     }
-    
+
     @GetMapping("/")
-    public String home(Model model){
+    public String home(Model model) {
         model.addAttribute("boards", boardsService.findAllBoards());
 
-        return "/boardsLayout/homePage";
+        return "boardsLayout/homePage";
     }
 }

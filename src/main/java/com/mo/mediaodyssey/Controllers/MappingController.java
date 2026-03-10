@@ -6,15 +6,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class MappingController {
 
-    /* This Controller is to navigates elements like create board icon, home icon, elements in side bar, and 
-    elements view in singular board layout */
+    /*
+     * This Controller is to navigates elements like create board icon, home icon,
+     * elements in side bar, and
+     * elements view in singular board layout
+     */
 
     /* HEADER ELEMENTS */
     @GetMapping("/homeReturn")
     public String homeReturn() {
-        return "/boardsLayout/homePage";
+        // return "boardsLayout/homePage";
+
+        // TODO: redirect to '/' instead of rendering same page at '/' and
+        // '/homeReturn'?
+        return "redirect:/";
     }
-    
+
     /* SIDE BAR ELEMENTS */
 
     @GetMapping("/socialTab")
