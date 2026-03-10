@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 public class FriendshipService {
 
     private final FriendshipRepository friendshipRepo;
-    private final CommunityService communityService;
+    private final CommService commService;
     private final UserRepository userRepo;
 
     public FriendshipService(FriendshipRepository friendshipRepo,
-                             CommunityService communityService,
+                             CommService commService,
                              UserRepository userRepo) {
         this.friendshipRepo = friendshipRepo;
-        this.communityService = communityService;
+        this.commService = commService;
         this.userRepo = userRepo;
     }
 
@@ -67,7 +67,7 @@ public class FriendshipService {
 
 
     public List<User> getSuggestedFriends(Integer userId) {
-        List<Integer> communityIds = communityService.getUserCommunities(userId).stream()
+        List<Integer> communityIds = commService.getUserCommunities(userId).stream()
                 .map(Community::getId)
                 .collect(Collectors.toList());
 

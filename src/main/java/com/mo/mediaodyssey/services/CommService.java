@@ -1,6 +1,5 @@
 package com.mo.mediaodyssey.services;
 
-import com.mo.mediaodyssey.enums.Permission;
 import com.mo.mediaodyssey.enums.RoleType;
 import com.mo.mediaodyssey.models.Comment;
 import com.mo.mediaodyssey.models.Community;
@@ -16,12 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
 @Transactional
-public class CommunityService {
+public class CommService {
 
     private final CommunityRepository communityRepository;
     private final CommunityRoleRepository roleRepository;
@@ -30,8 +28,8 @@ public class CommunityService {
     private final PermissionService permissionService;
     private final CommentService commentService;
 
-    public CommunityService(CommunityRepository communityRepository,
-                            CommunityRoleRepository roleRepository, PermissionService permissionService, PostRepository postRepository, CommentRepository commentRepository, CommentService commentService
+    public CommService(CommunityRepository communityRepository,
+                       CommunityRoleRepository roleRepository, PermissionService permissionService, PostRepository postRepository, CommentRepository commentRepository, CommentService commentService
     ) {
         this.communityRepository = communityRepository;
         this.roleRepository = roleRepository;
