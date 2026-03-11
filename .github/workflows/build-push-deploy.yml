@@ -2,12 +2,12 @@
 # Portion uses "Publishing images to GitHub Packages" example in GitHub Docs: https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images
 #
 # Image is being built in a workflow within GitHub Actions, instead of Render, because Render is very slow at building Docker images.
-name: build-push-deploy
+name: Build, Push, Deploy
 
 # Configures this workflow to run every time a change is pushed to the branch called `main`.
 on:
   push:
-    branches: ["main", "misc/workflows"]
+    branches: ["**"]
 
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
@@ -66,17 +66,34 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
-      # Fail early with a clear error if Render secrets are not available.
-      - name: Validate Render secrets
+      # Sync Render env vars from a single JSON secret to support any number of variables.
+      # This is optional; if RENDER_ENV_VARS_JSON is empty, it skips this step.
+      # 
+      # This step was primarily written by GitHub Copilot.
+      - name: Sync Render environment variables
         env:
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_ENV_VARS_JSON: ${{ secrets.RENDER_ENV_VARS_JSON }}
         run: |
-          if [ -z "$RENDER_SERVICE_ID" ] || [ -z "$RENDER_API_KEY" ]; then
-            echo "RENDER_SERVICE_ID or RENDER_API_KEY is missing in this job context."
-            echo "If these are Environment secrets, attach the job to that GitHub Environment."
-            exit 1
+          if [ -z "$RENDER_ENV_VARS_JSON" ]; then
+            exit 0
           fi
+
+          echo "$RENDER_ENV_VARS_JSON" | jq -rc 'to_entries[] | @base64' | while IFS= read -r row; do
+            entry=$(echo "$row" | base64 --decode)
+            key=$(echo "$entry" | jq -r '.key')
+            value=$(echo "$entry" | jq -r '.value')
+
+            payload=$(jq -n --arg value "$value" '{value: $value}')
+
+            curl --fail --show-error --silent -X PUT \
+              "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/env-vars/${key}" \
+              --header 'accept: application/json' \
+              --header 'content-type: application/json' \
+              --header "authorization: Bearer ${RENDER_API_KEY}" \
+              --data "$payload"
+          done
       
       # This step triggers a deployment to Render with the pre-built Docker image link.
       # Debugging this workflow was assisted by GitHub Copilot.
