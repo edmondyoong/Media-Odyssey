@@ -72,7 +72,7 @@ jobs:
       # This is optional; if RENDER_ENV_VARS_JSON is empty, it skips this step.
       # 
       # This step was primarily written by GitHub Copilot.
-      - name: Sync Render environment variables
+      - name: Sync environment variables with Render
         env:
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -101,7 +101,7 @@ jobs:
       
       # This step triggers a deployment to Render with the pre-built Docker image link.
       # Debugging this workflow was assisted by GitHub Copilot.
-      - name: Deploy to Render with curl
+      - name: Deploy to Render
         run: |
           curl --fail --show-error --silent -X POST \
             "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
@@ -110,5 +110,5 @@ jobs:
             --header 'authorization: Bearer ${{ secrets.RENDER_API_KEY }}' \
             --data '{
               "clearCache": "clear",
-              "imageUrl": "${DOCKER_METADATA_OUTPUT_TAGS}"
+              "imageUrl": ""${{ fromJSON(steps.meta.outputs.json).tags[0] }}""
             }'
