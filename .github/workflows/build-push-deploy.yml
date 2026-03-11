@@ -18,6 +18,7 @@ env:
 jobs:
   build-push-deploy-image:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
 
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
@@ -64,6 +65,18 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+      # Fail early with a clear error if Render secrets are not available.
+      - name: Validate Render secrets
+        env:
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          if [ -z "$RENDER_SERVICE_ID" ] || [ -z "$RENDER_API_KEY" ]; then
+            echo "RENDER_SERVICE_ID or RENDER_API_KEY is missing in this job context."
+            echo "If these are Environment secrets, attach the job to that GitHub Environment."
+            exit 1
+          fi
       
       # This step triggers a deployment to Render with the pre-built Docker image link.
       - name: Deploy to Render with curl
