@@ -1,9 +1,12 @@
 package com.mo.mediaodyssey.auth.controller;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,7 +36,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    // Inspiried by:
+    // Temporary Admin User creation logic
+    @Value("${ALLOW_ADMIN_USER_CREATION:FALSE}")
+    private String allowAdminUserCreation;
+
+    @Value("${EMAIL_FROM:null}")
+    private String adminEmail;
+
+    // Inspired by:
     // https://www.baeldung.com/spring-security-authentication-provider
     // https://www.djamware.com/post/secure-your-restful-api-with-spring-boot-35-jwt-and-mongodb
     // Debugging assisted by AI.
@@ -94,6 +104,39 @@ public class AuthController {
 
         // Return OK - successfully resent
         return ResponseEntity.ok("OK");
+    }
+
+    /**
+     * Temporary logic to create an Admin User and skip email verification.
+     * 
+     * Must be enabled via environment variable.
+     * 
+     * Email address and password is randomly assigned.
+     * 
+     * @return "OK", Email, and Password in body upon success
+     */
+    @GetMapping("/createAdminUser")
+    @Transactional
+    public ResponseEntity<String> createAdminUser(Authentication authentication) {
+        if (allowAdminUserCreation.toLowerCase().equals("TRUE".toLowerCase())) {
+
+            String id = UUID.randomUUID().toString();
+            String email = id + "-" + adminEmail;
+            String password = id;
+
+            UserDto dto = new UserDto(email, password);
+            authService.createAdminUser(dto);
+
+            // Return OK, the email address, and password - successfully registered
+            return ResponseEntity.ok("OK\n" +
+                    "Email: " + email + " \n" +
+                    "Password: " + password + " \n");
+        } else {
+            // return ResponseEntity
+            // .status(HttpStatus.FORBIDDEN)
+            // .build();
+            return new ResponseEntity<String>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // TODO: Completed?
