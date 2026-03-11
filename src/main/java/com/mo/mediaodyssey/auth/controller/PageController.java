@@ -1,10 +1,20 @@
 package com.mo.mediaodyssey.auth.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.mo.mediaodyssey.auth.model.User;
+import com.mo.mediaodyssey.auth.repository.UserRepository;
 
 @Controller
 public class PageController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Splash page for authentication. Users can choose to login or signup.
@@ -60,7 +70,9 @@ public class PageController {
      * @return Thymeleaf template at src/main/resources/templates/usersAD.html
      */
     @GetMapping("/admin/users")
-    public String adminListUsersPage() {
+    public String adminListUsersPage(Model model) {
+        List<User> users = userRepository.findAll();
+        model.addAttribute("users", users);
         return "usersAD";
     }
 }
