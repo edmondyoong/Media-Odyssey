@@ -79,14 +79,26 @@ jobs:
           fi
       
       # This step triggers a deployment to Render with the pre-built Docker image link.
+      # Debugging this workflow was assisted by GitHub Copilot.
       - name: Deploy to Render with curl
         run: |
+          IMAGE_TAG="${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
+          IMAGE_NAME_ONLY="${IMAGE_TAG%:*}"
+          RENDER_DIGEST_TAG="${{ steps.push.outputs.digest }}"
+          RENDER_DIGEST_TAG="${RENDER_DIGEST_TAG/:/-}"
+          IMAGE_URL="${IMAGE_NAME_ONLY}:${RENDER_DIGEST_TAG}"
+
+          PAYLOAD=$(cat <<EOF
+          {
+            "clearCache": "clear",
+            "imageUrl": "${IMAGE_URL}"
+          }
+          EOF
+          )
+
           curl --fail --show-error --silent -X POST \
             "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
             --header 'accept: application/json' \
             --header 'content-type: application/json' \
             --header 'authorization: Bearer ${{ secrets.RENDER_API_KEY }}' \
-            --data '{
-              "clearCache": "clear",
-              "imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}"
-            }'
+            --data "$PAYLOAD"
