@@ -33,8 +33,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final VerificationService verificationService;
-
     // Inspiried by:
     // https://www.baeldung.com/spring-security-authentication-provider
     // https://www.djamware.com/post/secure-your-restful-api-with-spring-boot-35-jwt-and-mongodb
@@ -43,9 +41,12 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    AuthController(VerificationService verificationService) {
-        this.verificationService = verificationService;
-    }
+    @Autowired
+    private VerificationService verificationService;
+
+    // AuthController(VerificationService verificationService) {
+    // this.verificationService = verificationService;
+    // }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -95,7 +96,8 @@ public class AuthController {
         return ResponseEntity.ok("OK");
     }
 
-    // TODO: AuthService, AuthController, GrantedAuthorities (Roles), Email
+    // TODO: Completed?
+    // AuthService, AuthController, GrantedAuthorities (Roles), Email
     // VerificationToken in VerificationService, Frontend (Thymeleaf templates)
 
 }
