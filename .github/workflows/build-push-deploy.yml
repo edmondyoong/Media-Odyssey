@@ -110,5 +110,5 @@ jobs:
             --header 'authorization: Bearer ${{ secrets.RENDER_API_KEY }}' \
             --data '{
               "clearCache": "clear",
-              "imageUrl": ""${{ fromJSON(steps.meta.outputs.json).tags[0] }}""
+              "imageUrl": "${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
             }'
