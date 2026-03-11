@@ -2,7 +2,7 @@
 # Portion uses "Publishing images to GitHub Packages" example in GitHub Docs: https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images
 #
 # Image is being built in a workflow within GitHub Actions, instead of Render, because Render is very slow at building Docker images.
-name: Build, Push, Deploy
+name: build-push-deploy-image
 
 # Configures this workflow to run every time a change is pushed to the branch called `main`.
 on:
@@ -18,7 +18,8 @@ env:
 jobs:
   build-push-deploy-image:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
+    # environment: ${{ github.ref_name }}
+    environment: misc/workflows
 
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
