@@ -86,13 +86,13 @@ public class PostController {
         Long userId = user.getId();
 
         try {
+            Post post = postService.getPostById(postId);
             postService.deletePost(userId.intValue(), postId);
             redirectAttributes.addFlashAttribute("success", "Post deleted successfully");
-            Post post = postService.getPostById(postId);
             return "redirect:/communities/" + post.getCommunityId();
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
             Post post = postService.getPostById(postId);
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/communities/" + post.getCommunityId();
         }
     }
@@ -124,7 +124,7 @@ public class PostController {
         model.addAttribute("post", post);
         model.addAttribute("postUsername", username);
         model.addAttribute("comments", comments);
-        model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("currentUserId", currentUserId.intValue());
         model.addAttribute("currentUserRole", currentUserRole);
 
         return "posts/view-post";
