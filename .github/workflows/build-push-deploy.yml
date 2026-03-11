@@ -84,6 +84,7 @@ jobs:
             entry=$(echo "$row" | base64 --decode)
             key=$(echo "$entry" | jq -r '.key')
             value=$(echo "$entry" | jq -r '.value')
+            echo "::add-mask::$value"
 
             payload=$(jq -n --arg value "$value" '{value: $value}')
 
@@ -92,7 +93,8 @@ jobs:
               --header 'accept: application/json' \
               --header 'content-type: application/json' \
               --header "authorization: Bearer ${RENDER_API_KEY}" \
-              --data "$payload"
+              --data "$payload" \
+              --output /dev/null
           done
       
       # This step triggers a deployment to Render with the pre-built Docker image link.
