@@ -64,3 +64,17 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+      
+      # This step triggers a deployment to Render with the pre-built Docker image link.
+      - name: Deploy to Render with curl
+        run: |
+          curl --fail --show-error --silent -X POST 
+            "https://api.render.com/v1/services/${{ env.RENDER_API_KEY }}/deploys" 
+            --header 'accept: application/json' 
+            --header 'content-type: application/json' 
+            --header 'authorization: Bearer ${{ env.RENDER_SERVICE_ID }}'
+            --data '{
+              "clearCache": "clear",
+              "deployMode": "deploy_only",
+              "imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}"
+            }'
