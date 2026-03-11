@@ -75,6 +75,5 @@ jobs:
             --header 'authorization: Bearer ${{ secrets.RENDER_API_KEY }}' \
             --data '{
               "clearCache": "clear",
-              "deployMode": "deploy_only",
               "imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}"
             }'
