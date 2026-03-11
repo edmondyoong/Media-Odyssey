@@ -10,6 +10,8 @@ import com.mo.mediaodyssey.repositories.CommunityRoleRepository;
 import com.mo.mediaodyssey.services.CommentService;
 import com.mo.mediaodyssey.services.PostService;
 import jakarta.servlet.http.HttpSession;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,7 @@ public class PostController {
     private final UserRepository userRepo;
 
     public PostController(PostService postService, CommentService commentService,
-                          CommunityRoleRepository communityRoleRepo, UserRepository userRepo) {
+            CommunityRoleRepository communityRoleRepo, UserRepository userRepo) {
         this.postService = postService;
         this.commentService = commentService;
         this.communityRoleRepo = communityRoleRepo;
@@ -43,15 +45,16 @@ public class PostController {
 
     @PostMapping("/create/{communityId}")
     public String createPost(@PathVariable Integer communityId,
-                             @RequestParam String title,
-                             @RequestParam String content,
-                             HttpSession session,
-                             RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            redirectAttributes.addFlashAttribute("error", "Please login to create a post");
-            return "redirect:/users/login";
-        }
+            @RequestParam String title,
+            @RequestParam String content,
+            HttpSession session,
+            RedirectAttributes redirectAttributes,
+            Authentication authentication) {
+
+        // TODO: changed to use id from /auth. Please clean up in future.
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
+
         postService.createPost(userId.intValue(), communityId, title, content);
         redirectAttributes.addFlashAttribute("success", "Post created successfully");
         return "redirect:/communities/" + communityId;
@@ -59,12 +62,12 @@ public class PostController {
 
     @GetMapping("/{postId}/edit")
     public String showEditPostForm(@PathVariable Integer postId, HttpSession session,
-                                    Model model, RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            redirectAttributes.addFlashAttribute("error", "Please login to edit posts");
-            return "redirect:/users/login";
-        }
+            Model model, RedirectAttributes redirectAttributes, Authentication authentication) {
+
+        // TODO: changed to use id from /auth. Please clean up in future.
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
+
         Post post = postService.getPostById(postId);
         if (!post.getAuthorId().equals(userId.intValue())) {
             redirectAttributes.addFlashAttribute("error", "You can only edit your own posts");
@@ -76,12 +79,12 @@ public class PostController {
 
     @PostMapping("/{postId}/delete")
     public String deletePost(@PathVariable Integer postId, HttpSession session,
-                              RedirectAttributes redirectAttributes) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            redirectAttributes.addFlashAttribute("error", "Please login to delete posts");
-            return "redirect:/users/login";
-        }
+            RedirectAttributes redirectAttributes, Authentication authentication) {
+
+        // TODO: changed to use id from /auth. Please clean up in future.
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
+
         try {
             postService.deletePost(userId.intValue(), postId);
             redirectAttributes.addFlashAttribute("success", "Post deleted successfully");
@@ -95,14 +98,19 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public String viewPost(@PathVariable Integer postId, Model model, HttpSession session) {
+    public String viewPost(@PathVariable Integer postId, Model model, HttpSession session,
+            Authentication authentication) {
         Post post = postService.getPostById(postId);
         String username = userRepo.findById((long) post.getAuthorId())
                 .map(User::getUsername)
                 .orElse("Unknown");
 
         List<CommentDTO> comments = commentService.getCommentsWithDepth(postId);
-        Long currentUserId = (Long) session.getAttribute("userId");
+
+        // TODO: changed to use id from /auth. Please clean up in future.
+        User user = (User) authentication.getPrincipal();
+        Long currentUserId = user.getId();
+
         RoleType currentUserRole = null;
 
         if (currentUserId != null) {
