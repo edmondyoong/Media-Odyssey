@@ -68,11 +68,11 @@ jobs:
       # This step triggers a deployment to Render with the pre-built Docker image link.
       - name: Deploy to Render with curl
         run: |
-          curl --fail --show-error --silent -X POST 
-            "https://api.render.com/v1/services/${{ env.RENDER_API_KEY }}/deploys" 
-            --header 'accept: application/json' 
-            --header 'content-type: application/json' 
-            --header 'authorization: Bearer ${{ env.RENDER_SERVICE_ID }}'
+          curl --fail --show-error --silent -X POST \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+            --header 'accept: application/json' \
+            --header 'content-type: application/json' \
+            --header 'authorization: Bearer ${{ secrets.RENDER_API_KEY }}' \
             --data '{
               "clearCache": "clear",
               "deployMode": "deploy_only",
