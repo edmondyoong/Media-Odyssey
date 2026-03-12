@@ -35,6 +35,6 @@ public class MappingController {
 
     @GetMapping("/dashboardTab")
     public String navToDashboard() {
-        return "/users/dashboard";
+        return "users/dashboard";
     }
 }
