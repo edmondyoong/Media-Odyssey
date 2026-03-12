@@ -37,11 +37,4 @@ public class MappingController {
     public String navToDashboard() {
         return "/users/dashboard";
     }
-    
-
-    /* ADMIN BUTTON TO USER */
-    @GetMapping("/admin/users")
-    public String navToUserDB() {
-        return "user"; 
-    }
 }
