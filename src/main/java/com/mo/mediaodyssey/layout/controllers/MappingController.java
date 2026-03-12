@@ -2,6 +2,8 @@ package com.mo.mediaodyssey.layout.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 public class MappingController {
@@ -30,6 +32,12 @@ public class MappingController {
     public String navToTrendingTab() {
         return "trending";
     }
+
+    @GetMapping("/dashboardTab")
+    public String navToDashboard() {
+        return "/users/dashboard";
+    }
+    
 
     /* ADMIN BUTTON TO USER */
     @GetMapping("/admin/users")
