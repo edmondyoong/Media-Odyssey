@@ -73,7 +73,6 @@ public class User implements UserDetails {
      * Logic handled in MOAuthenticationProvider. Adding more in the future requires
      * implementing its logic in MOAuthenticationProvider.
      */
-    @Column(nullable = false)
     private boolean isEnabled = false;
 
     /**
@@ -83,7 +82,6 @@ public class User implements UserDetails {
      * Logic handled in MOAuthenticationProvider. Adding more in the future requires
      * implementing its logic in MOAuthenticationProvider.
      */
-    @Column(nullable = false)
     private boolean isAccountNonLocked = true;
 
     /**
