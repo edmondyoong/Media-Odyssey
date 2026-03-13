@@ -368,3 +368,8 @@ header {
 .rec-btn.viewed {
     background-color: #1a7a4a;
 }
+
+/* DASHBOARD HTML /////////////// */ 
+.dashboardTitle {
+    margin: 13px;
+}
