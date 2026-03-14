@@ -127,6 +127,7 @@ jobs:
         env:
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          IMAGE_URL: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
         run: |
           if [ -z "$RENDER_SERVICE_ID" ] || [ -z "$RENDER_API_KEY" ]; then
             echo "::warning title=Deployment::Deployment to Render was skipped because variables are missing."
@@ -137,8 +138,8 @@ jobs:
             "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
             --header 'accept: application/json' \
             --header 'content-type: application/json' \
-            --header 'authorization: Bearer ${RENDER_API_KEY}' \
-            --data '{
-              "clearCache": "clear",
-              "imageUrl": "${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
-            }'
+            --header "authorization: Bearer ${RENDER_API_KEY}" \
+            --data "{
+              \"clearCache\": \"clear\",
+              \"imageUrl\": \"${IMAGE_URL}\"
+            }"
