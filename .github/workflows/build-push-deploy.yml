@@ -1,10 +1,10 @@
-# Build, Push, and Deploy Docker image to Render with environment variables updated with secrets
+# Build, Push, and Deploy Docker image to Render with environment variables updated
 # Some steps uses the example in "Publishing images to GitHub Packages" in GitHub Docs: https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images
 #
 # Image is being built in a workflow within GitHub Actions, instead of Render, because Render is very slow at building Docker images.
 name: build-push-deploy
 
-# Configures this workflow to run every time a change is pushed to the branch called `main`.
+# Configures this workflow to run every time a change is pushed to the branch called `main` and on workflow_dispatch (triggered manually).
 on:
   workflow_dispatch:
   push:
@@ -71,10 +71,12 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
-      # Sync Render env vars from a single JSON secret to support any number of variables.
+      # Sync Render environment variables from a single JSON secret to support any number of environment variables.
       #
       # This is optional; if $RENDER_SERVICE_ID and/or $RENDER_API_KEY is missing, this step and next step is skipped.
       # If $RENDER_ENV_VARS_JSON is empty, only this step is skipped.
+      #
+      # Value for $RENDER_ENV_VARS_JSON can be generated using output from env-to-json.sh
       #
       # This step was primarily written by GitHub Copilot.
       - name: Sync environment variables with Render
