@@ -1,14 +1,14 @@
 # Build, Push, and Deploy Docker image to Render with environment variables updated with secrets
-# Portion uses "Publishing images to GitHub Packages" example in GitHub Docs: https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images
+# Some steps uses the example in "Publishing images to GitHub Packages" in GitHub Docs: https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images
 #
 # Image is being built in a workflow within GitHub Actions, instead of Render, because Render is very slow at building Docker images.
-name: build-push-deploy-image
+name: build-push-deploy
 
 # Configures this workflow to run every time a change is pushed to the branch called `main`.
 on:
   workflow_dispatch:
   push:
-    branches: ["**"]
+    branches: ["main"]
 
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
@@ -19,8 +19,10 @@ env:
 jobs:
   build-push-deploy-image:
     runs-on: ubuntu-latest
-    # environment: ${{ github.ref_name }}
-    environment: misc/workflows
+
+    # TODO: Fix environments to allow different environments working correctly (ex. an environment for each branch, type of branches, etc.)
+    # environment: ${{ github.ref_name }} # Not correctly working
+    # environment: misc/workflows # Temporarily hard coded during testing
 
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
@@ -69,8 +71,10 @@ jobs:
           push-to-registry: true
 
       # Sync Render env vars from a single JSON secret to support any number of variables.
-      # This is optional; if RENDER_ENV_VARS_JSON is empty, it skips this step.
-      # 
+      #
+      # This is optional; if $RENDER_SERVICE_ID and/or $RENDER_API_KEY is missing, this step and next step is skipped.
+      # If $RENDER_ENV_VARS_JSON is empty, only this step is skipped.
+      #
       # This step was primarily written by GitHub Copilot.
       - name: Sync environment variables with Render
         env:
@@ -78,7 +82,20 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_ENV_VARS_JSON: ${{ secrets.RENDER_ENV_VARS_JSON }}
         run: |
+          if [ -z "$RENDER_SERVICE_ID" ]; then 
+            echo "::warning title=Variables::RENDER_SERVICE_ID is missing."
+          fi
+
+          if [ -z "$RENDER_API_KEY" ]; then 
+            echo "::warning title=Variables::RENDER_API_KEY is missing."
+          fi
+
           if [ -z "$RENDER_ENV_VARS_JSON" ]; then
+            echo "::warning title=Variables::RENDER_ENV_VARS_JSON is missing."
+          fi
+
+          if [ -z "$RENDER_SERVICE_ID" ] || [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_ENV_VARS_JSON" ]; then
+            echo "::warning title=Deployment::Syncing environment variables with Render was skipped because variables are missing."
             exit 0
           fi
 
@@ -98,16 +115,28 @@ jobs:
               --data "$payload" \
               --output /dev/null
           done
-      
+
       # This step triggers a deployment to Render with the pre-built Docker image link.
-      # Debugging this workflow was assisted by GitHub Copilot.
+      # 
+      # Variable warning are not displayed again because last step displays them. The warning will be identical.
+      # Skip warning is still shown from this step.
+      #
+      # Debugging this step was assisted by GitHub Copilot.
       - name: Deploy to Render
+        env:
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
+          if [ -z "$RENDER_SERVICE_ID" ] || [ -z "$RENDER_API_KEY" ]; then
+            echo "::warning title=Deployment::Deployment to Render was skipped because variables are missing."
+            exit 0
+          fi
+
           curl --fail --show-error --silent -X POST \
-            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
             --header 'accept: application/json' \
             --header 'content-type: application/json' \
-            --header 'authorization: Bearer ${{ secrets.RENDER_API_KEY }}' \
+            --header 'authorization: Bearer ${RENDER_API_KEY}' \
             --data '{
               "clearCache": "clear",
               "imageUrl": "${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
