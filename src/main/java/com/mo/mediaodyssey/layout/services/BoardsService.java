@@ -1,11 +1,11 @@
-package com.mo.mediaodyssey.services;
+package com.mo.mediaodyssey.layout.services;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.mo.mediaodyssey.models.Boards;
-import com.mo.mediaodyssey.repository.BoardsRepository;
+import com.mo.mediaodyssey.layout.models.Boards;
+import com.mo.mediaodyssey.layout.repositories.BoardsRepository;
 
 @Service
 public class BoardsService {

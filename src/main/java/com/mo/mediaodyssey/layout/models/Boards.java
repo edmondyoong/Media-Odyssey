@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.models;
+package com.mo.mediaodyssey.layout.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.mo.mediaodyssey.services.BoardsService;
+import com.mo.mediaodyssey.layout.services.BoardsService;
 
 @Controller
 public class homeController {

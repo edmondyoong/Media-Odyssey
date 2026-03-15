@@ -13,10 +13,12 @@
          for more specific informations
         -->
         
-        <!-- header + side bar  -->
-        <div th:replace="fragments/header :: header"></div>
+        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <div th:replace="boardsLayout/fragments/header :: header"></div>
 
-        <div th:replace="fragments/sidebar :: sideBar"></div>
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded
+         Please use the MO logo to work with side bar if needed -->
+        <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
         <!-- main content starts here -->
         <main>
