@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 @RequestMapping("/boards")
 public class BoardsController {
+    /* boards controller is a mapping controller for board related htmls */
 
     private final BoardsService boardsService; 
 
@@ -22,18 +23,20 @@ public class BoardsController {
         this.boardsService = boardsService; 
     }
 
+    /* Bring user to the page to create a board */
     @GetMapping("/create")
     public String createBoardPage(Model model) {
         model.addAttribute("board", new Boards());
 
-        return "createBoard"; 
+        return "pages/createBoard"; 
     }
 
+    /* After user finished created a board, they should be brought back to the homePage */
     @PostMapping("/create")
     public String createBoard (@ModelAttribute("board") Boards board) {
 
         boardsService.createBoard(board);
         
-        return "redirect:/";
+        return "boardsLayout/homePage";
     }
 }

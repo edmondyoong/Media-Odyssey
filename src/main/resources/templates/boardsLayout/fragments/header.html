@@ -1,10 +1,10 @@
 <header th:fragment="header">
     <!--LOGO that control the side bar (fold and unfold)-->
-    <img th:src="@{/images/closeLogo.svg}" alt="Logo" class="logo" id="logo">
+    <img th:src="@{/layout/images/closeLogo.svg}" alt="Logo" class="logo" id="logo">
 
     <!--Home Button (returns to the landing page)-->
     <a href="/homeReturn">
-        <img th:src="@{/images/House.svg}" alt="homeBtn" class="home-btn">
+        <img th:src="@{/layout/images/House.svg}" alt="homeBtn" class="home-btn">
     </a>
 
     <!-- Search bar -->
@@ -15,6 +15,6 @@
     <!-- Avatar -->
     <div class="user">
         <p class="username-display">username</p>
-        <a href="/api/auth/logout"><img th:src="@{/images/Avatar.png}" alt="Avatar" class="avatar-display"></a>
+        <a href="/api/auth/logout"><img th:src="@{/layout/images/Avatar.png}" alt="Avatar" class="avatar-display"></a>
     </div>
 </header>

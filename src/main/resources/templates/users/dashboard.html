@@ -14,16 +14,18 @@
         button { margin-left: 5px; }
         form { display: inline; }
     </style>
-    <link rel="stylesheet" th:href="@{/css/homePage.css}">
+
+    <!-- this css path is to ensure the header of the page -->
+    <link rel="stylesheet" th:href="@{/layout/css/homePage.css}">
 </head>
 <body>
 
-<!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
-<div th:replace="fragments/header :: header"></div>
+    <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+    <div th:replace="fragments/header :: header"></div>
 
-<!-- A side bar that contains features (can be discussed). Side bar can be folded
-Please use the MO logo to work with side bar if needed -->
-<div th:replace="fragments/sidebar :: sideBar"></div>
+    <!-- A side bar that contains features (can be discussed). Side bar can be folded
+    Please use the MO logo to work with side bar if needed -->
+    <div th:replace="fragments/sidebar :: sideBar"></div>
 
 <h1 class="dashboardTitle">Welcome to MediaOdyssey</h1>
 <p>You are logged in.</p>
@@ -135,6 +137,9 @@ Please use the MO logo to work with side bar if needed -->
     </ul>
 
 </div>
+
+    <!-- This js script path is to ensure the sidebar works -->
+    <script th:src="@{/layout/js/homePage.js}"></script>
 
 </body>
 </html>
