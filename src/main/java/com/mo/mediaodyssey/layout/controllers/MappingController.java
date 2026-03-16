@@ -27,7 +27,7 @@ public class MappingController {
     Social feature needs to be discussed more specifically tho.*/
     @GetMapping("/socialTab")
     public String navToSocialTab() {
-        return "social";
+        return "boardsLayout/features/social";
     }
 
     /* Temporary, social feature is in dashboard so there will be a dashboard element in sidebar.*/
@@ -39,6 +39,6 @@ public class MappingController {
     /* Bring user to the page specifically for trending feature */
     @GetMapping("/trendingTab")
     public String navToTrendingTab() {
-        return "trending";
+        return "boardsLayout/features/trending";
     }
 }

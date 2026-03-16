@@ -73,6 +73,6 @@ public class PageController {
     public String adminListUsersPage(Model model) {
         List<User> users = userRepository.findAll();
         model.addAttribute("users", users);
-        return "user";
+        return "boardsLayout/admin/user";
     }
 }
