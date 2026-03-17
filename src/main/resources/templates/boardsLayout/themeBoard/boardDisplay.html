@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Board's name</title>
-        <link rel="stylesheet" th:href="@{/css}">
+        <link rel="stylesheet" th:href="@{/layout/css}">
     </head>
     <body>
         <!-- This html will show when a user click on any board. Potential, this board will display 
@@ -13,10 +13,12 @@
          for more specific informations
         -->
         
-        <!-- header + side bar  -->
-        <div th:replace="fragments/header :: header"></div>
+        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <div th:replace="boardsLayout/fragments/header :: header"></div>
 
-        <div th:replace="fragments/sidebar :: sideBar"></div>
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded
+         Please use the MO logo to work with side bar if needed -->
+        <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
         <!-- main content starts here -->
         <main>
@@ -27,6 +29,6 @@
             <div></div>
         </main>
 
-        <script th:src="@{/js/homePage.js}"></script>
+        <script th:src="@{/layout/js/homePage.js}"></script>
     </body>
 </html>

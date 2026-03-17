@@ -1,27 +1,21 @@
-package com.mo.mediaodyssey.Controllers;
-
-import java.util.List;
+package com.mo.mediaodyssey.layout.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.mo.mediaodyssey.models.Boards;
-import com.mo.mediaodyssey.services.BoardsService;
+import com.mo.mediaodyssey.layout.models.Boards;
+import com.mo.mediaodyssey.layout.services.BoardsService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-
 
 
 @Controller
 @RequestMapping("/boards")
 public class BoardsController {
+    /* boards controller is a mapping controller for board related htmls */
 
     private final BoardsService boardsService; 
 
@@ -29,18 +23,20 @@ public class BoardsController {
         this.boardsService = boardsService; 
     }
 
+    /* Bring user to the page to create a board */
     @GetMapping("/create")
     public String createBoardPage(Model model) {
         model.addAttribute("board", new Boards());
 
-        return "createBoard"; 
+        return "pages/createBoard"; 
     }
 
+    /* After user finished created a board, they should be brought back to the homePage */
     @PostMapping("/create")
     public String createBoard (@ModelAttribute("board") Boards board) {
 
         boardsService.createBoard(board);
         
-        return "redirect:/";
+        return "boardsLayout/homePage";
     }
 }

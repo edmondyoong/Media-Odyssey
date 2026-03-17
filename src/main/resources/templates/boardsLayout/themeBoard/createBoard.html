@@ -5,17 +5,19 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Media Odyssey - board creating</title>
-        <link rel="stylesheet" th:href="@{/css/createBoard.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/createBoard.css}">
     </head>
     <body>
         <!--This html will show elments to create a board. 
         This is just to set a board titles and avatar. Objects like movies, games, and songs
         will be added or searched in the boardDisplay.html-->
 
-        <!-- headers and side bar -->
-        <div th:replace="fragments/header :: header"></div>
+        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <div th:replace="boardsLayout/fragments/header :: header"></div>
 
-        <div th:replace="fragments/sidebar :: sideBar"></div>
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded
+         Please use the MO logo to work with side bar if needed -->
+        <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
         <!-- main content starts here -->
         <main class="form-container">
@@ -42,6 +44,6 @@
             </form>
         </main>
         
-        <script th:src="@{/js/homePage.js}"></script>
+        <script th:src="@{/layout/js/homePage.js}"></script>
     </body>
 </html>

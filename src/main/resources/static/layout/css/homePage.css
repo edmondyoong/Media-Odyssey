@@ -3,16 +3,6 @@ body {
     color: white;
 }
 
-header {
-    background-color: #26054B;
-
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    height: 80px;
-} 
-
 /* HEADER */ 
 header {
     background-color: #26054B;
@@ -93,8 +83,6 @@ header {
     background-color: white;
     cursor: pointer;
 }
-
-
 
 /* SIDE BAR*/ 
 
@@ -221,6 +209,34 @@ header {
 .personal-boards-titles{
     color: rgb(217, 0, 255);
     font-family: 'Space Grotesk';
+}
+
+/* ADMIN BUTTON */ 
+.admin-view-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+
+    padding: 10px 16px;
+    background-color: #7B3FE4;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Space Grotesk';
+
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+
+    cursor: pointer;
+
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+}
+
+.admin-view-btn:hover {
+    background-color: #9256ff;
 }
 /* =========================================================
    RECOMMENDATIONS
@@ -351,4 +367,9 @@ header {
 
 .rec-btn.viewed {
     background-color: #1a7a4a;
+}
+
+/* DASHBOARD HTML /////////////// */ 
+.dashboardTitle {
+    margin: 13px;
 }

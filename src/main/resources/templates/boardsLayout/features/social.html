@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <head>
+        <meta charset="UTF-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Media Odyssey-Social</title>
+        <!-- this css path is to ensure the header of the page -->
+        <link rel="stylesheet" th:href="@{/layout/css/homePage.css}">
+    </head>
+    <body>
+        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <div th:replace="boardsLayout/fragments/header :: header"></div>
+
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded
+         Please use the MO logo to work with side bar if needed -->
+        <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
+
+        <!-- Implement what you want from here -->
+
+        <!-- this js path is to ensure the sidebar works-->
+        <script th:src="@{/layout/js/homePage.js}"></script>
+    </body> 
+</html>

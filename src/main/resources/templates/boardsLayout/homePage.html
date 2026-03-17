@@ -7,14 +7,15 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Media Odyssey-Home</title>
-        <link rel="stylesheet" th:href="@{/css/homePage.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/homePage.css}">
     </head>
     <body>
         <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
-        <div th:replace="fragments/header :: header"></div>
+        <div th:replace="boardsLayout/fragments/header :: header"></div>
 
-        <!-- A side bar that contains features (can be discussed). Side bar can be folded -->
-        <div th:replace="fragments/sidebar :: sideBar"></div>
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded
+        Please use the MO logo to work with side bar if needed -->
+        <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
         
         <!-- User side (to be implemented)-->
 
@@ -61,12 +62,13 @@
         </div>
 
         <!-- ADMINS ALLOWANCE TO VIEW USERS DATABASE -->
+
         <div sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/users}" class="admin-btn">
                 View Users Database
             </a>
         </div> 
 
-        <script th:src="@{/js/homePage.js}"></script>
+        <script th:src="@{/layout/js/homePage.js}"></script>
     </body>
 </html>
