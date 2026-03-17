@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.entity;
+package com.mo.mediaodyssey.community.favorite;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

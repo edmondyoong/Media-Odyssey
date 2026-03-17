@@ -1,6 +1,6 @@
-package com.mo.mediaodyssey.repository;
+package com.mo.mediaodyssey.community.favorite;
 
-import com.mo.mediaodyssey.entity.Media;
+import com.mo.mediaodyssey.community.favorite.Media;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

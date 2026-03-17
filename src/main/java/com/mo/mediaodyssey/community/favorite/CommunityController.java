@@ -1,7 +1,7 @@
-package com.mo.mediaodyssey.config.controller;
+package com.mo.mediaodyssey.community.favorite;
 
-import com.mo.mediaodyssey.entity.Media;
-import com.mo.mediaodyssey.repository.MediaRepository;
+import com.mo.mediaodyssey.community.favorite.Media;
+import com.mo.mediaodyssey.community.favorite.MediaRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
