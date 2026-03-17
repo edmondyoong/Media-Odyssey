@@ -80,9 +80,36 @@
                             <img src="" alt="Watched" id="watched-icon">
                             <!-- Default SVG fallback -->
                         </div>
+
+                        <!-- Theme boards drop down 
+                         Description: this drop down box will allow users to add movies into their 
+                         own created theme boards.
+                         Note: They cannot add movies into other's theme boards. 
+                         Future idea: Perhaps users can clone other users's theme boards? Or request the 
+                         theme board owner to add this movie in their theme board.-->
+                        <div class="themeBoard-Dropdown">
+                            <button class="dropdownBtn" id="dropdownBtn">
+                                <span>Add to board</span>
+                            </button>
+
+                            <!-- Show user's created board(s) -->
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Movie page's footer: show the streaming platforms that the movie is on -->
+             <div class="movie-footer">
+                <div class="stream-platforms-section">
+                    <h3>Available on</h3>
+
+                    <!--the div below will show the platforms that the movie is on-->
+                    <div class="platforms"></div>
+                </div>
+             </div>
         </main>
 
         <script th:src="@{/layout/js/homePage.js}"></script>
