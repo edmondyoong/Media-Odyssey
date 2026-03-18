@@ -1,6 +1,8 @@
 body {
+    font-family: 'Space Grotesk';
     background-color: #1E1E1E;
     color: white;
+    min-height: 100vh;
 }
 
 /* HEADER */ 
@@ -138,19 +140,64 @@ header {
 }
 
 /* BODY ///////////////////////////////////////// */ 
+    /* MAIN CONTENT */
 .main-content {
     padding-top: 95px;
     padding-left: 25px;
+    max-width: 100%;
+    overflow-x: hidden;
 
     font-family: 'Space Grotesk';
 }
 
-/* PERSONAL BOARDS DISPLAY */ 
+/* === PERSONAL BOARDS DISPLAY === */ 
+.personal-boards-container{
+    position: relative; 
+    margin-bottom: 3rem;
+}
+
 .personal-boards-title{
-    font-size: 30px;
-    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: #e0e0e0;
+    letter-spacing: 0.5px;
 
     margin: 13px;
+}
+
+/* ==== Board (display like cards) Wrapper ===*/
+/* Additional note: boards-scroll-wrapper, boards-scroll-container
+will not appear in raw homePage.html. These elements are created
+when the js runs. Testing are required to see how it works.*/
+
+.boards-scroll-wrapper{
+    position: relative; 
+    width: 100%;
+}
+
+.boards-scroll-container{
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto; 
+    scroll-behavior: smooth;
+    padding: 0.75rem 0.25rem 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #4a4a6a #1a1a2e;
+}
+
+/* Custom Scrollbar Styling */
+.boards-scroll-container::-webkit-scrollbar{
+    height: 8px;
+}
+
+.boards-scroll-container::-webkit-scrollbar-track{
+    background: #1a1a2e;
+    border-radius: 10px;
+}
+
+.boards-scroll-container::-webkit-scrollbar-thumb:hover{
+    background: linear-gradient(90deg, #818cf8, #a78bfa);
 }
 
 .board {
