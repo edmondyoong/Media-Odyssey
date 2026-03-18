@@ -21,12 +21,43 @@
         <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
         <!-- main content starts here -->
-        <main>
-            <div id="banner" class="banner"></div>
+        <main class="board-container">
 
-            <div id="objectAvt" class="object-avt"></div>
+            <!-- Top section: Board's avatar + Basic Info -->
+            <div class="board-header">
+                <div class="board-avatar">
+                    <img src="" alt="avt">
+                </div>
 
-            <div></div>
+                <div class="board-Info">
+                    <h1 class="board-title">BOARD TITLE</h1>
+
+                    <div class="board-desciption">
+                        <span> This is an example for this board </span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Middle Section: Community's Post + Media display -->
+            <div class="board-middle">
+                <!-- Let user choose to either see the posts or the media in this board-->
+                <div class="middle-select">
+                    <button class="board-post">POST</button>
+                    <button class="board-media">MEDIA</button>
+                </div>
+
+                <!-- This section will be reserved for Post (Prab) -->
+                <div class="board-POST-container"></div>
+
+                <!-- MEDIA: this section is to display the media, which is whatever user has put in the board. 
+                Aim for now: show movies -->
+                <div class="board-MEDIA-container">
+                    <div class="movie-card-display"></div>
+                </div>
+            </div>
+
+            <!-- Footer Section: in thoughts progress...-->
         </main>
 
         <script th:src="@{/layout/js/homePage.js}"></script>

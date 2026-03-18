@@ -25,10 +25,12 @@
             <!--Leave for display trending music, song, movies-->
             <div></div>
 
-            <h3 id="personalBoardTitle" class="personal-boards-title">
-                Journeys you've joined:
-            </h3>
+            <!-- Display the boards users have created + joined -->
             <div id="personalBoardsContainer" class="personal-boards-container">
+
+                <h3 id="personalBoardTitle" class="personal-boards-title">
+                Journeys you've joined:
+                </h3>
 
                 <!-- Create board element-->
                 <div>
@@ -62,7 +64,6 @@
         </div>
 
         <!-- ADMINS ALLOWANCE TO VIEW USERS DATABASE -->
-
         <div sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/users}" class="admin-btn">
                 View Users Database
