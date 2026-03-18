@@ -14,8 +14,7 @@ body {
 /* BODY ///////////////////////////////////////// */ 
     /* MAIN CONTENT */
 .main-content {
-    padding-top: 95px;
-    padding-left: 25px;
+    padding: 2rem;
     max-width: 100%;
     overflow-x: hidden;
 
