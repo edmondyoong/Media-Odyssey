@@ -1,10 +1,8 @@
 package com.mo.mediaodyssey.auth.controller;
 
 import java.net.URI;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mo.mediaodyssey.auth.dto.ResendVerifyTokenDto;
-import com.mo.mediaodyssey.auth.dto.ApiResponse;
+import com.mo.mediaodyssey.auth.dto.AuthApiResponse;
 import com.mo.mediaodyssey.auth.dto.UserDto;
 import com.mo.mediaodyssey.auth.dto.VerifyTokenDto;
 import com.mo.mediaodyssey.auth.services.AuthService;
@@ -36,13 +34,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    // Temporary Admin User creation logic
-    @Value("${ALLOW_ADMIN_USER_CREATION:FALSE}")
-    private String allowAdminUserCreation;
-
-    @Value("${EMAIL_FROM:null}")
-    private String adminEmail;
-
     // Inspired by:
     // https://www.baeldung.com/spring-security-authentication-provider
     // https://www.djamware.com/post/secure-your-restful-api-with-spring-boot-35-jwt-and-mongodb
@@ -56,7 +47,7 @@ public class AuthController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<ApiResponse> login(@RequestBody UserDto dto, HttpServletRequest request,
+    public ResponseEntity<AuthApiResponse> login(@RequestBody UserDto dto, HttpServletRequest request,
             HttpServletResponse response) {
         // Login the User
         Authentication authentication = authService.loginUser(dto);
@@ -70,16 +61,16 @@ public class AuthController {
 
         // Return OK - successfully logged in
         return ResponseEntity
-                .ok(ApiResponse.success("AUTH_LOGIN_SUCCESS", "Login successful"));
+                .ok(AuthApiResponse.success("AUTH_LOGIN_SUCCESS", "Login successful"));
     }
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<ApiResponse> register(@Valid @RequestBody UserDto dto) {
+    public ResponseEntity<AuthApiResponse> register(@Valid @RequestBody UserDto dto) {
         authService.registerUser(dto);
 
         // Return OK - successfully registered
-        return ResponseEntity.ok(ApiResponse.success("AUTH_REGISTER_SUCCESS", "Registration successful"));
+        return ResponseEntity.ok(AuthApiResponse.success("AUTH_REGISTER_SUCCESS", "Registration successful"));
     }
 
     @GetMapping(value = "/verify")
@@ -96,44 +87,11 @@ public class AuthController {
 
     @PostMapping(value = "/resend", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<ApiResponse> resend(@Valid @RequestBody ResendVerifyTokenDto dto) {
+    public ResponseEntity<AuthApiResponse> resend(@Valid @RequestBody ResendVerifyTokenDto dto) {
         verificationService.resendVerification(dto);
 
         // Return OK - successfully resent
-        return ResponseEntity.ok(ApiResponse.success("AUTH_RESEND_SUCCESS", "Verification email resent"));
-    }
-
-    /**
-     * Temporary logic to create an Admin User and skip email verification.
-     * 
-     * Must be enabled via environment variable.
-     * 
-     * Email address and password is randomly assigned.
-     * 
-     * @return "OK", Email, and Password in body upon success
-     */
-    @GetMapping("/createAdminUser")
-    @Transactional
-    public ResponseEntity<ApiResponse> createAdminUser(Authentication authentication) {
-        if (allowAdminUserCreation.toLowerCase().equals("TRUE".toLowerCase())) {
-
-            String id = UUID.randomUUID().toString();
-            String email = id + "-" + adminEmail;
-            String password = id;
-
-            UserDto dto = new UserDto(email, password);
-            authService.createAdminUser(dto);
-
-            // Return OK and generated credentials in a message body
-            return ResponseEntity.ok(ApiResponse.success(
-                    "AUTH_ADMIN_CREATED",
-                    "Admin created. Email: " + email + ", Password: " + password,
-                    email));
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(ApiResponse.error("AUTH_ADMIN_CREATION_DISABLED", "Admin creation is disabled"));
-        }
+        return ResponseEntity.ok(AuthApiResponse.success("AUTH_RESEND_SUCCESS", "Verification email resent"));
     }
 
     // TODO: Completed?

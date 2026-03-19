@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.mo.mediaodyssey.auth.dto.AuthApiResponse;
 
-@RestControllerAdvice(basePackageClasses = AuthController.class)
+@RestControllerAdvice(basePackageClasses = { AuthController.class, AuthAdminController.class })
 public class AuthExceptionHandler {
 
     // Debugging assisted by AI.
