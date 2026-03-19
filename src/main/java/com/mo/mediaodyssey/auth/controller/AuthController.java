@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mo.mediaodyssey.auth.dto.ResendVerifyTokenDto;
+import com.mo.mediaodyssey.auth.dto.ApiResponse;
 import com.mo.mediaodyssey.auth.dto.UserDto;
 import com.mo.mediaodyssey.auth.dto.VerifyTokenDto;
 import com.mo.mediaodyssey.auth.services.AuthService;
@@ -53,13 +54,9 @@ public class AuthController {
     @Autowired
     private VerificationService verificationService;
 
-    // AuthController(VerificationService verificationService) {
-    // this.verificationService = verificationService;
-    // }
-
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<String> login(@RequestBody UserDto dto, HttpServletRequest request,
+    public ResponseEntity<ApiResponse> login(@RequestBody UserDto dto, HttpServletRequest request,
             HttpServletResponse response) {
         // Login the User
         Authentication authentication = authService.loginUser(dto);
@@ -72,16 +69,17 @@ public class AuthController {
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
         // Return OK - successfully logged in
-        return ResponseEntity.ok("OK");
+        return ResponseEntity
+                .ok(ApiResponse.success("AUTH_LOGIN_SUCCESS", "Login successful"));
     }
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<String> register(@Valid @RequestBody UserDto dto) {
+    public ResponseEntity<ApiResponse> register(@Valid @RequestBody UserDto dto) {
         authService.registerUser(dto);
 
         // Return OK - successfully registered
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok(ApiResponse.success("AUTH_REGISTER_SUCCESS", "Registration successful"));
     }
 
     @GetMapping(value = "/verify")
@@ -98,11 +96,11 @@ public class AuthController {
 
     @PostMapping(value = "/resend", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<String> resend(@Valid @RequestBody ResendVerifyTokenDto dto) {
+    public ResponseEntity<ApiResponse> resend(@Valid @RequestBody ResendVerifyTokenDto dto) {
         verificationService.resendVerification(dto);
 
         // Return OK - successfully resent
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok(ApiResponse.success("AUTH_RESEND_SUCCESS", "Verification email resent"));
     }
 
     /**
@@ -116,7 +114,7 @@ public class AuthController {
      */
     @GetMapping("/createAdminUser")
     @Transactional
-    public ResponseEntity<String> createAdminUser(Authentication authentication) {
+    public ResponseEntity<ApiResponse> createAdminUser(Authentication authentication) {
         if (allowAdminUserCreation.toLowerCase().equals("TRUE".toLowerCase())) {
 
             String id = UUID.randomUUID().toString();
@@ -126,15 +124,15 @@ public class AuthController {
             UserDto dto = new UserDto(email, password);
             authService.createAdminUser(dto);
 
-            // Return OK, the email address, and password - successfully registered
-            return ResponseEntity.ok("OK\n" +
-                    "Email: " + email + " \n" +
-                    "Password: " + password + " \n");
+            // Return OK and generated credentials in a message body
+            return ResponseEntity.ok(ApiResponse.success(
+                    "AUTH_ADMIN_CREATED",
+                    "Admin created. Email: " + email + ", Password: " + password,
+                    email));
         } else {
-            // return ResponseEntity
-            // .status(HttpStatus.FORBIDDEN)
-            // .build();
-            return new ResponseEntity<String>(HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(ApiResponse.error("AUTH_ADMIN_CREATION_DISABLED", "Admin creation is disabled"));
         }
     }
 
