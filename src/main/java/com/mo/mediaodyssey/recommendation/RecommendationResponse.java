@@ -4,15 +4,17 @@ package com.mo.mediaodyssey.recommendation;
 public class RecommendationResponse {
     private String mediaApiId;
     private String title;
+    private String artist;
     private String mediaType;
     private String genre;
     private String imageUrl;
     private double score;
 
-    public RecommendationResponse(String mediaApiId, String title, String mediaType,
+    public RecommendationResponse(String mediaApiId, String title, String artist, String mediaType,
                                    String genre, String imageUrl, double score) {
         this.mediaApiId = mediaApiId;
         this.title = title;
+        this.artist = artist;
         this.mediaType = mediaType;
         this.genre = genre;
         this.imageUrl = imageUrl;
@@ -21,6 +23,7 @@ public class RecommendationResponse {
 
     public String getMediaApiId() { return mediaApiId; }
     public String getTitle() { return title; }
+    public String getArtist() { return artist; }
     public String getMediaType() { return mediaType; }
     public String getGenre() { return genre; }
     public String getImageUrl() { return imageUrl; }
