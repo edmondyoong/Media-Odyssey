@@ -28,7 +28,7 @@ public class BoardsController {
     public String createBoardPage(Model model) {
         model.addAttribute("board", new Boards());
 
-        return "pages/createBoard"; 
+        return "boardsLayout/themeBoard/createBoard"; 
     }
 
     /* After user finished created a board, they should be brought back to the homePage */
