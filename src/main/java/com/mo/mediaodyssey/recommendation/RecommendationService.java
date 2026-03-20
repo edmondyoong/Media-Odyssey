@@ -10,6 +10,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -179,7 +180,7 @@ public class RecommendationService {
         try {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
-            String url = "https://api.spotify.com/v1/search?q=genre:pop&type=track&limit=20";
+            String url = "https://api.spotify.com/v1/search?q=you&type=track&limit=10&market=US";
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
@@ -282,7 +283,7 @@ public class RecommendationService {
             // search for tracks matching the genre
             String genreSlug = genre.toLowerCase().replace(" ", "-");
             String query = java.net.URLEncoder.encode("genre:" + genreSlug, "UTF-8");
-            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=20";
+            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=10&market=US";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
