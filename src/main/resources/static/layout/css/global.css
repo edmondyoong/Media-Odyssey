@@ -1,0 +1,22 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Space Grotesk';
+  background-color: #0f0f1a;
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+/* BODY ///////////////////////////////////////// */ 
+    /* MAIN CONTENT */
+.main-content {
+    padding: 2rem;
+    max-width: 100%;
+    overflow-x: hidden;
+
+    font-family: 'Space Grotesk';
+}
