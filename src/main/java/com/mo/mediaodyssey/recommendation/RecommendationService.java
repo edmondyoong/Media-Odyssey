@@ -179,11 +179,11 @@ public class RecommendationService {
         try {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
-            String url = "https://api.spotify.com/v1/recommendations?seed_genres=pop&limit=20";
+            String url = "https://api.spotify.com/v1/search?q=genre:pop&type=track&limit=20";
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-            JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks");
+            JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks").path("items");
             for (JsonNode track : tracks) {
                 String mediaApiId = track.path("id").asText();
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
@@ -270,7 +270,8 @@ public class RecommendationService {
         return results;
     }
 
-    // calls Spotify to get recommended tracks for the user's favourite genre
+    // calls Spotify search to get tracks for the user's favourite genre
+    // uses /v1/search since /v1/recommendations was deprecated for new apps in Nov 2024
     private List<RecommendationResponse> fetchSpotifyRecommendations(String genre) {
         List<RecommendationResponse> results = new ArrayList<>();
 
@@ -278,10 +279,10 @@ public class RecommendationService {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
 
-            // Spotify expects genre as lowercase slug e.g. "pop", "hip-hop"
+            // search for tracks matching the genre
             String genreSlug = genre.toLowerCase().replace(" ", "-");
-
-            String url = "https://api.spotify.com/v1/recommendations?seed_genres=" + genreSlug + "&limit=20";
+            String query = java.net.URLEncoder.encode("genre:" + genreSlug, "UTF-8");
+            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=20";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
@@ -289,7 +290,7 @@ public class RecommendationService {
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
             JsonNode root = objectMapper.readTree(response.getBody());
-            JsonNode tracks = root.path("tracks");
+            JsonNode tracks = root.path("tracks").path("items");
 
             for (JsonNode track : tracks) {
                 String mediaApiId = track.path("id").asText();
