@@ -1,339 +1,189 @@
 <!DOCTYPE html>
-<htm lang="en"> 
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <meta charset="UTF-8"> 
-        <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Media Odyssey-Trending</title>
-        <!-- this css path is to ensure the header of the page -->
+        <title>Media Odyssey - Community Favourites</title>
         <link rel="stylesheet" th:href="@{/layout/css/homePage.css}">
     </head>
     <body>
 
-        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <!-- Header: logo, home button, search bar, avatar -->
         <div th:replace="boardsLayout/fragments/header :: header"></div>
 
-        <!-- A side bar that contains features (can be discussed). Side bar can be folded
-        Please use the MO logo to work with side bar if needed -->
+        <!-- Sidebar: navigation links -->
         <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
-    <main class="main-content">
+        <main class="main-content">
 
-        <h1>Community Favourites</h1>
+            <h1>Community Favourites</h1>
 
-        <!-- ── Sort Options ─────────────────────────────────────────────────── -->
-        <!--
-            Server-side sort: reloads the page with the selected sort parameter.
-            "Top 10 (Score)" is the default — uses the Point System ranking.
-        -->
-        <div class="sort-links">
-            <a href="/community">Top 10 (Score)</a> |
-            <a href="/community?sort=likes">Most Liked</a> |
-            <a href="/community?sort=views">Most Viewed</a> |
-            <a href="/community?sort=rating">Top Rated</a>
-        </div>
-
-        <!-- ── Category Tabs ────────────────────────────────────────────────── -->
-        <!--
-            Client-side filtering: JavaScript shows/hides cards by data-cat.
-            No page reload on tab switch.
-        -->
-        <div class="tab-container">
-            <button class="tab-btn active" data-cat="ALL">All</button>
-            <button class="tab-btn" data-cat="Movie">Movies</button>
-            <button class="tab-btn" data-cat="Game">Games</button>
-            <button class="tab-btn" data-cat="Song">Songs</button>
-        </div>
-
-        <hr/>
-
-        <!-- ── Fast-Rising Top 5 ─────────────────────────────────────────────── -->
-        <!--
-            Displays the 5 items with the highest weekly like growth.
-            Growth = (likes - likesLastWeek). likesLastWeek is snapshotted
-            automatically every Sunday midnight by TrendingScheduler.
-            The ▲ badge only appears when weekly growth >= 10%.
-        -->
-        <section class="trending-section">
-            <h2>🔥 Fast-Rising This Week (Top 5)</h2>
-            <div id="trendingGrid">
-                <div th:each="m : ${trending}" class="media-card trending-card">
-
-                    <div class="card-title">
-                        <strong th:text="${m.title}">Title</strong>
-                        <em th:text="'[' + ${m.category} + ']'">[Category]</em>
-                    </div>
-
-                    <!-- Trending badge: rendered only when weekly growth >= 10% -->
-                    <span class="trending-badge"
-                          th:if="${m.trending}"
-                          th:text="'▲ ' + ${#numbers.formatDecimal(m.trendingGrowth, 1, 0)} + '%'">
-                    </span>
-
-                    <div class="card-stats">
-                        <span>👁 <span th:text="${m.views}">0</span></span>
-                        <span>❤️ <span th:text="${m.likes}">0</span></span>
-                        <span>⭐ <span th:text="${m.averageRating > 0 ? m.averageRating + ' / 5' : 'No ratings yet'}">0</span></span>
-                    </div>
-
-                </div>
+            <!-- ── Category Tabs ──────────────────────────────────────────── -->
+            <!--
+                Server-side filter: reloads with ?category= param.
+                Tab values match UserInteraction mediaType: MOVIE, GAME, SONG.
+            -->
+            <div class="tab-container">
+                <a href="/community">
+                    <button class="tab-btn" th:classappend="${currentCat == null} ? 'active'">All</button>
+                </a>
+                <a href="/community?category=MOVIE">
+                    <button class="tab-btn" th:classappend="${currentCat == 'MOVIE'} ? 'active'">Movies</button>
+                </a>
+                <a href="/community?category=GAME">
+                    <button class="tab-btn" th:classappend="${currentCat == 'GAME'} ? 'active'">Games</button>
+                </a>
+                <a href="/community?category=SONG">
+                    <button class="tab-btn" th:classappend="${currentCat == 'SONG'} ? 'active'">Songs</button>
+                </a>
             </div>
-        </section>
 
-        <hr/>
+            <!-- Live search bar -->
+            <div>
+                <input id="localSearch" type="text" placeholder="Search titles..." autocomplete="off"/>
+            </div>
 
-        <!-- ── Top 10 Ranked ─────────────────────────────────────────────────── -->
-        <!--
-            Default: ranked by Point System (views×1 + likes×10).
-            data-cat  : used by JS tab filter
-            data-title: used by JS live search filter
-            data-id   : used by JS for AJAX like / view / rating requests
-        -->
-        <section class="ranking-section">
-            <h2>🏆 Top 10 Ranked</h2>
-            <div id="top10Grid">
-                <div th:each="m, stat : ${mediaList}"
-                     class="media-card"
-                     th:attr="data-id=${m.id}, data-cat=${m.category}, data-title=${m.title}">
+            <hr/>
 
-                    <!-- Rank number + title -->
-                    <div class="card-title">
-                        <span class="rank-number" th:text="${stat.index + 1}">1</span>
-                        <strong th:text="${m.title}">Title</strong>
-                        <em th:text="'[' + ${m.category} + ']'">[Category]</em>
+            <!-- ── Fast-Rising Top 5 ───────────────────────────────────────── -->
+            <!--
+                Top 5 most-liked items in the past 7 days.
+                Data comes from UserInteraction table via MediaRankingService.
+            -->
+            <section class="trending-section">
+                <h2>🔥 Fast-Rising This Week (Top 5)</h2>
 
-                        <!-- Trending badge if this ranked item also qualifies as fast-rising -->
-                        <span class="trending-badge"
-                              th:if="${m.trending}"
-                              th:text="'▲ ' + ${#numbers.formatDecimal(m.trendingGrowth, 1, 0)} + '%'">
-                        </span>
-                    </div>
+                <div th:if="${#lists.isEmpty(trending)}">
+                    <p>No trending data yet — start interacting with media on the home page!</p>
+                </div>
 
-                    <!-- Stats row: views, likes, score -->
-                    <div class="card-stats">
-                        <span>👁 <span class="views-cnt" th:text="${m.views}">0</span></span>
-                        <span>❤️ <span class="likes-cnt" th:text="${m.likes}">0</span></span>
-                        <span>Score: <span class="score-val" th:text="${m.totalScore}">0</span></span>
-                    </div>
+                <div id="trendingGrid" th:unless="${#lists.isEmpty(trending)}">
+                    <div th:each="m : ${trending}" class="media-card trending-card"
+                         th:attr="data-title=${m.title}, data-type=${m.mediaType}">
 
-                    <!-- Star rating display + interactive stars -->
-                    <!--
-                        averageRating is displayed as read-only text (e.g. ★ 4.3 / 5 · 12 ratings).
-                        The interactive stars allow the user to submit their own rating (once per session).
-                        On click, the displayed average updates immediately via Optimistic UI,
-                        then confirms with the server-returned value.
-                    -->
-                    <div class="rating-container">
-                        <span class="avg-rating-display">
-                            ⭐ <span class="avg-rating" th:text="${m.averageRating > 0 ? m.averageRating : '-'}">-</span>
-                            / 5
-                            (<span class="rating-count" th:text="${m.ratingCount}">0</span> ratings)
-                        </span>
-                        <!-- Interactive star buttons: 1–5, session-locked after first submission -->
-                        <div class="star-input" th:attr="data-id=${m.id}">
-                            <button class="star" data-value="1">★</button>
-                            <button class="star" data-value="2">★</button>
-                            <button class="star" data-value="3">★</button>
-                            <button class="star" data-value="4">★</button>
-                            <button class="star" data-value="5">★</button>
+                        <!-- Thumbnail image -->
+                        <img th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+                             th:src="${m.imageUrl}"
+                             th:alt="${m.title}"
+                             class="media-thumbnail"
+                             onerror="this.style.display='none'"/>
+
+                        <div class="card-title">
+                            <strong th:text="${m.title}">Title</strong>
+                            <!-- Artist name for songs -->
+                            <span th:if="${m.artist != null and !m.artist.isEmpty()}"
+                                  th:text="'by ' + ${m.artist}" class="artist-name"></span>
+                            <em th:text="'[' + ${m.mediaType} + ']'">[Type]</em>
                         </div>
+
+                        <div class="card-stats">
+                            <span>🔥 <span th:text="${m.weeklyLikes}">0</span> likes this week</span>
+                            <span>Score: <span th:text="${m.totalScore}">0</span></span>
+                        </div>
+
                     </div>
-
-                    <!-- Like button: one per session, disabled after click -->
-                    <!--
-                        Optimistic UI: count increments immediately on click.
-                        Server confirms the new count and updates the score.
-                        If already liked this session, shows "Already Liked".
-                    -->
-                    <button class="like-btn" th:attr="data-id=${m.id}">
-                        ❤️ Like (<span class="like-count" th:text="${m.likes}">0</span>)
-                    </button>
-
                 </div>
-            </div>
-        </section>
+            </section>
 
-    </main>
+            <hr/>
 
-    <!-- ── JavaScript ──────────────────────────────────────────────────────── -->
-    <script>
+            <!-- ── Top 10 Ranked ──────────────────────────────────────────── -->
+            <!--
+                Ranked by Point System: LIKE × 10 + VIEW × 1.
+                Aggregated from UserInteraction table via MediaRankingService.
+                data-title used by JS live search filter.
+            -->
+            <section class="ranking-section">
+                <h2>🏆 Top 10 Ranked</h2>
 
-        // ── Auto view count on page load ──────────────────────────────────────
-        /*
-         * Sends POST /community/view/{id} for every card when the page loads.
-         * The server uses HttpSession to ensure each item is counted only once
-         * per session — refreshing the page will NOT increment the count again.
-         */
-        document.querySelectorAll('#top10Grid > div[data-id]').forEach(card => {
-            fetch(`/community/view/${card.dataset.id}`, { method: 'POST' })
-                .then(r => r.json())
-                .then(data => {
-                    const viewEl = card.querySelector('.views-cnt');
-                    if (viewEl) viewEl.textContent = data.views;
-                    const scoreEl = card.querySelector('.score-val');
-                    if (scoreEl) scoreEl.textContent = data.totalScore;
-                })
-                .catch(() => { /* silently fail — rendered count stays */ });
-        });
+                <div th:if="${#lists.isEmpty(mediaList)}">
+                    <p>No rankings yet — start interacting with media on the home page!</p>
+                </div>
 
-        // ── Category tab switching (no page reload) ───────────────────────────
-        /*
-         * Clicking a tab filters the Top 10 grid client-side using data-cat.
-         * Combined with the current search query so both filters apply at once.
-         */
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const cards   = document.querySelectorAll('#top10Grid > div');
+                <div id="top10Grid" th:unless="${#lists.isEmpty(mediaList)}">
+                    <div th:each="m, stat : ${mediaList}"
+                         class="media-card"
+                         th:attr="data-api-id=${m.mediaApiId}, data-type=${m.mediaType}, data-title=${m.title}">
 
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const query = document.getElementById('searchBar').value.trim();
-                applyFilters(btn.dataset.cat, query);
-            });
-        });
+                        <!-- Rank number + thumbnail -->
+                        <span class="rank-number" th:text="${stat.index + 1}">1</span>
 
-        // ── Live search (filters as the user types) ───────────────────────────
-        /*
-         * Uses the shared #searchBar from the header fragment.
-         * Filters the Top 10 grid by title without any server request.
-         */
-        document.getElementById('searchBar').addEventListener('input', e => {
-            const activeCat = document.querySelector('.tab-btn.active').dataset.cat;
-            applyFilters(activeCat, e.target.value.trim());
-        });
+                        <img th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+                             th:src="${m.imageUrl}"
+                             th:alt="${m.title}"
+                             class="media-thumbnail"
+                             onerror="this.style.display='none'"/>
 
-        /**
-         * applyFilters — shows/hides cards without a server request.
-         *
-         * A card is visible only when BOTH of these are true:
-         *   1. Its category matches the active tab (or tab is "ALL")
-         *   2. Its title includes the current search query (case-insensitive)
-         *
-         * @param {string} cat   - active tab category ("ALL", "Movie", "Game", "Song")
-         * @param {string} query - current search input value
-         */
-        function applyFilters(cat, query) {
-            cards.forEach(card => {
-                const matchCat   = (cat === 'ALL') || (card.dataset.cat === cat);
-                const matchQuery = !query ||
-                    (card.dataset.title || '').toLowerCase().includes(query.toLowerCase());
-                card.style.display = (matchCat && matchQuery) ? '' : 'none';
-            });
-        }
+                        <!-- Title + artist + type -->
+                        <div class="card-title">
+                            <strong th:text="${m.title}">Title</strong>
+                            <span th:if="${m.artist != null and !m.artist.isEmpty()}"
+                                  th:text="'by ' + ${m.artist}" class="artist-name"></span>
+                            <em th:text="'[' + ${m.mediaType} + ']'">[Type]</em>
+                        </div>
 
-        // ── Like button — Optimistic UI ───────────────────────────────────────
-        /*
-         * Flow:
-         *   1. Button is disabled immediately to prevent double-click during request
-         *   2. Count increments on screen before the server responds (optimistic)
-         *   3. Server checks HttpSession — if already liked, returns liked:false
-         *      and the count reverts to the server-confirmed value
-         */
-        document.querySelectorAll('.like-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (btn.disabled) return;
-                btn.disabled = true;
+                        <!-- Stats -->
+                        <div class="card-stats">
+                            <span>Score: <span class="score-val" th:text="${m.totalScore}">0</span></span>
+                        </div>
 
-                const id      = btn.dataset.id;
-                const card    = btn.closest('div');
-                const countEl = btn.querySelector('.like-count');
-                const scoreEl = card.querySelector('.score-val');
-                const cntEl   = card.querySelector('.likes-cnt');
+                        <!-- Like button: one per session -->
+                        <button class="like-btn" th:attr="data-api-id=${m.mediaApiId}">
+                            ❤️ Like
+                        </button>
 
-                // Optimistic increment before server responds
-                const optimisticCount = parseInt(countEl.textContent) + 1;
-                countEl.textContent          = optimisticCount;
-                if (cntEl) cntEl.textContent = optimisticCount;
+                    </div>
+                </div>
+            </section>
 
-                fetch(`/community/like/${id}`, { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (!data.liked) {
-                            // Already liked this session — revert and show message
-                            btn.textContent = '✓ Already Liked';
-                        }
-                        // Always confirm with server values
-                        countEl.textContent          = data.likes;
-                        if (cntEl) cntEl.textContent = data.likes;
-                        if (scoreEl) scoreEl.textContent = data.totalScore;
-                    })
-                    .catch(() => {
-                        // Re-enable on network error so the user can retry
-                        btn.disabled = false;
-                        countEl.textContent = parseInt(countEl.textContent) - 1;
-                        if (cntEl) cntEl.textContent = parseInt(cntEl.textContent) - 1;
-                    });
-            });
-        });
+        </main>
 
-        // ── Star rating — Optimistic UI ───────────────────────────────────────
-        /*
-         * Flow:
-         *   1. Stars highlight on hover to preview the selected rating
-         *   2. On click, selected stars are highlighted immediately (optimistic)
-         *   3. POST /community/rate/{id}?stars={value} is sent to the server
-         *   4. Server checks HttpSession — if already rated, returns rated:false
-         *   5. On success, the displayed average and count update with server values
-         *   6. Stars are disabled after a successful rating to prevent resubmission
-         */
-        document.querySelectorAll('.star-input').forEach(starGroup => {
-            const stars  = starGroup.querySelectorAll('.star');
-            const id     = starGroup.dataset.id;
-            const card   = starGroup.closest('.media-card');
-            const avgEl  = card.querySelector('.avg-rating');
-            const cntEl  = card.querySelector('.rating-count');
+        <!-- ── JavaScript ──────────────────────────────────────────────────── -->
+        <script>
 
-            // Highlight stars on hover
-            stars.forEach((star, index) => {
-                star.addEventListener('mouseover', () => {
-                    stars.forEach((s, i) => s.classList.toggle('hovered', i <= index));
-                });
-                star.addEventListener('mouseout', () => {
-                    stars.forEach(s => s.classList.remove('hovered'));
+            // ── Live search (client-side, no reload) ─────────────────────────
+            document.getElementById('localSearch').addEventListener('input', function(e) {
+                const query = e.target.value.trim().toLowerCase();
+                document.querySelectorAll('#top10Grid > div').forEach(card => {
+                    const title = (card.dataset.title || '').toLowerCase();
+                    card.style.display = (!query || title.includes(query)) ? '' : 'none';
                 });
             });
 
-            // Submit rating on click
-            stars.forEach((star, index) => {
-                star.addEventListener('click', () => {
-                    // Check if this group is already locked (rated this session)
-                    if (starGroup.dataset.rated === 'true') return;
+            // ── Like button ───────────────────────────────────────────────────
+            /*
+             * Records a LIKE interaction via POST /community/like/{mediaApiId}.
+             * Session-based: server prevents duplicate likes.
+             * The actual ranking update happens asynchronously as UserInteraction
+             * data accumulates — page refresh will reflect updated rankings.
+             */
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.disabled) return;
+                    btn.disabled = true;
 
-                    const value = index + 1;
+                    const mediaApiId = btn.dataset.apiId;
 
-                    // Optimistic highlight
-                    stars.forEach((s, i) => s.classList.toggle('selected', i < value));
-
-                    fetch(`/community/rate/${id}?stars=${value}`, { method: 'POST' })
+                    fetch(`/community/like/${mediaApiId}`, { method: 'POST' })
                         .then(r => r.json())
                         .then(data => {
-                            if (data.rated) {
-                                // Lock stars after successful submission
-                                starGroup.dataset.rated = 'true';
-                                stars.forEach(s => s.disabled = true);
-                                // Update display with server-confirmed average
-                                if (avgEl) avgEl.textContent = data.averageRating;
-                                if (cntEl) cntEl.textContent = data.ratingCount;
+                            if (data.liked) {
+                                btn.textContent = '❤️ Liked!';
                             } else {
-                                // Already rated — revert star highlight and show message
-                                stars.forEach(s => s.classList.remove('selected'));
-                                starGroup.dataset.rated = 'true';
-                                stars.forEach(s => s.disabled = true);
+                                btn.textContent = '✓ Already Liked';
                             }
                         })
                         .catch(() => {
-                            // Revert on network error
-                            stars.forEach(s => s.classList.remove('selected'));
+                            btn.disabled = false;
                         });
                 });
             });
-        });
 
-    </script>
+        </script>
 
+        <!-- Sidebar toggle script -->
+        <script th:src="@{/layout/js/homePage.js}"></script>
 
-    <!-- This js script path is to ensure the sidebar works -->
-    <script th:src="@{/layout/js/homePage.js}"></script>
-</body>
+    </body>
 </html>
