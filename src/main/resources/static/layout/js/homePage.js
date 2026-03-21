@@ -136,4 +136,3 @@ document.querySelectorAll(".rec-tab").forEach(tab => {
 });
 
 // Load on page open
-loadRecommendations(currentMediaType);

@@ -1,61 +1,95 @@
 package com.mo.mediaodyssey.community.favorite;
 
 /**
- * DTO (Data Transfer Object) for a ranked media item on the Community Favourites page.
+ * DTO used by the Community Favourites page.
  *
  * Combines:
- *   - Interaction data from the UserInteraction table (score, mediaApiId, mediaType)
- *   - Media metadata fetched from external APIs (title, imageUrl, artist)
- *
- * Used by MediaRankingService and passed to the Thymeleaf template via the model.
+ * - metadata from external APIs
+ * - score/trending information from UserInteraction
+ * - rating information from Media table
  */
 public class RankedMediaResponse {
 
-    /** External API ID (e.g. TMDB movie ID, RAWG game ID, Spotify track ID) */
+    /** External API id (TMDB / RAWG / Spotify) */
     private String mediaApiId;
 
-    /** Display title of the media item */
+    /** Display title */
     private String title;
 
-    /** Artist name — only populated for songs (Spotify) */
+    /** Artist name (mainly for songs) */
     private String artist;
 
-    /** Media type: "MOVIE", "GAME", or "SONG" */
+    /** MOVIE / GAME / SONG */
     private String mediaType;
 
-    /** Thumbnail image URL from the external API */
+    /** Poster / thumbnail / album image */
     private String imageUrl;
 
-    /**
-     * Point System score aggregated from all UserInteraction records.
-     * Formula: (VIEW count × 1) + (LIKE count × 10)
-     */
+    /** score = views * 1 + likes * 10 */
     private long totalScore;
 
-    /** Weekly like count — used for the Fast-Rising trending section */
+    /** Likes collected in the past 7 days */
     private long weeklyLikes;
 
-    // ── Constructor ───────────────────────────────────────────────────────────
+    /** Average star rating */
+    private double averageRating;
 
-    public RankedMediaResponse(String mediaApiId, String title, String artist,
-                                String mediaType, String imageUrl,
-                                long totalScore, long weeklyLikes) {
-        this.mediaApiId  = mediaApiId;
-        this.title       = title;
-        this.artist      = artist;
-        this.mediaType   = mediaType;
-        this.imageUrl    = imageUrl;
-        this.totalScore  = totalScore;
+    /** Number of submitted ratings */
+    private int ratingCount;
+
+    public RankedMediaResponse(String mediaApiId,
+                               String title,
+                               String artist,
+                               String mediaType,
+                               String imageUrl,
+                               long totalScore,
+                               long weeklyLikes,
+                               double averageRating,
+                               int ratingCount) {
+        this.mediaApiId = mediaApiId;
+        this.title = title;
+        this.artist = artist;
+        this.mediaType = mediaType;
+        this.imageUrl = imageUrl;
+        this.totalScore = totalScore;
         this.weeklyLikes = weeklyLikes;
+        this.averageRating = averageRating;
+        this.ratingCount = ratingCount;
     }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
+    public String getMediaApiId() {
+        return mediaApiId;
+    }
 
-    public String getMediaApiId()  { return mediaApiId; }
-    public String getTitle()       { return title; }
-    public String getArtist()      { return artist; }
-    public String getMediaType()   { return mediaType; }
-    public String getImageUrl()    { return imageUrl; }
-    public long   getTotalScore()  { return totalScore; }
-    public long   getWeeklyLikes() { return weeklyLikes; }
+    public String getTitle() {
+        return title;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public long getTotalScore() {
+        return totalScore;
+    }
+
+    public long getWeeklyLikes() {
+        return weeklyLikes;
+    }
+
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public int getRatingCount() {
+        return ratingCount;
+    }
 }

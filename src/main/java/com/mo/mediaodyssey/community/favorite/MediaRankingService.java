@@ -3,30 +3,39 @@ package com.mo.mediaodyssey.community.favorite;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mo.mediaodyssey.recommendation.UserInteractionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Service responsible for building the Community Favourites ranking.
+ * Service responsible for building the Community Favourites page data.
  *
- * Flow:
- *   1. Query UserInteraction table to get Top 10 mediaApiIds by Point System score
- *   2. For each mediaApiId, call the appropriate external API (TMDB / RAWG / Spotify)
- *      to fetch the title, image, and artist (for songs)
- *   3. Return a list of RankedMediaResponse objects for the Thymeleaf template
+ * Data sources:
+ * 1. UserInteraction table
+ *    - Top 10 by score
+ *    - Top 5 trending this week
  *
- * Point System: LIKE = 10 points, VIEW = 1 point
- * Trending: Top 5 most-liked items in the past 7 days
+ * 2. Media table
+ *    - Top Rated ranking
+ *    - Rating persistence (ratingSum / ratingCount)
+ *
+ * This service also enriches ranking rows with metadata from:
+ * - TMDB (movies)
+ * - RAWG (games)
+ * - Spotify (songs)
  */
 @Service
 public class MediaRankingService {
 
     private final UserInteractionRepository userInteractionRepository;
+    private final MediaRepository mediaRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -42,68 +51,182 @@ public class MediaRankingService {
     @Value("${spotify.client.secret}")
     private String spotifyClientSecret;
 
-    public MediaRankingService(UserInteractionRepository userInteractionRepository) {
+    public MediaRankingService(UserInteractionRepository userInteractionRepository,
+                               MediaRepository mediaRepository) {
         this.userInteractionRepository = userInteractionRepository;
+        this.mediaRepository = mediaRepository;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
 
-    // ── Top 10 Ranking ────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // Top 10 by score
+    // Source: UserInteraction aggregate query
+    // ─────────────────────────────────────────────────────────────
 
     /**
-     * Returns the Top 10 ranked media items across all categories.
-     * Aggregates UserInteraction scores, then enriches with API metadata.
+     * Returns Top 10 ranked media across all categories using score.
+     * score = views * 1 + likes * 10
      */
     public List<RankedMediaResponse> getTop10() {
         List<Object[]> rows = userInteractionRepository.findTop10ByScore();
-        return enrichWithMetadata(rows);
+        return enrichScoreRows(rows);
     }
 
     /**
-     * Returns the Top 10 ranked media items filtered by media type.
-     * Used when the user clicks the Movies, Games, or Songs tab.
+     * Returns Top 10 ranked media for a specific media type using score.
      *
-     * @param mediaType "MOVIE", "GAME", or "SONG"
+     * @param mediaType MOVIE / GAME / SONG
      */
     public List<RankedMediaResponse> getTop10ByMediaType(String mediaType) {
-        List<Object[]> rows = userInteractionRepository.findTop10ByScoreAndMediaType(mediaType);
-        return enrichWithMetadata(rows);
+        List<Object[]> rows = userInteractionRepository.findTop10ByScoreAndMediaType(normalizeMediaType(mediaType));
+        return enrichScoreRows(rows);
     }
 
-    // ── Fast-Rising Top 5 Trending ────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // Top 5 trending this week
+    // Source: UserInteraction aggregate query
+    // ─────────────────────────────────────────────────────────────
 
     /**
-     * Returns the Top 5 fastest-rising media items based on likes in the past 7 days.
-     * Used for the Fast-Rising section on the Community Favourites page.
+     * Returns Top 5 fastest-rising media based on likes in the past 7 days.
+     *
+     * Important:
+     * The query result for trending uses weekly likes, not total score.
+     * We preserve weeklyLikes so the Top 5 section shows the correct value.
      */
     public List<RankedMediaResponse> getTop5Trending() {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
         List<Object[]> rows = userInteractionRepository.findTop5TrendingLikesSince(oneWeekAgo);
-        return enrichWithMetadata(rows);
+        return enrichTrendingRows(rows);
     }
 
-    // ── Metadata Enrichment ───────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // Top Rated
+    // Source: Media table (ratingSum / ratingCount)
+    // ─────────────────────────────────────────────────────────────
 
     /**
-     * Takes raw rows from the UserInteraction aggregate query and enriches
-     * each one with title, imageUrl, and artist by calling the external API.
-     *
-     * Each row is Object[]:
-     *   [0] = mediaApiId (String)
-     *   [1] = mediaType  (String)
-     *   [2] = score      (Long)
+     * Returns Top 10 by average rating across all categories.
      */
-    private List<RankedMediaResponse> enrichWithMetadata(List<Object[]> rows) {
+    public List<RankedMediaResponse> getTop10ByRating() {
+        return mediaRepository.findTop10ByRating()
+                .stream()
+                .map(this::toRatedResponse)
+                .toList();
+    }
+
+    /**
+     * Returns Top 10 by average rating for a specific media type.
+     *
+     * @param mediaType MOVIE / GAME / SONG
+     */
+    public List<RankedMediaResponse> getTop10ByRatingAndMediaType(String mediaType) {
+        return mediaRepository.findTop10ByRatingAndCategory(normalizeMediaType(mediaType))
+                .stream()
+                .map(this::toRatedResponse)
+                .toList();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Rating persistence
+    // Source: Media table
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Adds a rating to the Media table.
+     *
+     * We identify the row by:
+     * - externalApiId
+     * - category
+     *
+     * If the media row does not exist yet, we create a placeholder entry
+     * using metadata fetched from the external API.
+     */
+    @Transactional
+    public void addRating(String mediaApiId, String mediaType, int stars) {
+        String normalizedType = normalizeMediaType(mediaType);
+
+        Media media = mediaRepository.findByExternalApiIdAndCategoryIgnoreCase(mediaApiId, normalizedType)
+                .orElseGet(() -> createPlaceholderMedia(mediaApiId, normalizedType));
+
+        media.setRatingSum(media.getRatingSum() + stars);
+        media.setRatingCount(media.getRatingCount() + 1);
+
+        mediaRepository.save(media);
+    }
+
+    /**
+     * Creates a Media row if rating is submitted before the item has been cached.
+     * This prevents the rate endpoint from failing when the DB row does not exist yet.
+     */
+    private Media createPlaceholderMedia(String mediaApiId, String mediaType) {
+        RankedMediaResponse metadata = fetchMetadata(mediaApiId, mediaType, 0, 0);
+
+        Media media = new Media();
+        media.setExternalApiId(mediaApiId);
+        media.setCategory(mediaType);
+
+        if (metadata != null) {
+            media.setTitle(metadata.getTitle());
+            media.setArtist(metadata.getArtist());
+            media.setImageUrl(metadata.getImageUrl());
+        } else {
+            media.setTitle("Unknown");
+            media.setArtist("");
+            media.setImageUrl("");
+        }
+
+        media.setViews(0);
+        media.setLikes(0);
+        media.setLikesLastWeek(0);
+        media.setRatingSum(0);
+        media.setRatingCount(0);
+
+        return mediaRepository.save(media);
+    }
+
+    /**
+     * Converts a Media entity into RankedMediaResponse for Top Rated UI.
+     */
+    private RankedMediaResponse toRatedResponse(Media media) {
+        return new RankedMediaResponse(
+                media.getExternalApiId() == null ? String.valueOf(media.getId()) : media.getExternalApiId(),
+                media.getTitle(),
+                media.getArtist(),
+                normalizeMediaType(media.getCategory()),
+                media.getImageUrl() == null ? "" : media.getImageUrl(),
+                media.getTotalScore(),
+                0,
+                media.getAverageRating(),
+                media.getRatingCount()
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Metadata enrichment
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Enriches Top 10 score rows with API metadata.
+     *
+     * Expected row structure:
+     * [0] mediaApiId
+     * [1] mediaType
+     * [2] totalScore
+     */
+    private List<RankedMediaResponse> enrichScoreRows(List<Object[]> rows) {
         List<RankedMediaResponse> results = new ArrayList<>();
 
         for (Object[] row : rows) {
-            String mediaApiId = (String) row[0];
-            String mediaType  = (String) row[1];
-            long   score      = ((Number) row[2]).longValue();
+            String mediaApiId = String.valueOf(row[0]);
+            String mediaType = normalizeMediaType(String.valueOf(row[1]));
+            long score = ((Number) row[2]).longValue();
 
-            RankedMediaResponse enriched = fetchMetadata(mediaApiId, mediaType, score);
+            RankedMediaResponse enriched = fetchMetadata(mediaApiId, mediaType, score, 0);
             if (enriched != null) {
                 results.add(enriched);
+                cacheMediaMetadata(enriched);
             }
         }
 
@@ -111,66 +234,159 @@ public class MediaRankingService {
     }
 
     /**
-     * Dispatches to the correct API based on mediaType.
-     * Returns null if the API call fails.
+     * Enriches Top 5 trending rows with API metadata.
+     *
+     * Expected row structure:
+     * [0] mediaApiId
+     * [1] mediaType
+     * [2] weeklyLikes
+     *
+     * This is separated from score enrichment because trending cards need
+     * weeklyLikes to display correctly.
      */
-    private RankedMediaResponse fetchMetadata(String mediaApiId, String mediaType, long score) {
-        switch (mediaType) {
-            case "MOVIE": return fetchTmdbMetadata(mediaApiId, score);
-            case "GAME":  return fetchRawgMetadata(mediaApiId, score);
-            case "SONG":  return fetchSpotifyMetadata(mediaApiId, score);
-            default:      return null;
+    private List<RankedMediaResponse> enrichTrendingRows(List<Object[]> rows) {
+        List<RankedMediaResponse> results = new ArrayList<>();
+
+        for (Object[] row : rows) {
+            String mediaApiId = String.valueOf(row[0]);
+            String mediaType = normalizeMediaType(String.valueOf(row[1]));
+            long weeklyLikes = ((Number) row[2]).longValue();
+
+            RankedMediaResponse enriched = fetchMetadata(mediaApiId, mediaType, 0, weeklyLikes);
+            if (enriched != null) {
+                results.add(enriched);
+                cacheMediaMetadata(enriched);
+            }
         }
+
+        return results;
     }
 
-    // ── TMDB (Movies) ─────────────────────────────────────────────────────────
+    /**
+     * Stores basic metadata into the Media table.
+     *
+     * This helps keep title / artist / image cached locally, especially useful
+     * when a user rates something before that item has been saved before.
+     */
+    @Transactional
+    protected void cacheMediaMetadata(RankedMediaResponse response) {
+        if (response == null || response.getMediaApiId() == null || response.getMediaType() == null) {
+            return;
+        }
+
+        String mediaApiId = response.getMediaApiId();
+        String mediaType = normalizeMediaType(response.getMediaType());
+
+        Optional<Media> existingOpt = mediaRepository.findByExternalApiIdAndCategoryIgnoreCase(mediaApiId, mediaType);
+        Media media = existingOpt.orElseGet(Media::new);
+
+        if (media.getExternalApiId() == null) {
+            media.setExternalApiId(mediaApiId);
+            media.setCategory(mediaType);
+        }
+
+        media.setTitle(response.getTitle() == null || response.getTitle().isBlank() ? "Unknown" : response.getTitle());
+        media.setArtist(response.getArtist() == null ? "" : response.getArtist());
+        media.setImageUrl(response.getImageUrl() == null ? "" : response.getImageUrl());
+
+        mediaRepository.save(media);
+    }
 
     /**
-     * Fetches movie title and poster image from TMDB by movie ID.
+     * Fetches metadata using the correct external API based on media type.
      */
-    private RankedMediaResponse fetchTmdbMetadata(String mediaApiId, long score) {
+    private RankedMediaResponse fetchMetadata(String mediaApiId, String mediaType, long totalScore, long weeklyLikes) {
+        return switch (normalizeMediaType(mediaType)) {
+            case "MOVIE" -> fetchTmdbMetadata(mediaApiId, totalScore, weeklyLikes);
+            case "GAME" -> fetchRawgMetadata(mediaApiId, totalScore, weeklyLikes);
+            case "SONG" -> fetchSpotifyMetadata(mediaApiId, totalScore, weeklyLikes);
+            default -> null;
+        };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // TMDB
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Fetches movie metadata from TMDB.
+     */
+    private RankedMediaResponse fetchTmdbMetadata(String mediaApiId, long totalScore, long weeklyLikes) {
         try {
             String url = "https://api.themoviedb.org/3/movie/" + mediaApiId + "?api_key=" + tmdbApiKey;
             String response = restTemplate.getForObject(url, String.class);
             JsonNode movie = objectMapper.readTree(response);
 
-            String title    = movie.path("title").asText("Unknown");
-            String imageUrl = "https://image.tmdb.org/t/p/w500" + movie.path("poster_path").asText();
+            String title = movie.path("title").asText("Unknown");
+            String posterPath = movie.path("poster_path").asText("");
+            String imageUrl = posterPath.isBlank() ? "" : "https://image.tmdb.org/t/p/w500" + posterPath;
 
-            return new RankedMediaResponse(mediaApiId, title, "", "MOVIE", imageUrl, score, 0);
+            Media cached = mediaRepository.findByExternalApiIdAndCategoryIgnoreCase(mediaApiId, "MOVIE").orElse(null);
+            double avgRating = cached == null ? 0.0 : cached.getAverageRating();
+            int ratingCount = cached == null ? 0 : cached.getRatingCount();
+
+            return new RankedMediaResponse(
+                    mediaApiId,
+                    title,
+                    "",
+                    "MOVIE",
+                    imageUrl,
+                    totalScore,
+                    weeklyLikes,
+                    avgRating,
+                    ratingCount
+            );
         } catch (Exception e) {
             System.err.println("TMDB metadata error for " + mediaApiId + ": " + e.getMessage());
             return null;
         }
     }
 
-    // ── RAWG (Games) ──────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // RAWG
+    // ─────────────────────────────────────────────────────────────
 
     /**
-     * Fetches game title and background image from RAWG by game ID.
+     * Fetches game metadata from RAWG.
      */
-    private RankedMediaResponse fetchRawgMetadata(String mediaApiId, long score) {
+    private RankedMediaResponse fetchRawgMetadata(String mediaApiId, long totalScore, long weeklyLikes) {
         try {
             String url = "https://api.rawg.io/api/games/" + mediaApiId + "?key=" + rawgApiKey;
             String response = restTemplate.getForObject(url, String.class);
             JsonNode game = objectMapper.readTree(response);
 
-            String title    = game.path("name").asText("Unknown");
+            String title = game.path("name").asText("Unknown");
             String imageUrl = game.path("background_image").asText("");
 
-            return new RankedMediaResponse(mediaApiId, title, "", "GAME", imageUrl, score, 0);
+            Media cached = mediaRepository.findByExternalApiIdAndCategoryIgnoreCase(mediaApiId, "GAME").orElse(null);
+            double avgRating = cached == null ? 0.0 : cached.getAverageRating();
+            int ratingCount = cached == null ? 0 : cached.getRatingCount();
+
+            return new RankedMediaResponse(
+                    mediaApiId,
+                    title,
+                    "",
+                    "GAME",
+                    imageUrl,
+                    totalScore,
+                    weeklyLikes,
+                    avgRating,
+                    ratingCount
+            );
         } catch (Exception e) {
             System.err.println("RAWG metadata error for " + mediaApiId + ": " + e.getMessage());
             return null;
         }
     }
 
-    // ── Spotify (Songs) ───────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // Spotify
+    // ─────────────────────────────────────────────────────────────
 
     /**
-     * Fetches track title, artist name, and album art from Spotify by track ID.
+     * Fetches track metadata from Spotify.
      */
-    private RankedMediaResponse fetchSpotifyMetadata(String mediaApiId, long score) {
+    private RankedMediaResponse fetchSpotifyMetadata(String mediaApiId, long totalScore, long weeklyLikes) {
         try {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return null;
@@ -178,16 +394,35 @@ public class MediaRankingService {
             String url = "https://api.spotify.com/v1/tracks/" + mediaApiId;
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
+
             ResponseEntity<String> response = restTemplate.exchange(
-                    url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+                    url,
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    String.class
+            );
 
             JsonNode track = objectMapper.readTree(response.getBody());
 
-            String title    = track.path("name").asText("Unknown");
-            String artist   = track.path("artists").path(0).path("name").asText("");
+            String title = track.path("name").asText("Unknown");
+            String artist = track.path("artists").path(0).path("name").asText("");
             String imageUrl = track.path("album").path("images").path(0).path("url").asText("");
 
-            return new RankedMediaResponse(mediaApiId, title, artist, "SONG", imageUrl, score, 0);
+            Media cached = mediaRepository.findByExternalApiIdAndCategoryIgnoreCase(mediaApiId, "SONG").orElse(null);
+            double avgRating = cached == null ? 0.0 : cached.getAverageRating();
+            int ratingCount = cached == null ? 0 : cached.getRatingCount();
+
+            return new RankedMediaResponse(
+                    mediaApiId,
+                    title,
+                    artist,
+                    "SONG",
+                    imageUrl,
+                    totalScore,
+                    weeklyLikes,
+                    avgRating,
+                    ratingCount
+            );
         } catch (Exception e) {
             System.err.println("Spotify metadata error for " + mediaApiId + ": " + e.getMessage());
             return null;
@@ -195,8 +430,7 @@ public class MediaRankingService {
     }
 
     /**
-     * Obtains a Spotify OAuth access token using the Client Credentials flow.
-     * Required before making any Spotify API calls.
+     * Requests a Spotify access token using client credentials flow.
      */
     private String getSpotifyAccessToken() {
         try {
@@ -210,13 +444,35 @@ public class MediaRankingService {
 
             HttpEntity<org.springframework.util.MultiValueMap<String, String>> request =
                     new HttpEntity<>(body, headers);
+
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    "https://accounts.spotify.com/api/token", request, String.class);
+                    "https://accounts.spotify.com/api/token",
+                    request,
+                    String.class
+            );
 
             return objectMapper.readTree(response.getBody()).path("access_token").asText();
         } catch (Exception e) {
             System.err.println("Spotify token error: " + e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Normalizes category/mediaType values to one of:
+     * MOVIE / GAME / SONG
+     *
+     * This helps when different parts of the app use slightly different names.
+     */
+    private String normalizeMediaType(String value) {
+        if (value == null) return "";
+        String upper = value.trim().toUpperCase();
+
+        return switch (upper) {
+            case "MOVIE", "MOVIES" -> "MOVIE";
+            case "GAME", "GAMES" -> "GAME";
+            case "SONG", "SONGS", "MUSIC" -> "SONG";
+            default -> upper;
+        };
     }
 }

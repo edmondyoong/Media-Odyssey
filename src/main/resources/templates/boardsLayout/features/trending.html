@@ -1,189 +1,318 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Media Odyssey - Community Favourites</title>
-        <link rel="stylesheet" th:href="@{/layout/css/homePage.css}">
-    </head>
-    <body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Odyssey - Community Favourites</title>
+    <link rel="stylesheet" th:href="@{/layout/css/homePage.css}" />
+  </head>
+  <body>
+    <!-- Header: logo, home button, search bar, avatar -->
+    <div th:replace="boardsLayout/fragments/header :: header"></div>
 
-        <!-- Header: logo, home button, search bar, avatar -->
-        <div th:replace="boardsLayout/fragments/header :: header"></div>
+    <!-- Sidebar: navigation links -->
+    <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
-        <!-- Sidebar: navigation links -->
-        <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
+    <main class="main-content">
+      <h1>Community Favourites</h1>
 
-        <main class="main-content">
-
-            <h1>Community Favourites</h1>
-
-            <!-- ── Category Tabs ──────────────────────────────────────────── -->
-            <!--
+      <!-- ── Category Tabs ──────────────────────────────────────────── -->
+      <!--
                 Server-side filter: reloads with ?category= param.
                 Tab values match UserInteraction mediaType: MOVIE, GAME, SONG.
             -->
-            <div class="tab-container">
-                <a href="/community">
-                    <button class="tab-btn" th:classappend="${currentCat == null} ? 'active'">All</button>
-                </a>
-                <a href="/community?category=MOVIE">
-                    <button class="tab-btn" th:classappend="${currentCat == 'MOVIE'} ? 'active'">Movies</button>
-                </a>
-                <a href="/community?category=GAME">
-                    <button class="tab-btn" th:classappend="${currentCat == 'GAME'} ? 'active'">Games</button>
-                </a>
-                <a href="/community?category=SONG">
-                    <button class="tab-btn" th:classappend="${currentCat == 'SONG'} ? 'active'">Songs</button>
-                </a>
-            </div>
+      <div class="tab-container">
+        <a href="/community">
+          <button
+            class="tab-btn"
+            th:classappend="${currentCat == null} ? 'active'"
+          >
+            All
+          </button>
+        </a>
+        <a href="/community?category=MOVIE">
+          <button
+            class="tab-btn"
+            th:classappend="${currentCat == 'MOVIE'} ? 'active'"
+          >
+            Movies
+          </button>
+        </a>
+        <a href="/community?category=GAME">
+          <button
+            class="tab-btn"
+            th:classappend="${currentCat == 'GAME'} ? 'active'"
+          >
+            Games
+          </button>
+        </a>
+        <a href="/community?category=SONG">
+          <button
+            class="tab-btn"
+            th:classappend="${currentCat == 'SONG'} ? 'active'"
+          >
+            Songs
+          </button>
+        </a>
+      </div>
 
-            <!-- Live search bar -->
-            <div>
-                <input id="localSearch" type="text" placeholder="Search titles..." autocomplete="off"/>
-            </div>
+      <!-- Live search bar -->
+      <div>
+        <input
+          id="localSearch"
+          type="text"
+          placeholder="Search titles..."
+          autocomplete="off"
+        />
+      </div>
 
-            <hr/>
+      <hr />
 
-            <!-- ── Fast-Rising Top 5 ───────────────────────────────────────── -->
-            <!--
+      <!-- ── Fast-Rising Top 5 ───────────────────────────────────────── -->
+      <!--
                 Top 5 most-liked items in the past 7 days.
                 Data comes from UserInteraction table via MediaRankingService.
             -->
-            <section class="trending-section">
-                <h2>🔥 Fast-Rising This Week (Top 5)</h2>
+      <section class="trending-section">
+        <h2>🔥 Fast-Rising This Week (Top 5)</h2>
 
-                <div th:if="${#lists.isEmpty(trending)}">
-                    <p>No trending data yet — start interacting with media on the home page!</p>
-                </div>
+        <div th:if="${#lists.isEmpty(trending)}">
+          <p>
+            No trending data yet — start interacting with media on the home
+            page!
+          </p>
+        </div>
 
-                <div id="trendingGrid" th:unless="${#lists.isEmpty(trending)}">
-                    <div th:each="m : ${trending}" class="media-card trending-card"
-                         th:attr="data-title=${m.title}, data-type=${m.mediaType}">
+        <div id="trendingGrid" th:unless="${#lists.isEmpty(trending)}">
+          <div
+            th:each="m : ${trending}"
+            class="media-card trending-card"
+            th:attr="data-title=${m.title}, data-type=${m.mediaType}"
+          >
+            <!-- Thumbnail image -->
+            <img
+              th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+              th:src="${m.imageUrl}"
+              th:alt="${m.title}"
+              class="media-thumbnail"
+              onerror="this.style.display = 'none'"
+            />
 
-                        <!-- Thumbnail image -->
-                        <img th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
-                             th:src="${m.imageUrl}"
-                             th:alt="${m.title}"
-                             class="media-thumbnail"
-                             onerror="this.style.display='none'"/>
+            <div class="card-title">
+              <strong th:text="${m.title}">Title</strong>
+              <!-- Artist name for songs -->
+              <span
+                th:if="${m.artist != null and !m.artist.isEmpty()}"
+                th:text="'by ' + ${m.artist}"
+                class="artist-name"
+              ></span>
+              <em th:text="'[' + ${m.mediaType} + ']'">[Type]</em>
+            </div>
 
-                        <div class="card-title">
-                            <strong th:text="${m.title}">Title</strong>
-                            <!-- Artist name for songs -->
-                            <span th:if="${m.artist != null and !m.artist.isEmpty()}"
-                                  th:text="'by ' + ${m.artist}" class="artist-name"></span>
-                            <em th:text="'[' + ${m.mediaType} + ']'">[Type]</em>
-                        </div>
+            <div class="card-stats">
+              <span
+                >🔥 <span th:text="${m.weeklyLikes}">0</span> likes this
+                week</span
+              >
+              <span>Score: <span th:text="${m.totalScore}">0</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                        <div class="card-stats">
-                            <span>🔥 <span th:text="${m.weeklyLikes}">0</span> likes this week</span>
-                            <span>Score: <span th:text="${m.totalScore}">0</span></span>
-                        </div>
+      <hr />
 
-                    </div>
-                </div>
-            </section>
-
-            <hr/>
-
-            <!-- ── Top 10 Ranked ──────────────────────────────────────────── -->
-            <!--
+      <!-- ── Top 10 Ranked ──────────────────────────────────────────── -->
+      <!--
                 Ranked by Point System: LIKE × 10 + VIEW × 1.
                 Aggregated from UserInteraction table via MediaRankingService.
                 data-title used by JS live search filter.
             -->
-            <section class="ranking-section">
-                <h2>🏆 Top 10 Ranked</h2>
+      <section class="ranking-section">
+        <h2>🏆 Top 10 Ranked</h2>
 
-                <div th:if="${#lists.isEmpty(mediaList)}">
-                    <p>No rankings yet — start interacting with media on the home page!</p>
-                </div>
+        <div th:if="${#lists.isEmpty(mediaList)}">
+          <p>
+            No rankings yet — start interacting with media on the home page!
+          </p>
+        </div>
 
-                <div id="top10Grid" th:unless="${#lists.isEmpty(mediaList)}">
-                    <div th:each="m, stat : ${mediaList}"
-                         class="media-card"
-                         th:attr="data-api-id=${m.mediaApiId}, data-type=${m.mediaType}, data-title=${m.title}">
+        <div id="top10Grid" th:unless="${#lists.isEmpty(mediaList)}">
+          <div
+            th:each="m, stat : ${mediaList}"
+            class="media-card"
+            th:attr="data-api-id=${m.mediaApiId}, data-type=${m.mediaType}, data-title=${m.title}"
+          >
+            <!-- Rank number + thumbnail -->
+            <span class="rank-number" th:text="${stat.index + 1}">1</span>
 
-                        <!-- Rank number + thumbnail -->
-                        <span class="rank-number" th:text="${stat.index + 1}">1</span>
+            <img
+              th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+              th:src="${m.imageUrl}"
+              th:alt="${m.title}"
+              class="media-thumbnail"
+              onerror="this.style.display = 'none'"
+            />
 
-                        <img th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
-                             th:src="${m.imageUrl}"
-                             th:alt="${m.title}"
-                             class="media-thumbnail"
-                             onerror="this.style.display='none'"/>
+            <!-- Title + artist + type -->
+            <div class="card-title">
+              <strong th:text="${m.title}">Title</strong>
+              <span
+                th:if="${m.artist != null and !m.artist.isEmpty()}"
+                th:text="'by ' + ${m.artist}"
+                class="artist-name"
+              ></span>
+              <em th:text="'[' + ${m.mediaType} + ']'">[Type]</em>
+            </div>
 
-                        <!-- Title + artist + type -->
-                        <div class="card-title">
-                            <strong th:text="${m.title}">Title</strong>
-                            <span th:if="${m.artist != null and !m.artist.isEmpty()}"
-                                  th:text="'by ' + ${m.artist}" class="artist-name"></span>
-                            <em th:text="'[' + ${m.mediaType} + ']'">[Type]</em>
-                        </div>
+            <!-- Stats -->
+            <div class="card-stats">
+              <span
+                >Score:
+                <span class="score-val" th:text="${m.totalScore}">0</span></span
+              >
+            </div>
 
-                        <!-- Stats -->
-                        <div class="card-stats">
-                            <span>Score: <span class="score-val" th:text="${m.totalScore}">0</span></span>
-                        </div>
+            <!-- Like button: one per session -->
+            <button
+              class="like-btn"
+              th:attr="data-api-id=${m.mediaApiId}, data-type=${m.mediaType}"
+            >
+              ❤️ Like
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
 
-                        <!-- Like button: one per session -->
-                        <button class="like-btn" th:attr="data-api-id=${m.mediaApiId}">
-                            ❤️ Like
-                        </button>
+    <!-- ── JavaScript ──────────────────────────────────────────────────── -->
+    <script>
+      // ── Live search (client-side, no reload) ─────────────────────────
+      // Auto view on page load
+      document
+        .querySelectorAll("#top10Grid > div[data-api-id]")
+        .forEach((card) => {
+          const mediaApiId = card.dataset.apiId;
+          const mediaType = card.dataset.type;
+          fetch(
+            `/community/view/${mediaApiId}?mediaType=${encodeURIComponent(mediaType)}`,
+            { method: "POST" },
+          ).catch(() => {});
+        });
+      document
+        .getElementById("localSearch")
+        .addEventListener("input", function (e) {
+          const query = e.target.value.trim().toLowerCase();
+          document.querySelectorAll("#top10Grid > div").forEach((card) => {
+            const title = (card.dataset.title || "").toLowerCase();
+            card.style.display = !query || title.includes(query) ? "" : "none";
+          });
+        });
 
-                    </div>
-                </div>
-            </section>
+      // ── Like button ───────────────────────────────────────────────────
+      /*
+       * Records a LIKE interaction via POST /community/like/{mediaApiId}.
+       * Session-based: server prevents duplicate likes.
+       * The actual ranking update happens asynchronously as UserInteraction
+       * data accumulates — page refresh will reflect updated rankings.
+       */
+      document.querySelectorAll(".like-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (btn.disabled) return;
+          btn.disabled = true;
 
-        </main>
-
-        <!-- ── JavaScript ──────────────────────────────────────────────────── -->
-        <script>
-
-            // ── Live search (client-side, no reload) ─────────────────────────
-            document.getElementById('localSearch').addEventListener('input', function(e) {
-                const query = e.target.value.trim().toLowerCase();
-                document.querySelectorAll('#top10Grid > div').forEach(card => {
-                    const title = (card.dataset.title || '').toLowerCase();
-                    card.style.display = (!query || title.includes(query)) ? '' : 'none';
-                });
+          const mediaApiId = btn.dataset.apiId;
+          const mediaType = btn.dataset.type;
+          fetch(
+            `/community/like/${mediaApiId}?mediaType=${encodeURIComponent(mediaType)}`,
+            { method: "POST" },
+          )
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.liked) {
+                btn.textContent = "❤️ Liked!";
+              } else {
+                btn.textContent = "✓ Already Liked";
+              }
+            })
+            .catch(() => {
+              btn.disabled = false;
             });
+        });
+      });
+    </script>
+    <script>
+      document.querySelectorAll(".rating-stars").forEach((group) => {
+        const apiId = group.dataset.apiId;
+        const mediaType = group.dataset.type;
+        const buttons = Array.from(group.querySelectorAll(".star-btn"));
+        const msg = group.parentElement.querySelector(".rating-msg");
 
-            // ── Like button ───────────────────────────────────────────────────
-            /*
-             * Records a LIKE interaction via POST /community/like/{mediaApiId}.
-             * Session-based: server prevents duplicate likes.
-             * The actual ranking update happens asynchronously as UserInteraction
-             * data accumulates — page refresh will reflect updated rankings.
-             */
-            document.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (btn.disabled) return;
-                    btn.disabled = true;
+        buttons.forEach((btn, index) => {
+          btn.addEventListener("mouseenter", () => {
+            highlight(index + 1);
+          });
 
-                    const mediaApiId = btn.dataset.apiId;
+          btn.addEventListener("mouseleave", () => {
+            resetIfNotLocked();
+          });
 
-                    fetch(`/community/like/${mediaApiId}`, { method: 'POST' })
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data.liked) {
-                                btn.textContent = '❤️ Liked!';
-                            } else {
-                                btn.textContent = '✓ Already Liked';
-                            }
-                        })
-                        .catch(() => {
-                            btn.disabled = false;
-                        });
-                });
-            });
+          btn.addEventListener("click", () => {
+            const stars = Number(btn.dataset.stars);
 
-        </script>
+            buttons.forEach((b) => (b.disabled = true));
 
-        <!-- Sidebar toggle script -->
-        <script th:src="@{/layout/js/homePage.js}"></script>
+            fetch(
+              `/community/rate/${apiId}?stars=${stars}&mediaType=${encodeURIComponent(mediaType)}`,
+              {
+                method: "POST",
+              },
+            )
+              .then((r) => r.json())
+              .then((data) => {
+                if (data.rated) {
+                  highlight(stars);
+                  lockStars(stars);
+                  msg.textContent = `Thanks! You rated this ${stars}/5.`;
+                } else {
+                  msg.textContent =
+                    "You already rated this item in this session.";
+                }
+              })
+              .catch(() => {
+                buttons.forEach((b) => (b.disabled = false));
+                msg.textContent = "Rating failed. Please try again.";
+              });
+          });
+        });
 
-    </body>
+        function highlight(stars) {
+          buttons.forEach((b, i) => {
+            b.textContent = i < stars ? "★" : "☆";
+          });
+        }
+
+        function lockStars(stars) {
+          highlight(stars);
+          buttons.forEach((b) => (b.disabled = true));
+          group.dataset.locked = "true";
+          group.dataset.lockedStars = String(stars);
+        }
+
+        function resetIfNotLocked() {
+          if (group.dataset.locked === "true") {
+            highlight(Number(group.dataset.lockedStars || "0"));
+          } else {
+            highlight(0);
+          }
+        }
+
+        highlight(0);
+      });
+    </script>
+
+    <!-- Sidebar toggle script -->
+    <script th:src="@{/layout/js/homePage.js}"></script>
+  </body>
 </html>
