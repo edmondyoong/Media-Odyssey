@@ -85,18 +85,15 @@ public class RecommendationService {
                 switch (interaction.getInteractionType()) {
                     case "VIEW": points = 1; break;
                     case "LIKE": points = 10; break;
-                    // TODO: add RATING case when ratings are implemented
                     default: points = 0; break;
                 }
 
                 for (String genre : interaction.getGenres()) {
-                    // if genre already exists in map, add points to its current score; if not, start it at 0 then add points
                     genreScores.put(genre, genreScores.getOrDefault(genre, 0) + points);
                 }
             }
         }
 
-        // find genre with highest score
         String favoriteGenre = null;
         int highestScore = 0;
         for (Map.Entry<String, Integer> entry : genreScores.entrySet()) {
@@ -144,7 +141,7 @@ public class RecommendationService {
                 String title    = movie.path("title").asText();
                 String imageUrl = "https://image.tmdb.org/t/p/w500" + movie.path("poster_path").asText();
                 double score    = movie.path("popularity").asDouble();
-                results.add(new RecommendationResponse(mediaApiId, title, "MOVIE", "Popular", imageUrl, score));
+                results.add(new RecommendationResponse(mediaApiId, title, "", "MOVIE", "Popular", imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("TMDB popular fallback error: " + e.getMessage());
@@ -165,7 +162,7 @@ public class RecommendationService {
                 String title    = game.path("name").asText();
                 String imageUrl = game.path("background_image").asText();
                 double score    = game.path("rating").asDouble();
-                results.add(new RecommendationResponse(mediaApiId, title, "GAME", "Popular", imageUrl, score));
+                results.add(new RecommendationResponse(mediaApiId, title, "", "GAME", "Popular", imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("RAWG popular fallback error: " + e.getMessage());
@@ -173,24 +170,25 @@ public class RecommendationService {
         return results;
     }
 
-    // fallback: popular tracks from Spotify using a broad genre seed
+    // fallback: popular tracks from Spotify search
     private List<RecommendationResponse> fetchSpotifyPopular() {
         List<RecommendationResponse> results = new ArrayList<>();
         try {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
-            String url = "https://api.spotify.com/v1/recommendations?seed_genres=pop&limit=20";
+            String url = "https://api.spotify.com/v1/search?q=you&type=track&limit=10&market=US";
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-            JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks");
+            JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks").path("items");
             for (JsonNode track : tracks) {
                 String mediaApiId = track.path("id").asText();
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
                 String title    = track.path("name").asText();
+                String artist   = track.path("artists").path(0).path("name").asText();
                 String imageUrl = track.path("album").path("images").path(0).path("url").asText();
                 double score    = track.path("popularity").asDouble();
-                results.add(new RecommendationResponse(mediaApiId, title, "SONG", "Popular", imageUrl, score));
+                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", "Popular", imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("Spotify popular fallback error: " + e.getMessage());
@@ -203,7 +201,7 @@ public class RecommendationService {
         List<RecommendationResponse> results = new ArrayList<>();
 
         Integer genreId = TMDB_GENRE_IDS.get(genre);
-        if (genreId == null) return results; // genre not in our map
+        if (genreId == null) return results;
 
         String url = "https://api.themoviedb.org/3/discover/movie"
                 + "?api_key=" + tmdbApiKey
@@ -212,23 +210,17 @@ public class RecommendationService {
 
         try {
             String response = restTemplate.getForObject(url, String.class);
-            JsonNode root = objectMapper.readTree(response);
-            JsonNode movies = root.path("results");
+            JsonNode movies = objectMapper.readTree(response).path("results");
 
             for (JsonNode movie : movies) {
                 String mediaApiId = movie.path("id").asText();
-
-                // skip banned media
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
-
                 String title    = movie.path("title").asText();
                 String imageUrl = "https://image.tmdb.org/t/p/w500" + movie.path("poster_path").asText();
                 double score    = movie.path("popularity").asDouble();
-
-                results.add(new RecommendationResponse(mediaApiId, title, "MOVIE", genre, imageUrl, score));
+                results.add(new RecommendationResponse(mediaApiId, title, "", "MOVIE", genre, imageUrl, score));
             }
         } catch (Exception e) {
-            // if API call fails, return whatever results we have so far
             System.err.println("TMDB API error: " + e.getMessage());
         }
 
@@ -239,7 +231,6 @@ public class RecommendationService {
     private List<RecommendationResponse> fetchRawgRecommendations(String genre) {
         List<RecommendationResponse> results = new ArrayList<>();
 
-        // RAWG expects genre as lowercase slug e.g. "action", "role-playing-games"
         String genreSlug = genre.toLowerCase().replace(" ", "-");
 
         String url = "https://api.rawg.io/api/games"
@@ -249,19 +240,15 @@ public class RecommendationService {
 
         try {
             String response = restTemplate.getForObject(url, String.class);
-            JsonNode root = objectMapper.readTree(response);
-            JsonNode games = root.path("results");
+            JsonNode games = objectMapper.readTree(response).path("results");
 
             for (JsonNode game : games) {
                 String mediaApiId = game.path("id").asText();
-
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
-
                 String title    = game.path("name").asText();
                 String imageUrl = game.path("background_image").asText();
                 double score    = game.path("rating").asDouble();
-
-                results.add(new RecommendationResponse(mediaApiId, title, "GAME", genre, imageUrl, score));
+                results.add(new RecommendationResponse(mediaApiId, title, "", "GAME", genre, imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("RAWG API error: " + e.getMessage());
@@ -270,7 +257,7 @@ public class RecommendationService {
         return results;
     }
 
-    // calls Spotify to get recommended tracks for the user's favourite genre
+    // calls Spotify search to get tracks for the user's favourite genre
     private List<RecommendationResponse> fetchSpotifyRecommendations(String genre) {
         List<RecommendationResponse> results = new ArrayList<>();
 
@@ -278,29 +265,25 @@ public class RecommendationService {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
 
-            // Spotify expects genre as lowercase slug e.g. "pop", "hip-hop"
             String genreSlug = genre.toLowerCase().replace(" ", "-");
-
-            String url = "https://api.spotify.com/v1/recommendations?seed_genres=" + genreSlug + "&limit=20";
+            String query = java.net.URLEncoder.encode("genre:" + genreSlug, "UTF-8");
+            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=10&market=US";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-            JsonNode root = objectMapper.readTree(response.getBody());
-            JsonNode tracks = root.path("tracks");
+            JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks").path("items");
 
             for (JsonNode track : tracks) {
                 String mediaApiId = track.path("id").asText();
-
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
-
                 String title    = track.path("name").asText();
+                String artist   = track.path("artists").path(0).path("name").asText();
                 String imageUrl = track.path("album").path("images").path(0).path("url").asText();
                 double score    = track.path("popularity").asDouble();
-
-                results.add(new RecommendationResponse(mediaApiId, title, "SONG", genre, imageUrl, score));
+                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("Spotify API error: " + e.getMessage());
