@@ -74,6 +74,10 @@ function renderCards(items) {
                 <p class="rec-title">${item.title}</p>
                 <p class="rec-meta">${item.genre} · ${item.mediaType === 'SONG' ? item.artist : 'score: ' + item.score.toFixed(1)}</p>
             </div>
+            <div class="rec-actions">
+                <button class="rec-btn view-btn"  onclick="recordInteraction(this, 'VIEW')">👁 View</button>
+                <button class="rec-btn like-btn"  onclick="recordInteraction(this, 'LIKE')">♡ Like</button>
+            </div>
         `;
 
         cardsEl.appendChild(card);
@@ -81,10 +85,7 @@ function renderCards(items) {
 }
 
 // re add buttons when we have interactions working
-//<div class="rec-actions">
-//                   <button class="rec-btn view-btn"  onclick="recordInteraction(this, 'VIEW')">👁 View</button>
-  //                  <button class="rec-btn like-btn"  onclick="recordInteraction(this, 'LIKE')">♡ Like</button>
-   //             </div>
+
 
 
 
