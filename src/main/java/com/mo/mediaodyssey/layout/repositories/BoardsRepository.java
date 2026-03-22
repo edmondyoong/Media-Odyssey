@@ -7,5 +7,4 @@ import com.mo.mediaodyssey.layout.models.Boards;
 
 @Repository
 public interface BoardsRepository extends JpaRepository<Boards, Long> {
-
 }

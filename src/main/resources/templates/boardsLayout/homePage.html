@@ -39,9 +39,10 @@
                 </div>
 
                 <!-- Already joined boards will be shown here (for now, only creaeted boards) -->
-                <div th:each="board : ${boards}" class="board-card">
+                <a th:href="@{boards/display/{id}(id=${board.id})}" th:each="board : ${boards}" class="board-card">
                     <h3 th:text="${board.board_name}" class="personal-boards-titles"></h3>
-                </div>
+                    <p th:text="${board.board_type}" class="board-type-label"></p>
+                </a>
 
             </div>
 

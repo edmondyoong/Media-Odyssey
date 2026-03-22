@@ -161,6 +161,7 @@ when the js runs. Testing are required to see how it works.*/
   opacity: 1;
 }
 
+/* Display information of the board displayed in homePage (title + type)*/
 .personal-boards-titles {
   font-size: 1rem;
   font-weight: 600;
@@ -174,6 +175,16 @@ when the js runs. Testing are required to see how it works.*/
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.board-type-label {
+  font-size: 0.75rem;
+  color: #818cf8;
+  margin-top: 0.5rem;
+  z-index: 1;
+  text-transform: capitalize;
+  opacity: 0.8;
+}
+
 
 /* ===== Navigation Arrows ===== */
 .scroll-nav-btn {

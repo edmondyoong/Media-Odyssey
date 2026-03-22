@@ -1,6 +1,7 @@
 package com.mo.mediaodyssey.layout.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -22,5 +23,9 @@ public class BoardsService {
 
     public List<Boards> findAllBoards () {
         return boardsRepository.findAll();
+    }
+
+    public Optional<Boards> findBoardById(Long id) {
+        return boardsRepository.findById(id); 
     }
 }
