@@ -57,6 +57,16 @@ public class RecommendationService {
         TMDB_GENRE_IDS.forEach((name, id) -> TMDB_GENRE_NAMES.put(id, name));
     }
 
+    // genre slugs used for Spotify search — must match Spotify's accepted genre seeds
+    private static final List<String> SPOTIFY_GENRES = Arrays.asList(
+        "Pop", "Rock", "Hip-hop", "R&b", "Jazz", "Classical", "Electronic", "Country", "Reggae", "Soul"
+    );
+
+    // genre slugs used for RAWG — must match RAWG's accepted genre slugs
+    private static final List<String> RAWG_GENRES = Arrays.asList(
+        "Action", "Adventure", "Puzzle", "Strategy", "Shooter", "Racing", "Sports", "Simulation", "Indie", "Fighting"
+    );
+
     public RecommendationService(UserInteractionRepository userInteractionRepository,
                                   BannedMediaRepository bannedMediaRepository) {
         this.userInteractionRepository = userInteractionRepository;
@@ -112,8 +122,18 @@ public class RecommendationService {
         return favoriteGenre;
     }
 
-    // main recommendation method — finds user's favourite genre then calls the right API
-    // falls back to popular/trending media for new users with no interaction history
+    // picks a random genre from the provided list, excluding the user's favourite
+    private String pickOtherGenre(String favoriteGenre, List<String> genreList) {
+        List<String> others = new ArrayList<>(genreList);
+        others.removeIf(g -> g.equalsIgnoreCase(favoriteGenre));
+        if (others.isEmpty()) return genreList.get(0);
+        Collections.shuffle(others);
+        return others.get(0);
+    }
+
+    // main recommendation method
+    // returns 20 from the user's favourite genre + 10 from a random other genre
+    // falls back to popular media for new users with no interaction history
     public List<RecommendationResponse> getRecommendations(Long userId, String mediaType) {
         String favoriteGenre = userFavoriteGenre(userId, mediaType);
 
@@ -126,12 +146,40 @@ public class RecommendationService {
             }
         }
 
+        List<RecommendationResponse> results = new ArrayList<>();
+
         switch (mediaType) {
-            case "MOVIE": return fetchTmdbRecommendations(favoriteGenre);
-            case "GAME":  return fetchRawgRecommendations(favoriteGenre);
-            case "SONG":  return fetchSpotifyRecommendations(favoriteGenre);
-            default:      return List.of();
+            case "MOVIE": {
+                // 20 from favourite genre (TMDB always returns 20 per page)
+                results.addAll(fetchTmdbRecommendations(favoriteGenre));
+                // 10 from a random other TMDB genre
+                String otherGenre = pickOtherGenre(favoriteGenre, new ArrayList<>(TMDB_GENRE_IDS.keySet()));
+                List<RecommendationResponse> other = fetchTmdbRecommendations(otherGenre);
+                results.addAll(other.subList(0, Math.min(10, other.size())));
+                break;
+            }
+            case "GAME": {
+                // 20 from favourite genre
+                results.addAll(fetchRawgRecommendations(favoriteGenre, 20));
+                // 10 from a random other RAWG genre
+                String otherGenre = pickOtherGenre(favoriteGenre, RAWG_GENRES);
+                results.addAll(fetchRawgRecommendations(otherGenre, 10));
+                break;
+            }
+            case "SONG": {
+                // 20 from favourite genre — two Spotify calls with offset 0 and 10 (max limit is 10 per call)
+                results.addAll(fetchSpotifyRecommendations(favoriteGenre, 0));
+                results.addAll(fetchSpotifyRecommendations(favoriteGenre, 10));
+                // 10 from a random other Spotify genre
+                String otherGenre = pickOtherGenre(favoriteGenre, SPOTIFY_GENRES);
+                results.addAll(fetchSpotifyRecommendations(otherGenre, 0));
+                break;
+            }
+            default:
+                break;
         }
+
+        return results;
     }
 
     // fallback: top popular movies from TMDB
@@ -221,7 +269,7 @@ public class RecommendationService {
                 String imageUrl = track.path("album").path("images").path(0).path("url").asText();
                 double score    = track.path("popularity").asDouble();
 
-                // fetch artist to get genre — falls back to "Pop" if artist call fails or genres is empty
+                // fetch artist genre — falls back to "Pop" if call fails or genres is empty
                 String genre = fetchSpotifyArtistGenre(artistId, accessToken, "Pop");
 
                 results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score));
@@ -232,27 +280,8 @@ public class RecommendationService {
         return results;
     }
 
-    // helper: fetches the first genre from a Spotify artist's genres array
-    // returns fallbackGenre if the call fails or genres is empty
-    private String fetchSpotifyArtistGenre(String artistId, String accessToken, String fallbackGenre) {
-        try {
-            String url = "https://api.spotify.com/v1/artists/" + artistId;
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(accessToken);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-            JsonNode genres = objectMapper.readTree(response.getBody()).path("genres");
-            if (genres.isArray() && genres.size() > 0) {
-                // Spotify genres are lowercase slugs e.g. "pop", "hip hop" — capitalise first letter
-                String raw = genres.get(0).asText();
-                return raw.substring(0, 1).toUpperCase() + raw.substring(1);
-            }
-        } catch (Exception e) {
-            System.err.println("Spotify artist genre fetch error: " + e.getMessage());
-        }
-        return fallbackGenre;
-    }
-
     // calls TMDB to get top movies in the user's favourite genre
+    // TMDB always returns 20 results per page — page size cannot be changed
     private List<RecommendationResponse> fetchTmdbRecommendations(String genre) {
         List<RecommendationResponse> results = new ArrayList<>();
 
@@ -284,7 +313,8 @@ public class RecommendationService {
     }
 
     // calls RAWG to get top games in the user's favourite genre
-    private List<RecommendationResponse> fetchRawgRecommendations(String genre) {
+    // limit parameter controls how many results to return (RAWG supports page_size up to 40)
+    private List<RecommendationResponse> fetchRawgRecommendations(String genre, int limit) {
         List<RecommendationResponse> results = new ArrayList<>();
 
         String genreSlug = genre.toLowerCase().replace(" ", "-");
@@ -292,7 +322,8 @@ public class RecommendationService {
         String url = "https://api.rawg.io/api/games"
                 + "?key=" + rawgApiKey
                 + "&genres=" + genreSlug
-                + "&ordering=-rating";
+                + "&ordering=-rating"
+                + "&page_size=" + limit;
 
         try {
             String response = restTemplate.getForObject(url, String.class);
@@ -313,8 +344,9 @@ public class RecommendationService {
         return results;
     }
 
-    // calls Spotify search to get tracks for the user's favourite genre
-    private List<RecommendationResponse> fetchSpotifyRecommendations(String genre) {
+    // calls Spotify search to get tracks for the given genre
+    // offset allows fetching the next 10 results (Spotify search max limit is 10 per call)
+    private List<RecommendationResponse> fetchSpotifyRecommendations(String genre, int offset) {
         List<RecommendationResponse> results = new ArrayList<>();
 
         try {
@@ -323,7 +355,7 @@ public class RecommendationService {
 
             String genreSlug = genre.toLowerCase().replace(" ", "-");
             String query = java.net.URLEncoder.encode("genre:" + genreSlug, "UTF-8");
-            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=10&market=US";
+            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=10&offset=" + offset + "&market=US";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
@@ -346,6 +378,25 @@ public class RecommendationService {
         }
 
         return results;
+    }
+
+    // helper: fetches the first genre from a Spotify artist's genres array
+    // returns fallbackGenre if the call fails or genres is empty
+    private String fetchSpotifyArtistGenre(String artistId, String accessToken, String fallbackGenre) {
+        try {
+            String url = "https://api.spotify.com/v1/artists/" + artistId;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+            JsonNode genres = objectMapper.readTree(response.getBody()).path("genres");
+            if (genres.isArray() && genres.size() > 0) {
+                String raw = genres.get(0).asText();
+                return raw.substring(0, 1).toUpperCase() + raw.substring(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Spotify artist genre fetch error: " + e.getMessage());
+        }
+        return fallbackGenre;
     }
 
     // Spotify requires an OAuth access token — this gets one using client credentials
