@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.mo.mediaodyssey.auth.dto.AuthApiResponse;
+import com.mo.mediaodyssey.auth.exception.InvalidVerificationTokenException;
+import com.mo.mediaodyssey.auth.exception.UserAlreadyVerifiedException;
 
 @RestControllerAdvice(basePackageClasses = { AuthController.class, AuthAdminController.class })
 public class AuthExceptionHandler {
@@ -45,6 +47,21 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(AuthApiResponse.error("AUTH_USER_NOT_FOUND", "User could not be found. Please try again."));
+    }
+
+    @ExceptionHandler(UserAlreadyVerifiedException.class)
+    public ResponseEntity<AuthApiResponse> handleUserAlreadyVerified() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(AuthApiResponse.error("AUTH_USER_ALREADY_VERIFIED", "User is already verified. Please log in."));
+    }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<AuthApiResponse> handleInvalidVerificationToken() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(AuthApiResponse.error("AUTH_INVALID_VERIFICATION_TOKEN",
+                        "Verification token is invalid. Please try again."));
     }
 
     @ExceptionHandler({ MethodArgumentNotValidException.class, BindException.class, IllegalArgumentException.class })
