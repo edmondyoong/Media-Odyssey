@@ -29,37 +29,31 @@ public interface MediaRepository extends JpaRepository<Media, Long> {
      * 2. rating count desc
      * 3. title asc
      */
-    @Query(
-            value = """
+    @Query(value = """
                 SELECT *
                 FROM media
                 WHERE rating_count > 0
-                ORDER BY 
+                ORDER BY
                     CAST(rating_sum AS double precision) / NULLIF(rating_count, 0) DESC,
                     rating_count DESC,
                     title ASC
                 LIMIT 10
-            """,
-            nativeQuery = true
-    )
+            """, nativeQuery = true)
     List<Media> findTop10ByRating();
 
     /**
      * Top 10 by average rating within a specific category.
      */
-    @Query(
-            value = """
+    @Query(value = """
                 SELECT *
                 FROM media
                 WHERE rating_count > 0
                   AND UPPER(category) = UPPER(:category)
-                ORDER BY 
+                ORDER BY
                     CAST(rating_sum AS double precision) / NULLIF(rating_count, 0) DESC,
                     rating_count DESC,
                     title ASC
                 LIMIT 10
-            """,
-            nativeQuery = true
-    )
+            """, nativeQuery = true)
     List<Media> findTop10ByRatingAndCategory(String category);
 }

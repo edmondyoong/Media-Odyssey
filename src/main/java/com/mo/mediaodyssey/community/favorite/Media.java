@@ -5,25 +5,20 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Media entity used for:
- * - cached metadata
- * - rating storage
+ * Media entity used for cached metadata if needed by community/favorite.
  *
- * externalApiId examples:
- * - TMDB movie id
- * - RAWG game id
- * - Spotify track id
+ * Current iteration:
+ * - kept lightweight
+ * - artist is transient because the current DB schema does not include artist
  *
- * category:
- * - MOVIE / GAME / SONG
+ * Later iteration:
+ * - if the DB schema is updated, artist can be persisted safely
+ * - fast-rising related counters can also be used more actively
  */
 @Entity
-@Table(
-        name = "media",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"external_api_id", "category"})
-        }
-)
+@Table(name = "media", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "external_api_id", "category" })
+})
 public class Media {
 
     @Id
@@ -41,8 +36,15 @@ public class Media {
     @Column(nullable = false)
     private String category;
 
-    /** Artist for songs, blank for movies/games */
-    @Column(nullable = false)
+    /**
+     * Current DB schema does not include artist column.
+     * Keep it transient for now to avoid runtime SQL errors.
+     *
+     * TODO (later iteration):
+     * If the team decides to persist artist for songs, add the DB column first,
+     * then convert this back to a normal @Column field.
+     */
+    @Transient
     private String artist = "";
 
     /** Cached image URL */
@@ -74,35 +76,9 @@ public class Media {
         }
     }
 
-    /**
-     * Derived score used by Top Score ranking.
-     */
     @Transient
     public int getTotalScore() {
         return (views * 1) + (likes * 10);
-    }
-
-    /**
-     * Derived average star rating.
-     */
-    @Transient
-    public double getAverageRating() {
-        if (ratingCount == 0) return 0.0;
-        return Math.round(((double) ratingSum / ratingCount) * 10.0) / 10.0;
-    }
-
-    /**
-     * Derived trending growth rate.
-     */
-    @Transient
-    public double getTrendingGrowth() {
-        if (likesLastWeek == 0) return likes > 0 ? 100.0 : 0.0;
-        return ((double) (likes - likesLastWeek) / likesLastWeek) * 100.0;
-    }
-
-    @Transient
-    public boolean isTrending() {
-        return getTrendingGrowth() >= 10.0;
     }
 
     public Long getId() {
