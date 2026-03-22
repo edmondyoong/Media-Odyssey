@@ -51,6 +51,12 @@ public class RecommendationService {
         TMDB_GENRE_IDS.put("Thriller", 53);
     }
 
+    // reverse map: TMDB genre ID -> genre name
+    private static final Map<Integer, String> TMDB_GENRE_NAMES = new HashMap<>();
+    static {
+        TMDB_GENRE_IDS.forEach((name, id) -> TMDB_GENRE_NAMES.put(id, name));
+    }
+
     public RecommendationService(UserInteractionRepository userInteractionRepository,
                                   BannedMediaRepository bannedMediaRepository) {
         this.userInteractionRepository = userInteractionRepository;
@@ -128,7 +134,8 @@ public class RecommendationService {
         }
     }
 
-    // fallback: top popular movies from TMDB (no genre filter)
+    // fallback: top popular movies from TMDB
+    // extracts real genre from genre_ids array using the reverse TMDB_GENRE_NAMES map
     private List<RecommendationResponse> fetchTmdbPopular() {
         List<RecommendationResponse> results = new ArrayList<>();
         String url = "https://api.themoviedb.org/3/movie/popular?api_key=" + tmdbApiKey;
@@ -141,7 +148,16 @@ public class RecommendationService {
                 String title    = movie.path("title").asText();
                 String imageUrl = "https://image.tmdb.org/t/p/w500" + movie.path("poster_path").asText();
                 double score    = movie.path("popularity").asDouble();
-                results.add(new RecommendationResponse(mediaApiId, title, "", "MOVIE", "Popular", imageUrl, score));
+
+                // extract first genre from genre_ids, fall back to "Action" if not found in our map
+                String genre = "Action";
+                JsonNode genreIds = movie.path("genre_ids");
+                if (genreIds.isArray() && genreIds.size() > 0) {
+                    int firstGenreId = genreIds.get(0).asInt();
+                    genre = TMDB_GENRE_NAMES.getOrDefault(firstGenreId, "Action");
+                }
+
+                results.add(new RecommendationResponse(mediaApiId, title, "", "MOVIE", genre, imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("TMDB popular fallback error: " + e.getMessage());
@@ -149,7 +165,8 @@ public class RecommendationService {
         return results;
     }
 
-    // fallback: top rated games from RAWG (no genre filter)
+    // fallback: top rated games from RAWG
+    // extracts real genre from the genres array returned by the RAWG API
     private List<RecommendationResponse> fetchRawgPopular() {
         List<RecommendationResponse> results = new ArrayList<>();
         String url = "https://api.rawg.io/api/games?key=" + rawgApiKey + "&ordering=-rating&page_size=20";
@@ -162,7 +179,18 @@ public class RecommendationService {
                 String title    = game.path("name").asText();
                 String imageUrl = game.path("background_image").asText();
                 double score    = game.path("rating").asDouble();
-                results.add(new RecommendationResponse(mediaApiId, title, "", "GAME", "Popular", imageUrl, score));
+
+                // extract first genre name from genres array, capitalise first letter
+                String genre = "Action";
+                JsonNode genres = game.path("genres");
+                if (genres.isArray() && genres.size() > 0) {
+                    String rawGenre = genres.get(0).path("name").asText();
+                    if (!rawGenre.isEmpty()) {
+                        genre = rawGenre.substring(0, 1).toUpperCase() + rawGenre.substring(1);
+                    }
+                }
+
+                results.add(new RecommendationResponse(mediaApiId, title, "", "GAME", genre, imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("RAWG popular fallback error: " + e.getMessage());
@@ -171,29 +199,57 @@ public class RecommendationService {
     }
 
     // fallback: popular tracks from Spotify search
+    // fetches each track's artist via GET /artists/{id} to get the real genre
     private List<RecommendationResponse> fetchSpotifyPopular() {
         List<RecommendationResponse> results = new ArrayList<>();
         try {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
+
             String url = "https://api.spotify.com/v1/search?q=you&type=track&limit=10&market=US";
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
             JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks").path("items");
+
             for (JsonNode track : tracks) {
                 String mediaApiId = track.path("id").asText();
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
                 String title    = track.path("name").asText();
                 String artist   = track.path("artists").path(0).path("name").asText();
+                String artistId = track.path("artists").path(0).path("id").asText();
                 String imageUrl = track.path("album").path("images").path(0).path("url").asText();
                 double score    = track.path("popularity").asDouble();
-                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", "Popular", imageUrl, score));
+
+                // fetch artist to get genre — falls back to "Pop" if artist call fails or genres is empty
+                String genre = fetchSpotifyArtistGenre(artistId, accessToken, "Pop");
+
+                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score));
             }
         } catch (Exception e) {
             System.err.println("Spotify popular fallback error: " + e.getMessage());
         }
         return results;
+    }
+
+    // helper: fetches the first genre from a Spotify artist's genres array
+    // returns fallbackGenre if the call fails or genres is empty
+    private String fetchSpotifyArtistGenre(String artistId, String accessToken, String fallbackGenre) {
+        try {
+            String url = "https://api.spotify.com/v1/artists/" + artistId;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+            JsonNode genres = objectMapper.readTree(response.getBody()).path("genres");
+            if (genres.isArray() && genres.size() > 0) {
+                // Spotify genres are lowercase slugs e.g. "pop", "hip hop" — capitalise first letter
+                String raw = genres.get(0).asText();
+                return raw.substring(0, 1).toUpperCase() + raw.substring(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Spotify artist genre fetch error: " + e.getMessage());
+        }
+        return fallbackGenre;
     }
 
     // calls TMDB to get top movies in the user's favourite genre
