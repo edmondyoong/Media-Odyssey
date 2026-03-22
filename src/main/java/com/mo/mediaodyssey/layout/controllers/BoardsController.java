@@ -1,5 +1,6 @@
 package com.mo.mediaodyssey.layout.controllers;
 
+import org.springframework.security.core.Authentication;
 import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
@@ -8,12 +9,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.mo.mediaodyssey.auth.model.User;
+import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.services.BoardsService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 
@@ -24,9 +28,13 @@ public class BoardsController {
 
     private final BoardsService boardsService; 
 
-    public BoardsController (BoardsService boardsService) {
+    private final UserRepository userRepository;
+
+    public BoardsController (BoardsService boardsService, UserRepository userRepository) {
         this.boardsService = boardsService; 
+        this.userRepository = userRepository; 
     }
+
 
     /* Bring user to the page to create a board */
     @GetMapping("/create")
@@ -36,26 +44,47 @@ public class BoardsController {
         return "boardsLayout/themeBoard/createBoard"; 
     }
 
-    /* After user finished created a board, they should be brought back to the homePage */
+    /* After user finished created a board, they should be brought back to the homePage 
+    *
+    ** Notice: the return is set to redirect for the page to automatically reload, in order for the newly
+        created boards to appear. If return is setted to actual path of returning to homePage.html then
+        no boards will show and error will happen.
+    */
     @PostMapping("/create")
-    public String createBoard (@ModelAttribute("board") Boards board) {
+    public String createBoard (@ModelAttribute("board") Boards board, Authentication authentication) {
 
+        String userEmail = authentication.getName(); 
+        User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("User not found."));
+
+        board.setUser(user);
         boardsService.createBoard(board);
         
-        return "boardsLayout/homePage";
+        return "redirect:/";
     }
 
     /* Theme boards that are displayed on the homePage are clickable. 
     After clicking on those boards, users will be able to see the details of that boards. 
     Which would be showing the media, description, post, .... */
-    @GetMapping("/display")
-    public String navToboardDisplay(@PathVariable("id") Long id, Model model) {
+    @GetMapping("/display/{id}")
+    public String navToboardDisplay(@PathVariable("id") Long id, 
+                                    Model model, RedirectAttributes redirectAtrrAttributes,
+                                    Authentication authentication) {
 
-        Optional<Boards> board = boardsService.findBoardById(id); 
+        // Find whether the board exists or not. 
+        Optional<Boards> boardOpt = boardsService.findBoardById(id); 
 
-        if (board.isPresent()) {
-            model.addAttribute("board", board.get());
-        } else {}
+        // If board exists
+        if (boardOpt.isPresent()) {
+            Boards board = boardOpt.get(); //store board's data
+
+            //Check whether the current user actually have that board or not. 
+            String userEmail = authentication.getName(); 
+            User user = userRepository.findByEmail(userEmail).orElse(null);
+        } else {
+            redirectAtrrAttributes.addFlashAttribute("errorMessage", "Board not found or have been deleted.");
+            return "redirect:/";
+        }
 
         return "boardsLayout/themeBoard/boardDisplay";
     }

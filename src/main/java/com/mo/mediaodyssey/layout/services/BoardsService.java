@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.repositories.BoardsRepository;
 
@@ -27,5 +28,9 @@ public class BoardsService {
 
     public Optional<Boards> findBoardById(Long id) {
         return boardsRepository.findById(id); 
+    }
+
+    public List<Boards> findBoardsByUser (User user) {
+        return boardsRepository.findByUser(user); 
     }
 }

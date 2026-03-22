@@ -1,9 +1,13 @@
 package com.mo.mediaodyssey.layout.models;
 
+import com.mo.mediaodyssey.auth.model.User;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -18,8 +22,11 @@ public class Boards {
     private String board_description; 
     private String board_type;
 
-    public Boards(){}
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
 
+    public Boards(){}
     public Boards (Long id, String board_name, String board_description) {
         this.id = id; 
         this.board_name = board_name;
@@ -56,5 +63,13 @@ public class Boards {
 
     public void setBoard_type(String board_type) {
         this.board_type = board_type;
+    }
+
+    public User getUser(){
+        return user;
+    }
+
+    public void setUser (User user){
+        this.user = user; 
     }
 }
