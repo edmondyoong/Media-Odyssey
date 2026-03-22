@@ -1,14 +1,14 @@
 <header th:fragment="header">
     <!--LOGO that control the side bar (fold and unfold)-->
-    <img th:src="@{/layout/images/closeLogo.svg}" alt="Logo" class="logo" id="logo">
+    <img th:src="@{/layout/images/openLogo.svg}" alt="Logo" class="logo" id="logo">
 
     <!--Home Button (returns to the landing page)-->
-    <a href="/homeReturn">
+    <a href="/">
         <img th:src="@{/layout/images/House.svg}" alt="homeBtn" class="home-btn">
     </a>
 
     <!-- Search bar -->
-    <div>
+    <div class="search-bar-container">
         <input type="text" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
     </div>
 
