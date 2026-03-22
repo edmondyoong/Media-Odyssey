@@ -1,7 +1,6 @@
 package com.mo.mediaodyssey.auth.services;
 
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +8,7 @@ import com.mo.mediaodyssey.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
-public class MOUserDetailsService implements UserDetailsService {
+public class MOUserDetailsService {
 
     // Inspiried by:
     // https://www.baeldung.com/role-and-privilege-for-spring-security-registration
@@ -20,7 +19,6 @@ public class MOUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));

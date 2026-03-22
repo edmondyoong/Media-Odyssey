@@ -4,12 +4,14 @@ import com.mo.mediaodyssey.auth.dto.UserDto;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
 
+@Service
 public class AuthAdminService {
     @Autowired
     private UserRepository userRepository;
