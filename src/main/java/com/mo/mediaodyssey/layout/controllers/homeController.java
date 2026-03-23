@@ -1,6 +1,5 @@
 package com.mo.mediaodyssey.layout.controllers;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
@@ -37,9 +36,7 @@ public class homeController {
     @GetMapping("/")
     public String home(Model model, Authentication authentication) {
 
-        String userEmail = authentication.getName();
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Cannot find this user."));
+        User user = (User) authentication.getPrincipal();
 
         List<Boards> boards = boardsService.findBoardsByUser(user); 
         

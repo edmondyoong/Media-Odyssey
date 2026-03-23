@@ -10,13 +10,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.mo.mediaodyssey.auth.model.User;
-import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.services.BoardsService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -28,11 +26,8 @@ public class BoardsController {
 
     private final BoardsService boardsService; 
 
-    private final UserRepository userRepository;
-
-    public BoardsController (BoardsService boardsService, UserRepository userRepository) {
+    public BoardsController (BoardsService boardsService) {
         this.boardsService = boardsService; 
-        this.userRepository = userRepository; 
     }
 
 
