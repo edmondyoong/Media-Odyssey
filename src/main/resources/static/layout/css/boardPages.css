@@ -391,6 +391,7 @@ body {
 .board-container {
     max-width: 1200px;
     margin: 0 auto;
+    padding-top: 80px;
     padding: 2rem;
     margin-left: 80px; /* Account for sidebar */
 }
@@ -403,6 +404,7 @@ body {
     padding: 2rem;
     background: linear-gradient(145deg, #1a1a2e 0%, #252545 100%);
     border-radius: 16px;
+    margin-top: 82px;
     margin-bottom: 2rem;
     border: 1px solid rgba(99, 102, 241, 0.1);
 }
