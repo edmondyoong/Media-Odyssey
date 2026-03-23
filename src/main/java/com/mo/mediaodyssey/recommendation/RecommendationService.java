@@ -33,6 +33,9 @@ public class RecommendationService {
     @Value("${spotify.client.secret}")
     private String spotifyClientSecret;
 
+    @Value("${lastfm.api.key}")
+    private String lastfmApiKey;
+
     // maps genre names to TMDB genre IDs
     private static final Map<String, Integer> TMDB_GENRE_IDS = new HashMap<>();
     static {
@@ -57,7 +60,7 @@ public class RecommendationService {
         TMDB_GENRE_IDS.forEach((name, id) -> TMDB_GENRE_NAMES.put(id, name));
     }
 
-    // genre slugs used for Spotify search — must match Spotify's accepted genre seeds
+    // genre tags used for Last.fm tag.getTopTracks — must be valid Last.fm tags
     private static final List<String> SPOTIFY_GENRES = Arrays.asList(
         "Pop", "Rock", "Hip-hop", "R&b", "Jazz", "Classical", "Electronic", "Country", "Reggae", "Soul"
     );
@@ -167,12 +170,11 @@ public class RecommendationService {
                 break;
             }
             case "SONG": {
-                // 20 from favourite genre — two Spotify calls with offset 0 and 10 (max limit is 10 per call)
-                results.addAll(fetchSpotifyRecommendations(favoriteGenre, 0));
-                results.addAll(fetchSpotifyRecommendations(favoriteGenre, 10));
-                // 10 from a random other Spotify genre
+                // 20 from favourite genre via Last.fm + Spotify search
+                results.addAll(fetchSpotifyRecommendations(favoriteGenre, 20));
+                // 10 from a random other genre via Last.fm + Spotify search
                 String otherGenre = pickOtherGenre(favoriteGenre, SPOTIFY_GENRES);
-                results.addAll(fetchSpotifyRecommendations(otherGenre, 0));
+                results.addAll(fetchSpotifyRecommendations(otherGenre, 10));
                 break;
             }
             default:
@@ -246,33 +248,34 @@ public class RecommendationService {
         return results;
     }
 
-    // fallback: popular tracks from Spotify search
-    // fetches each track's artist via GET /artists/{id} to get the real genre
+    // fallback: globally popular tracks for new users with no history
+    // uses Last.fm chart.getTopTracks to get track names, then resolves each to a Spotify track
     private List<RecommendationResponse> fetchSpotifyPopular() {
         List<RecommendationResponse> results = new ArrayList<>();
         try {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
 
-            String url = "https://api.spotify.com/v1/search?q=you&type=track&limit=10&market=US";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(accessToken);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-            JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks").path("items");
+            // Last.fm chart.getTopTracks returns the most popular tracks globally
+            String lastfmUrl = "https://ws.audioscrobbler.com/2.0/?method=chart.getTopTracks"
+                    + "&limit=20"
+                    + "&api_key=" + lastfmApiKey
+                    + "&format=json";
+
+            String lastfmResponse = restTemplate.getForObject(lastfmUrl, String.class);
+            JsonNode tracks = objectMapper.readTree(lastfmResponse).path("tracks").path("track");
 
             for (JsonNode track : tracks) {
-                String mediaApiId = track.path("id").asText();
-                if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
-                String title    = track.path("name").asText();
-                String artist   = track.path("artists").path(0).path("name").asText();
-                String artistId = track.path("artists").path(0).path("id").asText();
-                String imageUrl = track.path("album").path("images").path(0).path("url").asText();
-                double score    = track.path("popularity").asDouble();
+                String trackName  = track.path("name").asText();
+                String artistName = track.path("artist").path("name").asText();
 
-                // fetch artist genre — falls back to "Pop" if call fails or genres is empty
-                String genre = fetchSpotifyArtistGenre(artistId, accessToken, "Pop");
+                if (trackName.isEmpty() || artistName.isEmpty()) continue;
 
-                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score));
+                // resolve to Spotify track to get ID and image
+                RecommendationResponse rec = searchSpotifyTrack(trackName, artistName, "Pop", accessToken);
+                if (rec != null && !bannedMediaRepository.existsByMediaApiId(rec.getMediaApiId())) {
+                    results.add(rec);
+                }
             }
         } catch (Exception e) {
             System.err.println("Spotify popular fallback error: " + e.getMessage());
@@ -344,59 +347,73 @@ public class RecommendationService {
         return results;
     }
 
-    // calls Spotify search to get tracks for the given genre
-    // offset allows fetching the next 10 results (Spotify search max limit is 10 per call)
-    private List<RecommendationResponse> fetchSpotifyRecommendations(String genre, int offset) {
+    // uses Last.fm tag.getTopTracks to get top tracks for a genre tag,
+    // then resolves each to a Spotify track via search to get the Spotify ID and image
+    private List<RecommendationResponse> fetchSpotifyRecommendations(String genre, int limit) {
         List<RecommendationResponse> results = new ArrayList<>();
 
         try {
             String accessToken = getSpotifyAccessToken();
             if (accessToken == null) return results;
 
-            String genreSlug = genre.toLowerCase().replace(" ", "-");
-            String query = java.net.URLEncoder.encode("genre:" + genreSlug, "UTF-8");
-            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=10&offset=" + offset + "&market=US";
+            // Last.fm tag.getTopTracks returns top tracks tagged with the given genre
+            String tag = java.net.URLEncoder.encode(genre.toLowerCase(), "UTF-8");
+            String lastfmUrl = "https://ws.audioscrobbler.com/2.0/?method=tag.getTopTracks"
+                    + "&tag=" + tag
+                    + "&limit=" + limit
+                    + "&api_key=" + lastfmApiKey
+                    + "&format=json";
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(accessToken);
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-            JsonNode tracks = objectMapper.readTree(response.getBody()).path("tracks").path("items");
+            String lastfmResponse = restTemplate.getForObject(lastfmUrl, String.class);
+            JsonNode tracks = objectMapper.readTree(lastfmResponse).path("tracks").path("track");
 
             for (JsonNode track : tracks) {
-                String mediaApiId = track.path("id").asText();
-                if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
-                String title    = track.path("name").asText();
-                String artist   = track.path("artists").path(0).path("name").asText();
-                String imageUrl = track.path("album").path("images").path(0).path("url").asText();
-                double score    = track.path("popularity").asDouble();
-                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score));
+                String trackName  = track.path("name").asText();
+                String artistName = track.path("artist").path("name").asText();
+
+                if (trackName.isEmpty() || artistName.isEmpty()) continue;
+
+                // resolve to Spotify track to get ID and image
+                RecommendationResponse rec = searchSpotifyTrack(trackName, artistName, genre, accessToken);
+                if (rec != null && !bannedMediaRepository.existsByMediaApiId(rec.getMediaApiId())) {
+                    results.add(rec);
+                }
             }
         } catch (Exception e) {
-            System.err.println("Spotify API error: " + e.getMessage());
+            System.err.println("Spotify recommendations error: " + e.getMessage());
         }
 
         return results;
     }
 
-    // helper: fetches the first genre from a Spotify artist's genres array
-    // returns fallbackGenre if the call fails or genres is empty
-    private String fetchSpotifyArtistGenre(String artistId, String accessToken, String fallbackGenre) {
+    // searches Spotify for a specific track by name and artist
+    // returns a RecommendationResponse with the Spotify track ID and album image, or null if not found
+    private RecommendationResponse searchSpotifyTrack(String trackName, String artistName, String genre, String accessToken) {
         try {
-            String url = "https://api.spotify.com/v1/artists/" + artistId;
+            String query = java.net.URLEncoder.encode(trackName + " artist:" + artistName, "UTF-8");
+            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=1&market=US";
+
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-            JsonNode genres = objectMapper.readTree(response.getBody()).path("genres");
-            if (genres.isArray() && genres.size() > 0) {
-                String raw = genres.get(0).asText();
-                return raw.substring(0, 1).toUpperCase() + raw.substring(1);
-            }
+
+            JsonNode items = objectMapper.readTree(response.getBody()).path("tracks").path("items");
+            if (!items.isArray() || items.size() == 0) return null;
+
+            JsonNode track     = items.get(0);
+            String mediaApiId  = track.path("id").asText();
+            String title       = track.path("name").asText();
+            String artist      = track.path("artists").path(0).path("name").asText();
+            String imageUrl    = track.path("album").path("images").path(0).path("url").asText();
+            double score       = track.path("popularity").asDouble();
+
+            if (mediaApiId.isEmpty()) return null;
+
+            return new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score);
         } catch (Exception e) {
-            System.err.println("Spotify artist genre fetch error: " + e.getMessage());
+            System.err.println("Spotify track search error: " + e.getMessage());
+            return null;
         }
-        return fallbackGenre;
     }
 
     // Spotify requires an OAuth access token — this gets one using client credentials
