@@ -77,17 +77,6 @@ public class BoardsController {
         // If board exists
         if (boardOpt.isPresent()) {
             Boards board = boardOpt.get(); //store board's data
-
-            //Check whether the current user actually have that board or not. 
-            String userEmail = authentication.getName(); 
-
-            /* This secion is to check whether the user owns that board or not.
-            ** Seems reducdant as boards that are not from users can still appear if they are public,
-            ** so I'll comment this out for now. 
-            User currentUser = userRepository.findByEmail(userEmail).orElse(null); 
-
-            if (currentUser!=null && board.getUser()!=null
-                && board.getUser().getId().equals(currentUser.getId()) ) {} */
                 
             model.addAttribute("board", board);
             return "boardsLayout/themeBoard/boardDisplay";
