@@ -12,12 +12,17 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for MediaRankingService
- * Score formula: views*1 + likes*10  (from Media.getTotalScore())
- * Display rating: mapped from totalScore via toDisplayRating()
+ * Unit tests for MediaRankingService.
+ *
+ * Covers:
+ * - normalizeMediaType(): input normalisation (MOVIE / GAME / SONG)
+ * - getTop10(): calls correct repository method and returns ranked list
+ * - getTop10ByMediaType(): filters by category and normalises input
+ * - enrichScoreRows(): fallback behaviour and display rating range
  */
 @ExtendWith(MockitoExtension.class)
 class MediaRankingServiceTest {
@@ -30,6 +35,7 @@ class MediaRankingServiceTest {
 
     // ─── normalizeMediaType Tests ──────────────────────────────────────────────
 
+    // "MOVIE", "movies", "Movies" should all map to "MOVIE"
     @Test
     void normalizeMediaType_movie_returnsNormalizedString() {
         assertThat(rankingService.normalizeMediaType("MOVIE")).isEqualTo("MOVIE");
@@ -37,12 +43,14 @@ class MediaRankingServiceTest {
         assertThat(rankingService.normalizeMediaType("Movies")).isEqualTo("MOVIE");
     }
 
+    // "GAME" and "games" should both map to "GAME"
     @Test
     void normalizeMediaType_game_returnsNormalizedString() {
         assertThat(rankingService.normalizeMediaType("GAME")).isEqualTo("GAME");
         assertThat(rankingService.normalizeMediaType("games")).isEqualTo("GAME");
     }
 
+    // "MUSIC", "song", "SONGS" should all map to "SONG" (internal canonical value)
     @Test
     void normalizeMediaType_music_returnsSong() {
         assertThat(rankingService.normalizeMediaType("MUSIC")).isEqualTo("SONG");
@@ -50,11 +58,13 @@ class MediaRankingServiceTest {
         assertThat(rankingService.normalizeMediaType("SONGS")).isEqualTo("SONG");
     }
 
+    // Null input should return empty string without throwing
     @Test
     void normalizeMediaType_null_returnsEmptyString() {
         assertThat(rankingService.normalizeMediaType(null)).isEqualTo("");
     }
 
+    // Unknown input should be uppercased and returned as-is
     @Test
     void normalizeMediaType_unknown_returnsUppercase() {
         assertThat(rankingService.normalizeMediaType("podcast")).isEqualTo("PODCAST");
@@ -62,6 +72,7 @@ class MediaRankingServiceTest {
 
     // ─── getTop10 Tests ────────────────────────────────────────────────────────
 
+    // Empty DB → should return an empty list without errors
     @Test
     void getTop10_noInteractions_returnsEmptyList() {
         when(userInteractionRepository.findTop10ByScore())
@@ -73,6 +84,7 @@ class MediaRankingServiceTest {
         assertThat(result).isEmpty();
     }
 
+    // getTop10() must call findTop10ByScore(), not the category-filtered version
     @Test
     void getTop10_callsCorrectRepositoryMethod() {
         when(userInteractionRepository.findTop10ByScore())
@@ -84,6 +96,7 @@ class MediaRankingServiceTest {
         verify(userInteractionRepository, never()).findTop10ByScoreAndMediaType(any());
     }
 
+    // Result list should never exceed 10 items (enforced by the DB query)
     @Test
     void getTop10_returnsAtMost10Items() {
         List<Object[]> fakeRows = Arrays.asList(
@@ -100,6 +113,7 @@ class MediaRankingServiceTest {
 
     // ─── getTop10ByMediaType Tests ─────────────────────────────────────────────
 
+    // "movies" input should be normalised to "MOVIE" before hitting the repository
     @Test
     void getTop10ByMediaType_movie_callsRepositoryWithNormalizedType() {
         when(userInteractionRepository.findTop10ByScoreAndMediaType("MOVIE"))
@@ -111,6 +125,7 @@ class MediaRankingServiceTest {
                 .findTop10ByScoreAndMediaType("MOVIE");
     }
 
+    // "MUSIC" should be normalised to "SONG" (the DB canonical value)
     @Test
     void getTop10ByMediaType_music_normalizesToSong() {
         when(userInteractionRepository.findTop10ByScoreAndMediaType("SONG"))
@@ -122,6 +137,7 @@ class MediaRankingServiceTest {
                 .findTop10ByScoreAndMediaType("SONG");
     }
 
+    // Unknown category → repository returns nothing → result should be empty
     @Test
     void getTop10ByMediaType_unknownCategory_returnsEmptyList() {
         when(userInteractionRepository.findTop10ByScoreAndMediaType("PODCAST"))
@@ -134,6 +150,7 @@ class MediaRankingServiceTest {
 
     // ─── enrichScoreRows / RankedMediaResponse structure Tests ────────────────
 
+    // Rows with an unrecognised mediaType should fall back to "Unknown" title (no crash)
     @Test
     void getTop10_rowWithUnknownMediaType_stillReturnsResult() {
         // explicitly typed to avoid List<Object> inference issue
@@ -147,6 +164,7 @@ class MediaRankingServiceTest {
         assertThat(result.get(0).getTitle()).isEqualTo("Unknown");
     }
 
+    // Display rating derived from score must always be within the 1.0–5.0 star range
     @Test
     void getTop10_displayRating_isWithinValidRange() {
         Object[] row1 = new Object[]{"11", "UNKNOWN", 0L};

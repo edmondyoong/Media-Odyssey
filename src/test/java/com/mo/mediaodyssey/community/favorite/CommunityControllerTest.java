@@ -15,11 +15,16 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for CommunityController (pure Mockito, no Spring context)
- * Tests: communityPage(), likeMedia(), incrementView()
+ * Unit tests for CommunityController.
+ *
+ * Uses pure Mockito (no Spring context) to verify:
+ * - communityPage() returns the correct view and model attributes
+ * - likeMedia() and incrementView() deduplicate requests within the same session
+ * - No interaction is saved when the user is not authenticated
  */
 @ExtendWith(MockitoExtension.class)
 class CommunityControllerTest {
@@ -40,6 +45,7 @@ class CommunityControllerTest {
 
     @BeforeEach
     void setUp() {
+        // Sample ranked media list used across multiple tests
         sampleList = Arrays.asList(
                 new RankedMediaResponse("11", "Inception",         "",      "MOVIE", "", 130L, 5.0),
                 new RankedMediaResponse("22", "The Witcher 3",     "",      "GAME",  "", 95L,  4.0),
@@ -49,6 +55,7 @@ class CommunityControllerTest {
 
     // ─── communityPage() ──────────────────────────────────────────────────────
 
+    // No category param → should call getTop10() and return the full ranked list
     @Test
     void communityPage_noCategory_callsGetTop10() {
         when(mediaRankingService.getTop10()).thenReturn(sampleList);
@@ -62,6 +69,7 @@ class CommunityControllerTest {
         verify(mediaRankingService, never()).getTop10ByMediaType(any());
     }
 
+    // Category "MOVIE" → should call getTop10ByMediaType() and set currentCat in model
     @Test
     void communityPage_withMovieCategory_callsGetTop10ByMediaType() {
         when(mediaRankingService.normalizeMediaType("MOVIE")).thenReturn("MOVIE");
@@ -77,6 +85,7 @@ class CommunityControllerTest {
         verify(mediaRankingService, never()).getTop10();
     }
 
+    // Blank category string should be treated the same as no filter
     @Test
     void communityPage_withBlankCategory_treatsAsNoFilter() {
         when(mediaRankingService.getTop10()).thenReturn(sampleList);
@@ -88,6 +97,7 @@ class CommunityControllerTest {
         verify(mediaRankingService, never()).getTop10ByMediaType(any());
     }
 
+    // Null category → currentCat model attribute should remain null
     @Test
     void communityPage_nullCategory_currentCatIsNull() {
         when(mediaRankingService.getTop10()).thenReturn(sampleList);
@@ -99,7 +109,8 @@ class CommunityControllerTest {
     }
 
     // ─── saveInteraction (via likeMedia / incrementView) ──────────────────────
-
+ 
+    // Unauthenticated user (auth = null) → no UserInteraction should be saved
     @Test
     void saveInteraction_nullUserId_doesNotSaveToRepository() {
         // getUserId returns null when user not found → saveInteraction should skip
@@ -114,6 +125,7 @@ class CommunityControllerTest {
         verify(userInteractionRepository, never()).save(any(UserInteraction.class));
     }
 
+    // Same user liking the same item twice in one session → second like should be rejected
     @Test
     void likeMedia_duplicateInSameSession_secondCallReturnsFalse() {
         when(mediaRankingService.normalizeMediaType("MOVIE")).thenReturn("MOVIE");
@@ -130,6 +142,7 @@ class CommunityControllerTest {
         assertThat(second.getBody()).containsEntry("liked", false);
     }
 
+    // Same user viewing the same item twice in one session → second view should be rejected
     @Test
     void incrementView_duplicateInSameSession_secondCallReturnsFalse() {
         when(mediaRankingService.normalizeMediaType("GAME")).thenReturn("GAME");
@@ -144,6 +157,7 @@ class CommunityControllerTest {
         assertThat(second.getBody()).containsEntry("viewed", false);
     }
 
+    // Liking two different items in one session → both should succeed
     @Test
     void likeMedia_differentMediaIds_bothReturnTrue() {
         when(mediaRankingService.normalizeMediaType("MOVIE")).thenReturn("MOVIE");
