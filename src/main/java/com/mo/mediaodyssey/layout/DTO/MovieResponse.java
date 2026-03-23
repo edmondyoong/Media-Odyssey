@@ -1,0 +1,75 @@
+package com.mo.mediaodyssey.layout.DTO;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class MovieResponse {
+    private String title;
+    private String overview; 
+    private String release_dates;
+    private List<Genres> genres;
+    private String poster_path; 
+
+    @JsonProperty("watch/providers")
+    private WatchProviders watch_providers;
+
+    public MovieResponse () {}
+
+    public MovieResponse (String title, String overview, String release_dates, List<Genres> genres, String poster_path, WatchProviders watchProviders){
+        this.title = title; 
+        this.overview = overview; 
+        this.release_dates = release_dates; 
+        this.genres = genres; 
+        this.poster_path = poster_path;
+        this.watch_providers = watchProviders;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public String getRelease_dates() {
+        return release_dates;
+    }
+
+    public void setRelease_dates(String release_dates) {
+        this.release_dates = release_dates;
+    }
+
+    public List<Genres> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genres> genres) {
+        this.genres = genres;
+    }
+
+    public String getPoster_path() {
+        return poster_path;
+    }
+
+    public void setPoster_path(String poster_path) {
+        this.poster_path = poster_path;
+    }
+
+    public WatchProviders getWatch_providers() {
+        return watch_providers;
+    }
+
+    public void setWatch_providers(WatchProviders watch_providers) {
+        this.watch_providers = watch_providers;
+    } 
+}
