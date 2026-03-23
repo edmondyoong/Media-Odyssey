@@ -53,9 +53,7 @@ public class BoardsController {
     @PostMapping("/create")
     public String createBoard (@ModelAttribute("board") Boards board, Authentication authentication) {
 
-        String userEmail = authentication.getName(); 
-        User user = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new RuntimeException("User not found."));
+        User user = (User) authentication.getPrincipal();
 
         board.setUser(user);
         boardsService.createBoard(board);
