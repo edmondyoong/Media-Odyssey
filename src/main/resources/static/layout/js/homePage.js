@@ -25,7 +25,7 @@ async function loadRecommendations(mediaType) {
     const statusEl = document.getElementById("recStatus");
     const cardsEl  = document.getElementById("recCards");
 
-    statusEl.textContent = "Loading…";
+    statusEl.textContent = "Loading… wait time is 30 seconds max. Thank you for your patience!";
     cardsEl.innerHTML    = "";
 
     try {
