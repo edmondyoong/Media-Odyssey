@@ -202,8 +202,16 @@ async function loadRecommendations(mediaType) {
 function renderCards(items) {
     const cardsEl = document.getElementById("recCards");
 
+    /*
+        *** This <div> HTML will be modified so user can click on them and be brought to HTML that displays
+        **  details information of the meta they clicked on. 
+        ** Logic: Media display Controller will have the path /mediaView/mediaType/mediaId
+        *  This ensures the type of media being cliked on and its id. (nice =])
+        *
+        *** Only movie is being worked on right now.
+    */ 
     items.forEach(item => {
-        const card = document.createElement("div");
+        const card = document.createElement("a");
         card.className = "rec-card";
         card.dataset.mediaApiId = item.mediaApiId;
         card.dataset.mediaType  = item.mediaType;
@@ -212,6 +220,10 @@ function renderCards(items) {
         const img = item.imageUrl && item.imageUrl !== "null"
             ? `<img class="rec-img" src="${item.imageUrl}" alt="${item.title}" onerror="this.style.display='none'">`
             : `<div class="rec-img rec-img-placeholder">No Image</div>`;
+
+        // route the link according to the media
+        const mediaType = item.mediaType.toLowerCase(); 
+        card.href= `/mediaView/${mediaType}/${item.mediaApiId}`;
 
         card.innerHTML = `
             ${img}

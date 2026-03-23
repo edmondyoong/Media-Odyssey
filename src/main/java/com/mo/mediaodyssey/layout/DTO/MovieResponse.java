@@ -7,7 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MovieResponse {
     private String title;
     private String overview; 
+
+    @JsonProperty("release_date")
     private String release_dates;
+    
     private List<Genres> genres;
     private String poster_path; 
 

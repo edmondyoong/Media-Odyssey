@@ -4,8 +4,11 @@
         <meta charset="UTF-8"> 
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Movie's name</title>
-        <link rel="stylesheet" th:href="@{/layout/css/homePage.css}">
+        <title th:text="${movie.title}"></title>
+        <link rel="stylesheet" th:href="@{/layout/css/global.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/movieDisplay.css}">
+
     </head>
     <body>
         <!--This html will show when user click on any movies. A webpage that shows ....-->
@@ -17,44 +20,49 @@
          Please use the MO logo to work with side bar if needed -->
         <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
-        <!-- main content of the page begins here -->
+        <!-- =====================================================================
+                main content of the page begins here 
+        ===========================================================================-->
         <main class="movie-container">
+
             <!-- Top Section: Poster + Info -->
             <div class="movie-header">
                 <!-- Poster Card -->
                 <div class="poster-card">
-                    <img src="" alt="Movie Poster" id="poster-img">
+                    <img th:src="'https://image.tmdb.org/t/p/w500' + ${movie.poster_path}" 
+                        alt="Movie Poster" id="poster-img" />
                 </div>
 
                 <!-- Movie's Info -->
                 <div class="movie-info">
-                    <h1 class="movie-title">MOVIE TITLE</h1>
+                    <h1 th:text="${movie.title}" class="movie-title"></h1>
 
-                    <!-- Recheck this element in css -->
                     <div class="movie-genres">
-                        <span class="genre-tag">Science Fiction</span>
-                        <span class="genre-tag">Adventure</span>
-                        <span class="genre-tag">Drama</span>
+                        <span th:each="genre : ${movie.genres}" th:text="${genre.name}" class="genre-tag"></span>
                     </div>
 
                     <!-- Meta info (released date and the movie's length)-->
                     <div class="meta-info">
+                        <!-- release date of the movie -->
                         <div class="meta-item">
-                            <span>Released date</span>
+                            <h3 class="release-date-title">Released on:</h3>
+                            <span th:text="${movie.release_dates}"></span>
                         </div>
 
+                        <!-- Display the length of the movie -->
+                        <!-- Comment out to test fetching simple movie first
                         <div class="meta-item">
-                            <span>movie's length</span>
-                        </div>
+                            <span th:text="${movie.video_length}"></span>
+                        </div> --> 
                     </div>
                 </div>
             </div>
 
             <!-- middle(body) shows movie's overview and interactive actions (ratings, added to board)-->
             <div class="movie-middle">
-                <!--Overview-->
+                <!--Movie's Overview-->
                 <div class="movie-overview">
-                    <p></p>
+                    <p th:text="${movie.overview}"></p>
                 </div>
 
                 <!-- Interact/ Actions Space -->
@@ -81,11 +89,11 @@
                         </div>
 
                         <!-- Theme boards drop down 
-                         Description: this drop down box will allow users to add movies into their 
-                         own created theme boards.
-                         Note: They cannot add movies into other's theme boards. 
-                         Future idea: Perhaps users can clone other users's theme boards? Or request the 
-                         theme board owner to add this movie in their theme board.-->
+                            Description: this drop down box will allow users to add movies into their 
+                            own created theme boards.
+                            Note: They cannot add movies into other's theme boards. 
+                            Future idea: Perhaps users can clone other users's theme boards? Or request the 
+                            theme board owner to add this movie in their theme board.-->
                         <div class="themeBoard-Dropdown">
                             <button class="dropdownBtn" id="dropdownBtn">
                                 <span>Add to board</span>
@@ -111,6 +119,8 @@
              </div>
         </main>
 
-        <script th:src="@{/layout/js/homePage.js}"></script>
+        <script th:src="@{/layout/js/fragments.js}"></script>
+        <script th:src="@{/layout/js/movieDisplay.js}"></script>
+
     </body>
 </html>

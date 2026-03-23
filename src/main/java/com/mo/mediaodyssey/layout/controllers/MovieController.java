@@ -7,10 +7,12 @@ import com.mo.mediaodyssey.layout.DTO.MovieResponse;
 import com.mo.mediaodyssey.layout.services.MovieService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
+@RequestMapping("/mediaView")
 public class MovieController {
 
     private final MovieService movieService; 
@@ -23,11 +25,18 @@ public class MovieController {
     public String getMovie(@PathVariable Long id, 
                         Model model, RedirectAttributes redirectAttributes) {
 
-        MovieResponse movie = movieService.getMovieById(id); 
+        try {
+            MovieResponse movie = movieService.getMovieById(id);
+            model.addAttribute("movie", movie); 
 
-        model.addAttribute("movie", movie);
+            System.out.println(movieService.getMovieById(id));
 
-        return "boardsLayout/mediaDisplay/movieDisplay";
+            return "boardsLayout/mediaDisplay/movieDisplay"; 
+        } catch (Exception e){
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "Unable to load this movie. Please try again later.");
+            return "redirect:/";
+        }
     }
     
     
