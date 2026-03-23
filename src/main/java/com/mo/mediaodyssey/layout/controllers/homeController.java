@@ -1,6 +1,7 @@
 package com.mo.mediaodyssey.layout.controllers;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
+import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.services.BoardsService;
 
 @Controller
@@ -26,25 +28,22 @@ public class homeController {
 
     /* 
     * homePage Mapping: 
-    ** Double check user's authentication.
-    ** Find the logged in user by Email, and check all their boards (created + joined [not yet implemented])
-    ** If no bards found, display nothing. Otherwise, Display all the boards.
-
-    *** In the case of not finding any boards, or user not authenticated: 
+    *** In the case of not finding any boards (this will always happen for new users): 
     ** homePage.html will not displayed any theme boards in "Jounreys you have joined".
-    ** But most likely, auth section will prevent unauthenticated users to join. This is just to double check.
+    *
+    * * Logic: This application does not include any unique username, it focuses on email. 
+    *   Therefore, authentication.getName() will return user's email.
     */
     @GetMapping("/")
     public String home(Model model, Authentication authentication) {
-        if(authentication!=null && authentication.isAuthenticated()) {
-            String userEmail = authentication.getName(); 
-            User user = userRepository.findByEmail(userEmail).orElse(null); 
 
-            if (user != null) { model.addAttribute("boards", boardsService.findAllBoards()); }
-            else { model.addAttribute("boards", Collections.emptyList());}
-        } else {
-            model.addAttribute("boards", Collections.emptyList());
-        }
+        String userEmail = authentication.getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Cannot find this user."));
+
+        List<Boards> boards = boardsService.findBoardsByUser(user); 
+        
+        model.addAttribute("boards", boards);
 
         return "boardsLayout/homePage";
     }
