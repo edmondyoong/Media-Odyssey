@@ -1,9 +1,15 @@
 package com.mo.mediaodyssey.layout.controllers;
 
+import java.util.List;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
+import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.layout.DTO.MovieResponse;
+import com.mo.mediaodyssey.layout.models.Boards;
+import com.mo.mediaodyssey.layout.services.BoardsService;
 import com.mo.mediaodyssey.layout.services.MovieService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,20 +22,37 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class MovieController {
 
     private final MovieService movieService; 
+    private final BoardsService boardsService;
 
-    public MovieController (MovieService movieService) {
+    public MovieController (MovieService movieService, BoardsService boardsService) {
         this.movieService = movieService; 
+        this.boardsService = boardsService; 
     }
 
+    /*
+    * *** This function will fetch the movie's id from homePage.js (mediaApiId)
+    * **  Call TMDB to get the details of the movie to set up movieDisplay.html
+    * 
+    * **  User and Boards are use for adding media into theme board logic.
+    * **  All the boards created by the current logged in user will be fetched every user clicked in any movie.
+    * **  This way, their boards will be displayed in the drop down box in the page. 
+    * **  => Allow users to add media into their created theme-boards.
+    */
     @GetMapping("/movie/{id}")
     public String getMovie(@PathVariable Long id, 
-                        Model model, RedirectAttributes redirectAttributes) {
+                        Model model, RedirectAttributes redirectAttributes, Authentication authentication) {
 
         try {
+            //Get the movie (1 object)
             MovieResponse movie = movieService.getMovieById(id);
-            model.addAttribute("movie", movie); 
 
-            System.out.println(movieService.getMovieById(id));
+            //Identify the User in order to get all their boards
+            User user = (User) authentication.getPrincipal();
+            // Use user to find all the boards that htis user created
+            List<Boards> boards = boardsService.findBoardsByUser(user);
+
+            model.addAttribute("movie", movie); 
+            model.addAttribute("boards", boards);
 
             return "boardsLayout/mediaDisplay/movieDisplay"; 
         } catch (Exception e){

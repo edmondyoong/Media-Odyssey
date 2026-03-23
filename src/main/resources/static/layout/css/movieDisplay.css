@@ -117,7 +117,7 @@ body {
 }
 
 /* Overview Box */
-.overview-box {
+.movie-overview {
   flex: 1;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 15px;
@@ -126,14 +126,14 @@ body {
   max-width: 620px;
 }
 
-.overview-box h3 {
+.movie-overview  h3 {
   font-size: 1.1rem;
   color: #fff;
   margin-bottom: 12px;
   font-weight: 600;
 }
 
-.overview-box p {
+.movie-overview  p {
   color: #c0c0c0;
   line-height: 1.7;
   font-size: 0.95rem;
@@ -193,10 +193,17 @@ body {
   gap: 20px;
 }
 
-.action-icon {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
+.action-icon-haveWatched h4 {
+  font-size: 15px;
+  font-weight: 500;
+
+  align-items: center;
+}
+
+.action-icon-haveWatched {
+  width: 100px;
+  height: 50px;
+  border-radius: 25px;
   background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;

@@ -1,4 +1,6 @@
-// Star Rating Functionality
+/* ===========================================
+          Star Rating System Functions:
+=============================================*/
 const stars = document.querySelectorAll('.star');
 let currentRating = 0;
 
@@ -28,6 +30,7 @@ function updateStars() {
 }
 
 // Like Button Toggle
+/*
 const likeBtn = document.getElementById('like-btn');
 likeBtn.addEventListener('click', () => {
   likeBtn.classList.toggle('active');
@@ -48,7 +51,12 @@ if (watchedIcon.src && watchedIcon.src !== window.location.href) {
 watchedBtn.addEventListener('click', () => {
   watchedBtn.classList.toggle('watched-active');
 });
+*/
 
+/*======================================================== 
+                  ADD MOVIE INTO BOARD JS
+                      DROP DOWN MENU
+==========================================================*/
 // Dropdown Toggle
 const dropdownBtn = document.getElementById('dropdown-btn');
 const dropdownMenu = document.getElementById('dropdown-menu');
@@ -64,6 +72,32 @@ document.addEventListener('click', (e) => {
     dropdownBtn.classList.remove('open');
     dropdownMenu.classList.remove('show');
   }
+});
+
+// Handle adding media
+document.addEventListener("DOMContentLoaded", function(){
+  const movieId = document.getElementById("movieApiId").value;
+  const dropdownItems = document.querySelectorAll(".dropdown-item");
+
+  dropdownItems.forEach(button => {
+    button.addEventListener("click", function() {
+      const boardId = this.dataset.board_id;
+
+      fetch(`api/boards/${boardId}/media?mediaApiId=${movieId}`, {
+        method : "POST", 
+        headers: {"Content-Type": "application/x-www-form-urlencoded"}
+      })
+      .then(response => {
+        if(response.ok()) {
+          alert("Movie is added"); 
+        } else { alert("Movie is already added in this board or error occured."); }
+      })
+      .catch (error => {
+        console.error("Error:", error );
+        aler ("Server error. Please log in again.");
+      });
+    });
+  });
 });
 
 // Dropdown item click handler

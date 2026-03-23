@@ -12,6 +12,6 @@ public interface BoardMediaRepository extends JpaRepository<BoardMedia, Long>{
 
     List<BoardMedia> findByBoardId (Long id);
 
-    boolean existByBoardIdAndMediaApiId (Long boardId, Long mediaApiId);
+    boolean existsByBoardIdAndMediaApiId (Long board_id, Long mediaApiId);
     
 }

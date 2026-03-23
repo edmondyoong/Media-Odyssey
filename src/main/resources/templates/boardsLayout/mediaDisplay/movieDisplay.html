@@ -62,6 +62,7 @@
             <div class="movie-middle">
                 <!--Movie's Overview-->
                 <div class="movie-overview">
+                    <h3>Overview:</h3>
                     <p th:text="${movie.overview}"></p>
                 </div>
 
@@ -80,12 +81,12 @@
                     <!-- Like & Have Watched Icons (likes can be removed) -->
                     <div class="action-icons">
 
+                        <!-- Unsure if like button is still needed or not
                         <div class="action-icon" id="like-btn" title="Like">
-                        </div>
+                        </div> -->
 
-                        <div class="action-icon" id="watched-btn" title="Mark as Watched">
-                            <img src="" alt="Watched" id="watched-icon">
-                            <!-- Default SVG fallback -->
+                        <div class="action-icon-haveWatched" id="watched-btn" title="Mark as Watched">
+                            <h4>Marked as Watched</h4>
                         </div>
 
                         <!-- Theme boards drop down 
@@ -93,15 +94,19 @@
                             own created theme boards.
                             Note: They cannot add movies into other's theme boards. 
                             Future idea: Perhaps users can clone other users's theme boards? Or request the 
-                            theme board owner to add this movie in their theme board.-->
-                        <div class="themeBoard-Dropdown">
-                            <button class="dropdownBtn" id="dropdownBtn">
+                            theme board owner to add this movie in their theme board.
+                        <input type="hidden" id="movieApiId" th:value="${movie.id}" /> -->
+                        <div class="theme-dropdown">
+                            <button class="dropdown-btn" id="dropdownBtn">
                                 <span>Add to board</span>
                             </button>
 
                             <!-- Show user's created board(s) -->
                             <div class="dropdown-menu">
-                                <div class="dropdown-item"></div>
+                                <button type="button" class="dropdown-item"
+                                        th:each="board : ${boards}"
+                                        th:text="${board.board_name}"
+                                        th:data-board-id="${board.id}"></button>
                             </div>
                         </div>
                     </div>

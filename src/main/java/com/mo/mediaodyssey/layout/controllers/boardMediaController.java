@@ -44,14 +44,14 @@ public class boardMediaController {
         Boards board = boardsRepository.findById(board_id)
             .orElseThrow(() -> new RuntimeException("Cannot find your board. Please try again."));
 
-        if (boardMediaRepository.existByBoardIdAndMediaApiId(board_id, boardMedia.getMediaApiId())){
+        if (boardMediaRepository.existsByBoardIdAndMediaApiId(board_id, boardMedia.getMediaApiId())){
             return ResponseEntity.badRequest().body("You've already added this in the board.");
         }
 
         boardMedia.setBoard(board);
         boardMediaRepository.save(boardMedia); 
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Added Successfully!");
     }
     
 }
