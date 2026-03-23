@@ -96,19 +96,21 @@ class MediaRankingServiceTest {
         verify(userInteractionRepository, never()).findTop10ByScoreAndMediaType(any());
     }
 
-    // Result list should never exceed 10 items (enforced by the DB query)
+    // Result count must equal the number of rows returned by the repository —
+    // fails if enrichScoreRows silently drops or duplicates entries
     @Test
-    void getTop10_returnsAtMost10Items() {
+    void getTop10_resultSizeMatchesRepositoryRowCount() {
         List<Object[]> fakeRows = Arrays.asList(
-                new Object[]{"11", "MOVIE", 130L},
-                new Object[]{"22", "GAME",  95L},
-                new Object[]{"33", "SONG",  50L}
+                new Object[]{"11", "UNKNOWN", 130L},
+                new Object[]{"22", "UNKNOWN",  95L},
+                new Object[]{"33", "UNKNOWN",  50L}
         );
         when(userInteractionRepository.findTop10ByScore()).thenReturn(fakeRows);
 
         List<RankedMediaResponse> result = rankingService.getTop10();
 
-        assertThat(result.size()).isLessThanOrEqualTo(10);
+        // Must return exactly 3 — not 0, not 2, not more
+        assertThat(result).hasSize(3);
     }
 
     // ─── getTop10ByMediaType Tests ─────────────────────────────────────────────
@@ -150,35 +152,68 @@ class MediaRankingServiceTest {
 
     // ─── enrichScoreRows / RankedMediaResponse structure Tests ────────────────
 
-    // Rows with an unrecognised mediaType should fall back to "Unknown" title (no crash)
+    // Fallback entry must preserve the exact mediaApiId from the DB row —
+    // fails if enrichScoreRows replaces or drops the id
     @Test
-    void getTop10_rowWithUnknownMediaType_stillReturnsResult() {
-        // explicitly typed to avoid List<Object> inference issue
-        Object[] row = new Object[]{"999", "UNKNOWN", 20L};
+    void getTop10_fallbackEntry_preservesMediaApiId() {
+        Object[] row = new Object[]{"abc-123", "UNKNOWN", 20L};
         List<Object[]> fakeRows = Collections.singletonList(row);
         when(userInteractionRepository.findTop10ByScore()).thenReturn(fakeRows);
 
         List<RankedMediaResponse> result = rankingService.getTop10();
 
         assertThat(result).hasSize(1);
+        // Must preserve the exact mediaApiId — fails if enrichScoreRows loses it
+        assertThat(result.get(0).getMediaApiId()).isEqualTo("abc-123");
+        // Must use "Unknown" as fallback title — fails if null or empty is returned
         assertThat(result.get(0).getTitle()).isEqualTo("Unknown");
     }
 
-    // Display rating derived from score must always be within the 1.0–5.0 star range
+    // score=0 must map to exactly 1.0 (minimum floor) —
+    // fails if toDisplayRating() returns 0.0 or removes the floor
     @Test
-    void getTop10_displayRating_isWithinValidRange() {
-        Object[] row1 = new Object[]{"11", "UNKNOWN", 0L};
-        Object[] row2 = new Object[]{"22", "UNKNOWN", 50L};
-        Object[] row3 = new Object[]{"33", "UNKNOWN", 200L};
-        List<Object[]> fakeRows = Arrays.asList(row1, row2, row3);
+    void getTop10_zeroScore_displayRatingIsMinimum() {
+        Object[] row = new Object[]{"zero-score", "UNKNOWN", 0L};
+        List<Object[]> fakeRows = Collections.singletonList(row);
         when(userInteractionRepository.findTop10ByScore()).thenReturn(fakeRows);
 
         List<RankedMediaResponse> result = rankingService.getTop10();
 
-        for (RankedMediaResponse item : result) {
-            assertThat(item.getDisplayRating())
-                    .isGreaterThanOrEqualTo(1.0)
-                    .isLessThanOrEqualTo(5.0);
-        }
+        assertThat(result).hasSize(1);
+        // score=0 must produce exactly 1.0 — fails if floor is removed
+        assertThat(result.get(0).getDisplayRating()).isEqualTo(1.0);
+    }
+
+    // Very high score must cap at exactly 5.0 —
+    // fails if toDisplayRating() returns a value above 5.0
+    @Test
+    void getTop10_veryHighScore_displayRatingCapsAt5() {
+        Object[] row = new Object[]{"high-score", "UNKNOWN", 999999L};
+        List<Object[]> fakeRows = Collections.singletonList(row);
+        when(userInteractionRepository.findTop10ByScore()).thenReturn(fakeRows);
+
+        List<RankedMediaResponse> result = rankingService.getTop10();
+
+        assertThat(result).hasSize(1);
+        // No matter how high the score, rating must not exceed 5.0
+        assertThat(result.get(0).getDisplayRating()).isEqualTo(5.0);
+    }
+
+    // Higher score must produce a higher or equal display rating —
+    // fails if toDisplayRating() is not monotonically non-decreasing
+    @Test
+    void getTop10_higherScore_producesHigherOrEqualDisplayRating() {
+        Object[] lowRow  = new Object[]{"low",  "UNKNOWN",  10L};
+        Object[] highRow = new Object[]{"high", "UNKNOWN", 130L};
+        List<Object[]> fakeRows = Arrays.asList(lowRow, highRow);
+        when(userInteractionRepository.findTop10ByScore()).thenReturn(fakeRows);
+
+        List<RankedMediaResponse> result = rankingService.getTop10();
+
+        double lowRating  = result.get(0).getDisplayRating();  // score=10
+        double highRating = result.get(1).getDisplayRating();  // score=130
+
+        // Higher score must yield higher or equal rating — fails if order is inverted
+        assertThat(highRating).isGreaterThanOrEqualTo(lowRating);
     }
 }
