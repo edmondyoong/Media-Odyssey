@@ -98,10 +98,10 @@
                         body: JSON.stringify(payload)
                     });
 
-                    const resText = await res.text();
+                    const resText = await res.json();
 
                     // If successful, responds with "OK". Otherwise, attempts default behavior of redirecting (failed).
-                    if (resText === "OK") {
+                    if (resText.status === "AUTH_LOGIN_SUCCESS") {
                         // If successful login, tell the User. Also automatically redirect shortly. User can choose to skip the delay by closing pop up.
                         showStatusModal("Login successful.", "/");
                         setTimeout(() => window.location.replace("/"), 500);

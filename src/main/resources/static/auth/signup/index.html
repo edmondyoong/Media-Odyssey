@@ -112,10 +112,10 @@
                         body: JSON.stringify(payload)
                     });
 
-                    const resText = await res.text();
+                    const resText = await res.json();
 
                     // If successful, responds with "OK". Otherwise, attempts default behavior of redirecting (failed).
-                    if (resText === "OK") {
+                    if (resText.status === "AUTH_REGISTER_SUCCESS") {
                         // If successful signup, tell the User. Do not automatically redirect. User needs to be informed to check their email. User can choose to be redirected by closing pop up.
                         showStatusModal("Account created successfully. Please check your email to verify your account.", "/auth/login");
                     }
