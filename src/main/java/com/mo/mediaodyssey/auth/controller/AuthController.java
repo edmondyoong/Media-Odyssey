@@ -47,7 +47,7 @@ public class AuthController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<AuthApiResponse> login(@RequestBody UserDto dto, HttpServletRequest request,
+    public ResponseEntity<AuthApiResponse> login(@Valid @RequestBody UserDto dto, HttpServletRequest request,
             HttpServletResponse response) {
         // Login the User
         Authentication authentication = authService.loginUser(dto);
