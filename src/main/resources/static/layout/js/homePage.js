@@ -56,7 +56,7 @@ async function loadRecommendations(mediaType) {
 // Build a card for each recommendation
 function renderCards(items) {
     const cardsEl = document.getElementById("recCards");
-
+    items.sort(() => Math.random() - 0.5); // shuffle
     items.forEach(item => {
         const card = document.createElement("div");
         card.className = "rec-card";
