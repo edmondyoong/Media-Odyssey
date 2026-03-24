@@ -5,6 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MovieResponse {
+
+    private Long id;
     private String title;
     private String overview; 
 
@@ -26,6 +28,14 @@ public class MovieResponse {
         this.genres = genres; 
         this.poster_path = poster_path;
         this.watch_providers = watchProviders;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId (Long id) {
+        this.id = id;
     }
 
     public String getTitle() {

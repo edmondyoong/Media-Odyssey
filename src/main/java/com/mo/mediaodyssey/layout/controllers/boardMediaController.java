@@ -1,12 +1,16 @@
 package com.mo.mediaodyssey.layout.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mo.mediaodyssey.layout.models.BoardMedia;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.repositories.BoardMediaRepository;
 import com.mo.mediaodyssey.layout.repositories.BoardsRepository;
+import com.mo.mediaodyssey.layout.services.BoardMediaService;
+
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,11 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class boardMediaController {
     
     private final BoardMediaRepository boardMediaRepository; 
-    private final BoardsRepository boardsRepository; 
+    private final BoardMediaService boardMediaService;
 
-    public boardMediaController (BoardMediaRepository boardMediaRepository, BoardsRepository boardsRepository) {
+    public boardMediaController (BoardMediaRepository boardMediaRepository, BoardMediaService boardMediaService) {
         this.boardMediaRepository = boardMediaRepository; 
-        this.boardsRepository = boardsRepository;
+        this.boardMediaService = boardMediaService;
     }
 
     /*
@@ -37,21 +41,15 @@ public class boardMediaController {
     * ** Therefore, there is no need to doublecheck mediApiId or user_id. 
     */
     @PostMapping("/{board_id}/media")
-    public ResponseEntity<?> addMediaToBoard( @PathVariable Long board_id, @RequestBody BoardMedia boardMedia,
-                                            Authentication authentication){
+    public ResponseEntity<?> addMediaToBoard( @PathVariable Long board_id, 
+                                            @RequestBody Map<String, Long> body){
 
-        // Find the board by its id
-        Boards board = boardsRepository.findById(board_id)
-            .orElseThrow(() -> new RuntimeException("Cannot find your board. Please try again."));
+        // Get mediaApiId 
+        Long mediaApiId = body.get("mediaApiId");
 
-        if (boardMediaRepository.existsByBoardIdAndMediaApiId(board_id, boardMedia.getMediaApiId())){
-            return ResponseEntity.badRequest().body("You've already added this in the board.");
-        }
+        boardMediaService.addMediaToBoard(board_id, mediaApiId);
 
-        boardMedia.setBoard(board);
-        boardMediaRepository.save(boardMedia); 
-
-        return ResponseEntity.ok("Added Successfully!");
+        return ResponseEntity.ok().build();
     }
     
 }

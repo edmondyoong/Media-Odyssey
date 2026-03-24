@@ -1,6 +1,7 @@
 /* ===========================================
           Star Rating System Functions:
 =============================================*/
+
 const stars = document.querySelectorAll('.star');
 let currentRating = 0;
 
@@ -15,9 +16,7 @@ stars.forEach((star, index) => {
   });
 });
 
-document.getElementById('star-rating').addEventListener('mouseleave', () => {
-  highlightStars(currentRating);
-});
+
 
 function highlightStars(count) {
   stars.forEach((star, index) => {
@@ -28,6 +27,7 @@ function highlightStars(count) {
 function updateStars() {
   highlightStars(currentRating);
 }
+
 
 // Like Button Toggle
 /*
@@ -57,55 +57,58 @@ watchedBtn.addEventListener('click', () => {
                   ADD MOVIE INTO BOARD JS
                       DROP DOWN MENU
 ==========================================================*/
-// Dropdown Toggle
-const dropdownBtn = document.getElementById('dropdown-btn');
-const dropdownMenu = document.getElementById('dropdown-menu');
+document.addEventListener("DOMContentLoaded", function () {
 
-dropdownBtn.addEventListener('click', () => {
-  dropdownBtn.classList.toggle('open');
-  dropdownMenu.classList.toggle('show');
-});
+  const dropdownBtn = document.getElementById("dropdownBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+  const movieId = document.getElementById("movieApiId")?.value;
 
-// Close dropdown when clicking outside
-document.addEventListener('click', (e) => {
-  if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-    dropdownBtn.classList.remove('open');
-    dropdownMenu.classList.remove('show');
-  }
-});
+  if (!dropdownBtn || !dropdownMenu) return;
 
-// Handle adding media
-document.addEventListener("DOMContentLoaded", function(){
-  const movieId = document.getElementById("movieApiId").value;
+  // Toggle dropdown
+  dropdownBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    dropdownMenu.classList.toggle("show");
+  });
+
+  // Close when clicking outside
+  document.addEventListener("click", function (e) {
+    if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
+      dropdownMenu.classList.remove("show");
+    }
+  });
+
+  // Handle clicking board
   const dropdownItems = document.querySelectorAll(".dropdown-item");
 
-  dropdownItems.forEach(button => {
-    button.addEventListener("click", function() {
-      const boardId = this.dataset.board_id;
+  console.log("Boards found:", dropdownItems.length);
 
-      fetch(`api/boards/${boardId}/media?mediaApiId=${movieId}`, {
-        method : "POST", 
-        headers: {"Content-Type": "application/x-www-form-urlencoded"}
+  dropdownItems.forEach(button => {
+    button.addEventListener("click", function () {
+
+      const boardId = this.dataset.boardId;
+
+      if (!boardId || !movieId) return;
+
+      fetch(`/api/boards/${boardId}/media`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }, 
+        body: JSON.stringify({
+          mediaApiId: movieId
+        })
       })
       .then(response => {
-        if(response.ok()) {
-          alert("Movie is added"); 
-        } else { alert("Movie is already added in this board or error occured."); }
-      })
-      .catch (error => {
-        console.error("Error:", error );
-        aler ("Server error. Please log in again.");
+        if (response.ok) {
+          alert("Movie added to board!");
+        } else {
+          alert("Already exists or error occurred.");
+        }
       });
+
+      dropdownMenu.classList.remove("show");
     });
   });
-});
 
-// Dropdown item click handler
-document.querySelectorAll('.dropdown-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const text = item.textContent.trim();
-    alert(`Added to "${text}"!`);
-    dropdownBtn.classList.remove('open');
-    dropdownMenu.classList.remove('show');
-  });
 });

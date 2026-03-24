@@ -94,15 +94,15 @@
                             own created theme boards.
                             Note: They cannot add movies into other's theme boards. 
                             Future idea: Perhaps users can clone other users's theme boards? Or request the 
-                            theme board owner to add this movie in their theme board.
-                        <input type="hidden" id="movieApiId" th:value="${movie.id}" /> -->
+                            theme board owner to add this movie in their theme board. -->
+                        <input type="hidden" id="movieApiId" th:value="${movie.id}" />
                         <div class="theme-dropdown">
                             <button class="dropdown-btn" id="dropdownBtn">
                                 <span>Add to board</span>
                             </button>
 
                             <!-- Show user's created board(s) -->
-                            <div class="dropdown-menu">
+                            <div class="dropdown-menu" id="dropdownMenu">
                                 <button type="button" class="dropdown-item"
                                         th:each="board : ${boards}"
                                         th:text="${board.board_name}"
