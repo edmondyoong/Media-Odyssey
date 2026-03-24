@@ -210,6 +210,7 @@ function renderCards(items) {
         *
         *** Only movie is being worked on right now.
     */ 
+    items.sort(() => Math.random() - 0.5); // shuffle
     items.forEach(item => {
         const card = document.createElement("a");
         card.className = "rec-card";
