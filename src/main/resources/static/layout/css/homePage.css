@@ -1,180 +1,102 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    background-color: #1E1E1E;
-    color: white;
-}
-
-/* HEADER */ 
-header {
-    background-color: #26054B;
-
-    position: fixed; 
-    top: 0px; 
-    left: 0px;
-    right: 0px; 
-    height: 80px; 
-    z-index: 1000;
-
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    gap: 5px; 
-    padding: 0 20px;
-}
-
-.logo {
-    width: 90px;
-    height: 40px;
-    left: 15px;
-    top: 15px;
-
-    cursor: pointer;
-}
-
-.home-btn{
-    width: 90px;
-    height: 40px;
-}
-
-.home-btn:hover{
-    cursor: pointer;
-    cursor: pointer; 
-}
-
-.search-bar {
-    width: 500px;
-    height: 40px;
-    left: 250px;
-    top: 15px;
-
-    background: rgba(173, 163, 192, 0.5);
-    padding: 4px;
-    padding-left: 20px;
-    border-radius: 65px;
-    line-height: 20px;
-}
-
-.search-bar::placeholder{
-    font-family: 'Space Grotesk';
-    color: #999;
-} 
-
-.search-bar::placeholder{
-    font-family: 'Space Grotesk';
-    color: #999; 
-    font-style: normal;
-    font-weight: 700;
-    font-size: 18px;
-}
-
-.username-display {
-    font-family: 'Space Grotesk';
-    color: white;
-    font-style: bold;
-}
-
-.avatar-display{
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-
-    margin-left: auto;
-    border: white;
-    background-color: white;
-    cursor: pointer;
-}
-
-/* SIDE BAR*/ 
-
-.side-bar {
-    position: fixed;
-    top: 80px;
-    left: 0;
-
-    width: 220px;
-    height: 100vh;
-
-    background-color: #290f67;
-
-    transition: width 0.3s ease;
-}
-
-.side-bar.collapsed {
-    width: 0px;
-}
-
-.side-bar.side-bar.collapsed .menu-items {
-    display: none;
-}
-
-.side-bar a {
-    text-decoration: none;
-    font-family: 'Space Grostesk';
-    font-size: 30px;
-}
-
-.side-bar li a {
-    display: block;
-}
-
-.features-list {
-    list-style: none;
-    padding: 0; 
-    margin: 0;
-}
-
-.menu-items{
-    margin: 14px 20px;
-    padding: 6px 10px;
-    
-    color: white;
-    font-weight: 450;
-
-    transition: background 0.2s ease;
-}
-
-.menu-items:hover{
-    background-color: #341381;
+  font-family: 'Space Grotesk';
+  background-color: #0f0f1a;
+  color: #ffffff;
+  min-height: 100vh;
 }
 
 /* BODY ///////////////////////////////////////// */ 
+    /* MAIN CONTENT */
 .main-content {
-    padding-top: 95px;
-    padding-left: 25px;
+    padding: 2rem;
+    max-width: 100%;
+    overflow-x: hidden;
 
     font-family: 'Space Grotesk';
 }
 
-/* PERSONAL BOARDS DISPLAY */ 
+/* === PERSONAL BOARDS DISPLAY === */ 
+.personal-boards-container{
+    position: relative; 
+    margin-bottom: 3rem;
+}
+
 .personal-boards-title{
-    font-size: 30px;
-    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: #e0e0e0;
+    letter-spacing: 0.5px;
 
     margin: 13px;
 }
 
-.board {
-    width: 150px;
-    height: 150px;
-    border-radius: 12px;
+/* ==== Board (display like cards) Wrapper ===*/
+/* Additional note: boards-scroll-wrapper, boards-scroll-container
+will not appear in raw homePage.html. These elements are created
+when the js runs. Testing are required to see how it works.*/
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    font-size: 2rem;
-    background-color: #f8f8f8;
-    border: 1px solid #ccc;
-    text-decoration: none;
-    color: #333;
-    text-decoration: none; 
-    color: #333;     
-    transition: all 0.2s;
+.boards-scroll-wrapper{
+    position: relative; 
+    width: 100%;
 }
 
-.board:hover {
-    background-color: #e0e0e0;
-    border-color: #999;
+.boards-scroll-container{
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto; 
+    scroll-behavior: smooth;
+    padding: 0.75rem 0.25rem 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #4a4a6a #1a1a2e;
+}
+
+/* Custom Scrollbar Styling */
+.boards-scroll-container::-webkit-scrollbar{
+    height: 8px;
+}
+
+.boards-scroll-container::-webkit-scrollbar-track{
+    background: #1a1a2e;
+    border-radius: 10px;
+}
+
+.boards-scroll-container::-webkit-scrollbar-thumb:hover{
+    background: linear-gradient(90deg, #818cf8, #a78bfa);
+}
+
+/* === Board Card Styling === */
+/* ===== Create Board Button ===== */
+.create-board {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5a 100%);
+    
+    border: 2px dashed #4a4a6a;
+    border-radius: 16px;
+    font-size: 3rem;
+    color: #6366f1;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.create-board:hover {
+  background: linear-gradient(135deg, #2a2a5a 0%, #3d3d7a 100%);
+  border-color: #6366f1;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+  color: #818cf8;
 }
 
 .personal-boards-container{
@@ -187,28 +109,138 @@ header {
 .board-card{
     width: 150px;
     height: 150px;
-    border-radius: 12px;
+    background: linear-gradient(145deg, #1a1a2e 0%, #252545 100%);
 
+    border-radius: 16px;
+    padding: 1.25rem;
     display: flex;
-    justify-content: center;
-    align-items: center;
-
-    font-size: 2rem;
-    background-color: #f8f8f8;
-    border: 1px solid #ccc;
-    text-decoration: none; 
-    color: #333;     
-    transition: all 0.2s;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    border: 1px solid rgba(99, 102, 241, 0.1);
 }
 
-.board-card.board-card:hover {
-    background-color: #e0e0e0;
-    border-color: #999;
+.board-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.personal-boards-titles{
-    color: rgb(217, 0, 255);
-    font-family: 'Space Grotesk';
+.board-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.board-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.board-card:hover::before {
+  opacity: 1;
+}
+
+.board-card:hover::after {
+  opacity: 1;
+}
+
+/* Display information of the board displayed in homePage (title + type)*/
+.personal-boards-titles {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  z-index: 1;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.board-type-label {
+  font-size: 0.75rem;
+  color: #818cf8;
+  margin-top: 0.5rem;
+  z-index: 1;
+  text-transform: capitalize;
+  opacity: 0.8;
+}
+
+
+/* ===== Navigation Arrows ===== */
+.scroll-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.scroll-nav-btn:hover {
+  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+}
+
+.scroll-nav-btn.prev {
+  left: -10px;
+}
+
+.scroll-nav-btn.next {
+  right: -10px;
+}
+
+.boards-scroll-wrapper:hover .scroll-nav-btn.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-nav-btn.visible:hover {
+  opacity: 1;
+}
+
+/* Arrow icons */
+.scroll-nav-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ADMIN BUTTON */ 

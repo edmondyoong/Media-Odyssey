@@ -5,7 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Media Odyssey - Community Favourites</title>
-    <link rel="stylesheet" th:href="@{/layout/css/homePage.css}" />
+    <link rel="stylesheet" th:href="@{/layout/css/global.css}">
+    <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
 
     <style>
       /* Added for current iteration:
@@ -400,7 +401,8 @@
       */
     </script>
 
-    <!-- Sidebar toggle script -->
-    <script th:src="@{/layout/js/homePage.js}"></script>
-  </body>
+
+    <!-- This js script path: ensures sidebar + header logic -->
+    <script th:src="@{/layout/js/fragments.js}"></script>
+</body>
 </html>

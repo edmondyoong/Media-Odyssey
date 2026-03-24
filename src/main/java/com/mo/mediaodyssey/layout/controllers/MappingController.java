@@ -6,18 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class MappingController {
 
-    /* This Controller is to navigates elements like create board icon, home icon, 
+    /* This Controller is to navigates elements like create board icon, 
     elements in side bar, and elements view in singular board layout */
-
-    /* HEADER ELEMENTS */
-
-    /* homeReturn is used for a en element in header, specifically home icon. 
-    homeReturn will direct user back to the homePage no matter which pages they are on.
-    This ensures the convenience for the user. */
-    @GetMapping("/homeReturn")
-    public String homeReturn() {
-        return "boardsLayout/homePage";
-    }
 
     /* SIDE BAR ELEMENTS */
 

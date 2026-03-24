@@ -5,7 +5,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Media Odyssey - board creating</title>
-        <link rel="stylesheet" th:href="@{/layout/css/createBoard.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/global.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/boardPages.css}">
+
     </head>
     <body>
         <!--This html will show elments to create a board. 
@@ -36,14 +39,15 @@
 
                 </div>
 
+                <!-- Avatar function is currently not researched so I'll comment this out.
                 <div class="form-rightside">
                     <div class="avatar-input">
                         <p>Avatar</p>
                     </div>
-                </div>
+                </div> -->
             </form>
         </main>
         
-        <script th:src="@{/layout/js/homePage.js}"></script>
+        <script th:src="@{/layout/js/fragments.js}"></script>
     </body>
 </html>
