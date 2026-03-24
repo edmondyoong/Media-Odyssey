@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Odyssey - Sign Up</title>
+    <title>Media Odyssey - Re-send email verification</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="/auth/auth-styles.css">
@@ -26,28 +26,13 @@
                             id="email" name="email" autocomplete="email" required placeholder="example@email.com">
                     </div>
 
-                    <div class="mb-3">
-                        <input type="password" class="form-control form-control-lg bg-light text-dark border-secondary"
-                            id="password" name="password" autocomplete="new-password" required placeholder="Password">
-                    </div>
-
-                    <div class="mb-3">
-                        <input type="password" class="form-control form-control-lg bg-light text-dark border-secondary"
-                            id="confirmPassword" name="password" autocomplete="new-password" required
-                            placeholder="Confirm password">
-                    </div>
-
                     <div class="row g-2">
                         <div class="col-6 d-grid gap-2">
-                            <button type="submit" class="btn btn-lg fw-semibold text-white" id="button">Sign Up</button>
+                            <button type="submit" class="btn btn-lg fw-semibold text-white" id="button">Re-send</button>
                         </div>
                         <div class="col-6 d-grid gap-2">
                             <a href="/auth/login" class="btn btn-lg fw-semibold text-white" id="button">Already have an
                                 account? Log In</a>
-                        </div>
-                        <div class="col-6 d-grid gap-2"></div>
-                        <div class="col-6 d-grid gap-2">
-                            <a href="/auth/resend" class="text-white text-decoration-none">Resend verification</a>
                         </div>
                     </div>
                 </form>
@@ -100,20 +85,12 @@
                 try {
 
                     const email = document.getElementById("email").value.trim();
-                    const password = document.getElementById("password").value;
-                    const confirmPassword = document.getElementById("confirmPassword").value;
-
-                    if (password !== confirmPassword) {
-                        showStatusModal("Passwords do not match.");
-                        return;
-                    }
 
                     const payload = {
                         email: email,
-                        password: password
                     };
 
-                    const res = await fetch("/api/auth/register", {
+                    const res = await fetch("/api/auth/resend", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include",
@@ -123,10 +100,12 @@
                     const resText = await res.json();
 
                     // If successful, responds with "OK". Otherwise, attempts default behavior of redirecting (failed).
-                    if (resText.status === "AUTH_REGISTER_SUCCESS") {
+                    if (resText.status === "AUTH_RESEND_SUCCESS") {
                         // If successful signup, tell the User. Do not automatically redirect. User needs to be informed to check their email. User can choose to be redirected by closing pop up.
-                        showStatusModal("Account created successfully. Please check your email to verify your account.", "/auth/login");
-                    } else if (resText.status === "AUTH_INVALID_CREDENTIALS") {
+                        showStatusModal("Successfully re-sent email verification link. Please check your email to verify your account.", "/auth/login");
+                    } else if (resText.status === "AUTH_INVALID_CREDENTIALS" || "AUTH_USER_NOT_FOUND") {
+                        showStatusModal("The email and/or password provided is incorrect. Please try again.");
+                    } else if (resText.status === "AUTH_USER_ALREADY_VERIFIED") {
                         showStatusModal("The email is already registered. Please log in.");
                     } else if (resText.status === "AUTH_LOCKED") {
                         showStatusModal("Your account is locked. Please contact support.");

@@ -64,6 +64,11 @@ public class PageController {
         return "redirect:/api/auth/logout";
     }
 
+    @GetMapping("/auth/resend")
+    public String resendPage() {
+        return "forward:/auth/resend/index.html";
+    }
+
     /**
      * Display a list of all Users
      * 
