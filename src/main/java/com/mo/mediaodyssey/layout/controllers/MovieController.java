@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @Controller
@@ -55,13 +57,27 @@ public class MovieController {
             model.addAttribute("boards", boards);
 
             return "boardsLayout/mediaDisplay/movieDisplay"; 
-            
+
         } catch (Exception e){
             redirectAttributes.addFlashAttribute("errorMessage", 
                 "Unable to load this movie. Please try again later.");
             return "redirect:/";
         }
     }
+
+    @GetMapping("/game/{id}")
+    public String navToGame(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Coming soon :)");
+        return "redirect:/";
+    }
+
+    @GetMapping("/music/{id}")
+    public String navToMusic(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Coming soon :)");
+        return "redirect:/";
+    }
+    
+    
     
     
 }
