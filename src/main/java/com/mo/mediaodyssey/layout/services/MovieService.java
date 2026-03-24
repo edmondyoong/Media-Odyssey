@@ -1,5 +1,8 @@
 package com.mo.mediaodyssey.layout.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +33,21 @@ public class MovieService {
                     + "?api_key=" + tmdbKey; 
 
         return restTemplate.getForObject(url, MovieResponse.class);
+    }
+
+    /* This function will assist in getting a list of movies instead of just one.*/
+    public List<MovieResponse> getMoviesByIds (List<Long> mediaApiIds) {
+
+        List<MovieResponse> movies = new ArrayList<>(); 
+
+        for (Long id: mediaApiIds) {
+            MovieResponse movie = getMovieById(id); 
+            if(movie != null) {
+                movies.add(movie);
+            }
+        }
+
+        return movies;
     }
     
 }
