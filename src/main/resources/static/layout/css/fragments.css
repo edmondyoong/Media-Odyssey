@@ -1,0 +1,421 @@
+/* =============================================
+   HEADER STYLES
+   ============================================= */
+
+/* Header Container */
+header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #1a1625 0%, #2d2640 100%);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 80px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Logo - Controls Sidebar */
+.logo {
+    width: 62px;
+    height: 62px;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: brightness(0.9);
+}
+
+.logo:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2) drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+}
+
+.logo:active {
+    transform: scale(0.95);
+}
+
+/* Logo rotation when sidebar is open 
+.logo.rotated {
+    transform: rotate(180deg);
+}
+
+.logo.rotated:hover {
+    transform: rotate(180deg) scale(1.1);
+}
+*/
+
+/* Home Button */
+.home-btn {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    filter: brightness(0.85);
+}
+
+.home-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.2) drop-shadow(0 4px 12px rgba(139, 92, 246, 0.5));
+}
+
+.home-btn:active {
+    transform: translateY(0);
+}
+
+/* Search Bar Container */
+.search-bar-container {
+    flex: 1;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Search Bar Input */
+.search-bar {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    padding-left: 2.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 25px;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.search-bar::placeholder {
+    color: rgba(203, 213, 225, 0.5);
+    font-style: italic;
+}
+
+.search-bar:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15),
+                0 4px 20px rgba(139, 92, 246, 0.2);
+}
+
+/* Search icon pseudo-element wrapper */
+.search-bar-container {
+    position: relative;
+}
+
+.search-bar-container::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b5cf6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    header {
+        padding: 0.5rem 1rem;
+        gap: 1rem;
+    }
+
+    .logo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .home-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    header > div {
+        max-width: none;
+    }
+
+    .search-bar {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.875rem;
+        padding-left: 2.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        gap: 0.75rem;
+    }
+
+    .search-bar::placeholder {
+        font-size: 0.8rem;
+    }
+}
+
+/* =============================================
+   SIDEBAR STYLES
+   Dark purple/indigo theme for Media Odyssey
+   Collapsible sidebar with smooth animations
+   ============================================= */
+
+/* Sidebar Container */
+.side-bar {
+    position: fixed;
+    top: 60px; /* Below header */
+    left: 0;
+    height: calc(100vh - 60px);
+    width: 240px;
+    background: linear-gradient(180deg, #1a1625 0%, #0f0d15 100%);
+    border-right: 1px solid rgba(139, 92, 246, 0.2);
+    z-index: 900;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Collapsed State */
+.side-bar.collapsed {
+    width: 0;
+    border-right-color: transparent;
+}
+
+/* Sidebar Content Wrapper */
+.sidebar-content {
+    padding: 1.5rem 0;
+    opacity: 1;
+    transition: opacity 0.2s ease 0.1s;
+    min-width: 240px;
+}
+
+.side-bar.collapsed .sidebar-content {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+/* Features List */
+.features-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* List Items */
+.features-list li {
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+/* Menu Item Links */
+.menu-items {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    color: rgba(226, 232, 240, 0.8);
+
+    font-family: 'Space Grotesk';
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover highlight bar */
+.menu-items::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #8b5cf6 0%, #a78bfa 100%);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+/* Hover background glow */
+.menu-items::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-items:hover {
+    color: #ffffff;
+    padding-left: 1.75rem;
+}
+
+.menu-items:hover::before {
+    transform: scaleY(1);
+}
+
+.menu-items:hover::after {
+    opacity: 1;
+}
+
+/* Active State */
+.features-list li.active .menu-items {
+    color: #ffffff;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.features-list li.active .menu-items::before {
+    transform: scaleY(1);
+    background: linear-gradient(180deg, #a78bfa 0%, #c4b5fd 100%);
+}
+
+/* Icons for menu items (using data attributes) */
+.features-list li[data-feature="dashboard"] .menu-items::after {
+    /* Dashboard icon placeholder - can be replaced with actual icon */
+}
+
+.features-list li[data-feature="socialFeature"] .menu-items::after {
+    /* Community icon placeholder */
+}
+
+.features-list li[data-feature="trending"] .menu-items::after {
+    /* Trending icon placeholder */
+}
+
+/* Decorative elements */
+.side-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(139, 92, 246, 0.3) 20%,
+        rgba(139, 92, 246, 0.3) 80%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+/* Sidebar section divider (if needed) */
+.sidebar-divider {
+    height: 1px;
+    margin: 1rem 1.5rem;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(139, 92, 246, 0.3) 50%,
+        transparent 100%
+    );
+}
+
+/* Main content adjustment when sidebar is visible */
+.main-content {
+    margin-left: 240px;
+    margin-top: 60px;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: calc(100vh - 60px);
+}
+
+.side-bar.collapsed ~ .main-content,
+.main-content.sidebar-collapsed {
+    margin-left: 0;
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    top: 60px;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 850;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .side-bar {
+        width: 200px;
+    }
+
+    .sidebar-content {
+        min-width: 200px;
+    }
+
+    .main-content {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .side-bar {
+        width: 240px;
+        transform: translateX(-100%);
+    }
+
+    .side-bar:not(.collapsed) {
+        transform: translateX(0);
+    }
+
+    .side-bar.collapsed {
+        width: 240px;
+        transform: translateX(-100%);
+    }
+
+    .sidebar-content {
+        min-width: 240px;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar-overlay {
+        display: block;
+    }
+}
+
+/* Scrollbar for sidebar if content overflows */
+.sidebar-content {
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 2px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+}

@@ -5,7 +5,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Board's name</title>
-        <link rel="stylesheet" th:href="@{/layout/css}">
+        <link rel="stylesheet" th:href="@{/layout/css/global.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/boardPages.css}">
+
     </head>
     <body>
         <!-- This html will show when a user click on any board. Potential, this board will display 
@@ -21,14 +24,63 @@
         <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
 
         <!-- main content starts here -->
-        <main>
-            <div id="banner" class="banner"></div>
+        <main class="board-container">
 
-            <div id="objectAvt" class="object-avt"></div>
+            <!-- Top section: Board's avatar + Basic Info -->
+            <div class="board-header">
 
-            <div></div>
+                <!-- Avatar may be commented out for now
+                <div class="board-avatar">
+                    <img src="" alt="avt">
+                </div> --> 
+
+                <div class="board-Info">
+                    <!-- BOARD TITLE -->
+                    <h1 class="board-title" th:text="${board.board_name}"></h1>
+
+                    <!-- BOARD'S DESCRIPTION: description is optional so this space may or may not be blank
+                    Unsure how much it would visually effect the layout in general. Doesn't look that bad for now.-->
+                    <div class="board-desciption">
+                        <span th:text="${board.board_description}"></span>
+                    </div>
+
+                    <!-- BOARD'S META: Show whether the board is public or private.-->
+                    <div class="board-meta">
+                        <span class="board-type-badge" th:text="${board.board_type}"></span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Middle Section: Community's Post + Media display -->
+            <div class="board-middle">
+                <!-- Let user choose to either see the posts or the media in this board-->
+                <div class="middle-select">
+                    <button class="board-post active" id="postsBtn">POST</button>
+                    <button class="board-media active" id="mediaBtn">MEDIA</button>
+                </div>
+
+                <!-- This section will be reserved for Post (Prab) -->
+                <div class="board-POST-container" id="postsContainer"></div>
+
+                <!-- MEDIA: this section is to display the media, which is whatever user has put in the board. 
+                Aim for now: show movies -->
+                <div class="board-MEDIA-container" id="mediaContainer" style="display: none;">
+
+                    <!-- === Movie cards display ==== -->
+                    <div class="movie-card-display">
+                        <h1> movie </h1>
+
+                        <div class="movie-card" th:each="movie : ${movies}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Section: in thoughts progress...-->
         </main>
 
-        <script th:src="@{/layout/js/homePage.js}"></script>
+        <script th:src="@{/layout/js/fragments.js}"></script>
+        <script th:src="@{/layout/js/boardPages.js}"></script>
+
     </body>
 </html>

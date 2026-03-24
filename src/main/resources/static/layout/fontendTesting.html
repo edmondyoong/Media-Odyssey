@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+        <meta charset="UTF-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Media Odyssey-Home</title>
+        <link rel="stylesheet" href="css/homePage.css">
+        <link rel="stylesheet" href="css/fragments.css">
+    </head>
+    <body>
+        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <header th:fragment="header">
+            <!--LOGO that control the side bar (fold and unfold)-->
+            <img src="images/closeLogo.svg" alt="Logo" class="logo" id="logo">
+
+            <!--Home Button (returns to the landing page)-->
+            <a href="/homeReturn">
+                <img src="images/House.svg" alt="homeBtn" class="home-btn">
+            </a>
+
+            <!-- Search bar -->
+            <div class="search-bar-container">
+                <input type="text" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
+            </div>
+
+            <!-- Avatar -->
+            <div class="user">
+                <p class="username-display">username</p>
+                <a href="/api/auth/logout"><img src="images/Avatar.png" alt="Avatar" class="avatar-display"></a>
+            </div>
+        </header>
+
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded
+        Please use the MO logo to work with side bar if needed -->
+        <aside class="side-bar collapsed" id="sideBar">
+            <div class="sidebar-content">
+                <ul class="features-list">
+
+                    <!-- Navigates over to dashboard.html (name can be changed) -->
+                    <li data-feature="dashboard">
+                        <a href="/dashboardTab" class="menu-items">Dashboard</a>
+                    </li>
+
+                    <!-- Navigates over to social.html (name can be changed)-->
+                    <li data-feature="socialFeature">
+                            <a href="/socialTab" class="menu-items">Community</a>
+                    </li>
+
+                    <!-- Navigates over to trending.html (name can be changed)-->
+                    <li data-feature="trending">
+                            <a href="/trendingTab" class="menu-items">Trending</a>
+                    </li>
+
+                </ul>
+            </div>
+        </aside>
+        
+        <!-- User side (to be implemented)-->
+
+        <!-- This div contains the display of boards user have joined and recommendations boards -->
+        <div id="mainContent" class="main-content">
+
+            <!--Leave for display trending music, song, movies-->
+            <div></div>
+
+            <!-- Display the boards users have created + joined -->
+            <div id="personalBoardsContainer" class="personal-boards-container">
+
+                <h3 id="personalBoardTitle" class="personal-boards-title">
+                Journeys you've joined:
+                </h3>
+
+                <!-- Create board element-->
+                <div>
+                    <a class="board create-board">+</a>
+                </div>
+
+                <!-- Already joined boards will be shown here (for now, only creaeted boards) -->
+                <div class="board-card">
+                    <h3 class="personal-boards-titles"></h3>
+                </div>
+
+            </div>
+
+            <script src="js/homePage.js"></script>
+            <script src="js/fragments.js"></script>
+    </body>
+</html>

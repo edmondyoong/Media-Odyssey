@@ -3,12 +3,13 @@
     <img th:src="@{/layout/images/closeLogo.svg}" alt="Logo" class="logo" id="logo">
 
     <!--Home Button (returns to the landing page)-->
-    <a href="/homeReturn">
-        <img th:src="@{/layout/images/House.svg}" alt="homeBtn" class="home-btn">
+    <!-- Icons taken from free figma packs: https://www.figma.com/community/file/1319540334775439319/free-icon-set-by-iconstica-library-->
+    <a href="/">
+        <img th:src="@{/layout/images/Home.svg}" alt="homeBtn" class="home-btn">
     </a>
 
     <!-- Search bar -->
-    <div>
+    <div class="search-bar-container">
         <input type="text" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
     </div>
 

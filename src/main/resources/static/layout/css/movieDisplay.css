@@ -1,0 +1,437 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: #fff;
+}
+
+.movie-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 30px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Top Section: Poster + Info */
+.movie-header {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 25px;
+}
+
+/* Poster Card */
+.poster-card {
+  flex-shrink: 0;
+  width: 200px;
+  height: 300px;
+  margin-top: 15px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.poster-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Movie Info (Right of Poster) */
+.movie-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 10px;
+}
+
+.movie-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 15px;
+  line-height: 1.2;
+}
+
+/* Genre Tags */
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.genre-tag {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 6px 16px;
+  margin: 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Release & Duration */
+.meta-info {
+  display: flex;
+  gap: 25px;
+  color: #b0b0b0;
+  font-size: 0.95rem;
+}
+
+.release-date-title{
+    display: flex; 
+    align-items: center;
+    margin: 14px;   
+    font-weight: 500;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-item svg {
+  width: 18px;
+  height: 18px;
+  fill: #888;
+}
+
+/* Middle Section: Overview + Actions */
+.movie-middle {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+/* Overview Box */
+.movie-overview {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 620px;
+}
+
+.movie-overview  h3 {
+  font-size: 1.1rem;
+  color: #fff;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.movie-overview  p {
+  color: #c0c0c0;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+/* Actions Panel (Right of Overview) */
+.actions-panel {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Star Rating */
+.rating-section {
+  text-align: center;
+}
+
+.rating-section label {
+  font-size: 0.85rem;
+  color: #888;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.star {
+  cursor: pointer;
+  font-size: 1.6rem;
+  color: #444;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.star:hover,
+.star.active {
+  color: #ffc107;
+  transform: scale(1.1);
+}
+
+.stars:hover .star {
+  color: #ffc107;
+}
+
+.stars .star:hover ~ .star {
+  color: #444;
+}
+
+/* Action Icons */
+.action-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.action-icon-haveWatched h4 {
+  font-size: 15px;
+  font-weight: 500;
+
+  align-items: center;
+}
+
+.action-icon-haveWatched {
+  width: 100px;
+  height: 50px;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.action-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.action-icon.active {
+  background: rgba(231, 76, 60, 0.2);
+  border-color: #e74c3c;
+}
+
+.action-icon.watched-active {
+  background: rgba(46, 204, 113, 0.2);
+  border-color: #2ecc71;
+}
+
+.action-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
+}
+
+.action-icon img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* Theme Board Dropdown */
+.theme-dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.dropdown-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dropdown-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: #fff;
+  transition: transform 0.3s;
+}
+
+.dropdown-btn.open svg {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #2a2a4a;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item svg {
+  width: 16px;
+  height: 16px;
+  fill: #888;
+}
+
+/* Bottom Section: Streaming Platforms */
+.streaming-section {
+  margin-top: 10px;
+}
+
+.streaming-section h3 {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.platform-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.platform-icon:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.platform-icon img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.platform-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* Platform specific colors on hover */
+.platform-icon.amazon:hover {
+  border-color: #00a8e1;
+  background: rgba(0, 168, 225, 0.15);
+}
+
+.platform-icon.disney:hover {
+  border-color: #113ccf;
+  background: rgba(17, 60, 207, 0.15);
+}
+
+.platform-icon.youtube:hover {
+  border-color: #ff0000;
+  background: rgba(255, 0, 0, 0.15);
+}
+
+.platform-icon.apple:hover {
+  border-color: #a2aaad;
+  background: rgba(162, 170, 173, 0.15);
+}
+
+.platform-icon.netflix:hover {
+  border-color: #e50914;
+  background: rgba(229, 9, 20, 0.15);
+}
+
+.platform-icon.hbo:hover {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .movie-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .genres {
+    justify-content: center;
+  }
+
+  .meta-info {
+    justify-content: center;
+  }
+
+  .movie-middle {
+    flex-direction: column;
+  }
+
+  .overview-box {
+    max-width: 100%;
+  }
+
+  .actions-panel {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .rating-section,
+  .action-icons,
+  .theme-dropdown {
+    flex: 1;
+    min-width: 150px;
+  }
+}

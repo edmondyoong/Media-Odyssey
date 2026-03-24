@@ -1,19 +1,164 @@
-/* Functions to fold and unfold side bar + the logo changes everytime actions are made */
-const logoToggle = document.getElementById("logo");
-const sideBar = document.getElementById("sideBar"); 
+/**
+ * Board Cards Horizontal Scroll with Navigation
+ * Initializes scroll containers with navigation arrows that appear on hover
+ */
 
-const openLogo = "/images/openLogo.svg";
-const closeLogo = "/images/closeLogo.svg"; 
+document.addEventListener('DOMContentLoaded', function() {
+  initBoardsScroll();
+});
 
-logoToggle.addEventListener("click", ()=>{
-    sideBar.classList.toggle("collapsed");
+function initBoardsScroll() {
+  const container = document.getElementById('personalBoardsContainer');
+  if (!container) return;
 
-    if(sideBar.classList.contains("collapsed")) {
-        logoToggle.src = closeLogo;
+  // Get all board elements (create button + board cards)
+  const createBoard = container.querySelector('.create-board');
+  const boardCards = container.querySelectorAll('.board-card');
+  const title = container.querySelector('.personal-boards-title');
+
+  // Remove existing board elements from container (keep title)
+  if (createBoard) createBoard.remove();
+  boardCards.forEach(card => card.remove());
+
+  // Create the scroll wrapper structure
+  const scrollWrapper = document.createElement('div');
+  scrollWrapper.className = 'boards-scroll-wrapper';
+
+  const scrollContainer = document.createElement('div');
+  scrollContainer.className = 'boards-scroll-container';
+
+  // Create navigation buttons
+  const prevBtn = document.createElement('button');
+  prevBtn.className = 'scroll-nav-btn prev';
+  prevBtn.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  `;
+  prevBtn.setAttribute('aria-label', 'Scroll left');
+
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'scroll-nav-btn next';
+  nextBtn.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  `;
+  nextBtn.setAttribute('aria-label', 'Scroll right');
+
+  // Add create board button first
+  if (createBoard) {
+    scrollContainer.appendChild(createBoard);
+  }
+
+  // Add all board cards
+  boardCards.forEach(card => {
+    scrollContainer.appendChild(card);
+  });
+
+  // Assemble the wrapper
+  scrollWrapper.appendChild(prevBtn);
+  scrollWrapper.appendChild(scrollContainer);
+  scrollWrapper.appendChild(nextBtn);
+
+  // Insert after title
+  if (title) {
+    title.after(scrollWrapper);
+  } else {
+    container.appendChild(scrollWrapper);
+  }
+
+  // Scroll amount per click (card width + gap)
+  const scrollAmount = 240;
+
+  // Navigation click handlers
+  prevBtn.addEventListener('click', () => {
+    scrollContainer.scrollBy({
+      left: -scrollAmount,
+      behavior: 'smooth'
+    });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    scrollContainer.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+  });
+
+  // Update button visibility based on scroll position
+  function updateNavButtons() {
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+    const maxScroll = scrollWidth - clientWidth;
+
+    // Show/hide prev button
+    if (scrollLeft > 10) {
+      prevBtn.classList.add('visible');
     } else {
-        logoToggle.src = openLogo; 
+      prevBtn.classList.remove('visible');
     }
-}); 
+
+    // Show/hide next button
+    if (scrollLeft < maxScroll - 10) {
+      nextBtn.classList.add('visible');
+    } else {
+      nextBtn.classList.remove('visible');
+    }
+  }
+
+  // Initial check
+  updateNavButtons();
+
+  // Update on scroll
+  scrollContainer.addEventListener('scroll', updateNavButtons);
+
+  // Update on window resize
+  window.addEventListener('resize', updateNavButtons);
+
+  // Add keyboard navigation support
+  scrollContainer.setAttribute('tabindex', '0');
+  scrollContainer.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else if (e.key === 'ArrowRight') {
+      scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  });
+
+  // Touch/drag scroll support for mobile
+  let isDown = false;
+  let startX;
+  let scrollLeftStart;
+
+  scrollContainer.addEventListener('mousedown', (e) => {
+    // Only enable drag if clicking on empty space
+    if (e.target === scrollContainer) {
+      isDown = true;
+      scrollContainer.style.cursor = 'grabbing';
+      startX = e.pageX - scrollContainer.offsetLeft;
+      scrollLeftStart = scrollContainer.scrollLeft;
+    }
+  });
+
+  scrollContainer.addEventListener('mouseleave', () => {
+    isDown = false;
+    scrollContainer.style.cursor = 'grab';
+  });
+
+  scrollContainer.addEventListener('mouseup', () => {
+    isDown = false;
+    scrollContainer.style.cursor = 'grab';
+  });
+
+  scrollContainer.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainer.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollContainer.scrollLeft = scrollLeftStart - walk;
+  });
+}
+
 /* =========================================================
    RECOMMENDATIONS
    ========================================================= */
@@ -25,7 +170,7 @@ async function loadRecommendations(mediaType) {
     const statusEl = document.getElementById("recStatus");
     const cardsEl  = document.getElementById("recCards");
 
-    statusEl.textContent = "Loading…";
+    statusEl.textContent = "Loading… wait time is 30 seconds max. Thank you for your patience!";
     cardsEl.innerHTML    = "";
 
     try {
@@ -57,8 +202,17 @@ async function loadRecommendations(mediaType) {
 function renderCards(items) {
     const cardsEl = document.getElementById("recCards");
 
+    /*
+        *** This <div> HTML will be modified so user can click on them and be brought to HTML that displays
+        **  details information of the meta they clicked on. 
+        ** Logic: Media display Controller will have the path /mediaView/mediaType/mediaId
+        *  This ensures the type of media being cliked on and its id. (nice =])
+        *
+        *** Only movie is being worked on right now.
+    */ 
+    items.sort(() => Math.random() - 0.5); // shuffle
     items.forEach(item => {
-        const card = document.createElement("div");
+        const card = document.createElement("a");
         card.className = "rec-card";
         card.dataset.mediaApiId = item.mediaApiId;
         card.dataset.mediaType  = item.mediaType;
@@ -68,11 +222,19 @@ function renderCards(items) {
             ? `<img class="rec-img" src="${item.imageUrl}" alt="${item.title}" onerror="this.style.display='none'">`
             : `<div class="rec-img rec-img-placeholder">No Image</div>`;
 
+        // route the link according to the media
+        const mediaType = item.mediaType.toLowerCase(); 
+        card.href= `/mediaView/${mediaType}/${item.mediaApiId}`;
+
         card.innerHTML = `
             ${img}
             <div class="rec-info">
                 <p class="rec-title">${item.title}</p>
                 <p class="rec-meta">${item.genre} · ${item.mediaType === 'SONG' ? item.artist : 'score: ' + item.score.toFixed(1)}</p>
+            </div>
+            <div class="rec-actions">
+                <button class="rec-btn view-btn"  onclick="recordInteraction(this, 'VIEW')">👁 View</button>
+                <button class="rec-btn like-btn"  onclick="recordInteraction(this, 'LIKE')">♡ Like</button>
             </div>
         `;
 
@@ -81,10 +243,7 @@ function renderCards(items) {
 }
 
 // re add buttons when we have interactions working
-//<div class="rec-actions">
-//                   <button class="rec-btn view-btn"  onclick="recordInteraction(this, 'VIEW')">👁 View</button>
-  //                  <button class="rec-btn like-btn"  onclick="recordInteraction(this, 'LIKE')">♡ Like</button>
-   //             </div>
+
 
 
 

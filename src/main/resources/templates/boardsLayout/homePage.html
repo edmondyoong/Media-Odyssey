@@ -8,6 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Media Odyssey-Home</title>
         <link rel="stylesheet" th:href="@{/layout/css/homePage.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
     </head>
     <body>
         <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
@@ -25,10 +26,12 @@
             <!--Leave for display trending music, song, movies-->
             <div></div>
 
-            <h3 id="personalBoardTitle" class="personal-boards-title">
-                Journeys you've joined:
-            </h3>
+            <!-- Display the boards users have created + joined -->
             <div id="personalBoardsContainer" class="personal-boards-container">
+
+                <h3 id="personalBoardTitle" class="personal-boards-title">
+                Journeys you've joined:
+                </h3>
 
                 <!-- Create board element-->
                 <div>
@@ -36,9 +39,10 @@
                 </div>
 
                 <!-- Already joined boards will be shown here (for now, only creaeted boards) -->
-                <div th:each="board : ${boards}" class="board-card">
+                <a th:href="@{boards/display/{id}(id=${board.id})}" th:each="board : ${boards}" class="board-card">
                     <h3 th:text="${board.board_name}" class="personal-boards-titles"></h3>
-                </div>
+                    <p th:text="${board.board_type}" class="board-type-label"></p>
+                </a>
 
             </div>
 
@@ -53,6 +57,12 @@
                     <button class="rec-tab" data-type="SONG">🎵 Songs</button>
                 </div>
 
+                <div th:if="${errorMessage}">
+                    <script th:inline="javascript">
+                        alert([[${errorMessage}]]);
+                    </script>
+                </div>
+
                 <!-- Status message (loading / no data yet) -->
                 <p id="recStatus" class="rec-status"></p>
 
@@ -62,7 +72,6 @@
         </div>
 
         <!-- ADMINS ALLOWANCE TO VIEW USERS DATABASE -->
-
         <div sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/users}" class="admin-btn">
                 View Users Database
@@ -70,5 +79,6 @@
         </div> 
 
         <script th:src="@{/layout/js/homePage.js}"></script>
+        <script th:src="@{/layout/js/fragments.js}"></script>
     </body>
 </html>
