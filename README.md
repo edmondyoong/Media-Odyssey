@@ -43,9 +43,7 @@ The user demands recommendations for content based on their personality to explo
 
 ### Community Favourites Discovery Page
 
-The Community Favourites Discovery Page displays the Top 10 games, movies, and songs using the same ranking method for all media types. Items are sorted based on a combination of likes and views, and each entry shows a thumbnail, title, and engagement summary such as “1.2K likes” and “5K views,” along with an overall rating out of 5. When a logged-in user submits a rating, it is added to the total score in real time. Users can switch between Games, Movies, and Songs through JavaScript-powered tabs without reloading the page, and a real-time search bar filters the Top 10 lists as the user types. The page also includes a Trending section that highlights the Top 5 fastest-rising items using recent growth compared to last week’s data, with badges like “Up 20% in 24h” to help users quickly spot what is gaining popularity.
-
-Media information for games, movies, and songs will be fetched using the same API methods as in the recommendation system.
+The Community Favourites Discovery Page displays the Top 10 games, movies, and songs using a consistent ranking method across all media types. Items are ranked based on user interaction data, specifically views and likes, to provide a fair and simple measure of popularity. Each entry displays a thumbnail, title, category, and a derived star-based rating out of 5 that represents overall popularity. Instead of allowing users to submit ratings directly, the system converts interaction signals into a visual rating display for a cleaner and more consistent user experience. Users can browse different categories and use the search bar to quickly find relevant media. Category filtering is handled through server-side requests, while search filtering is updated in real time on the client side. There'll be a Trending section for fast-rising content based on recent growth patterns. Media information for games, movies, and songs is fetched using the same API sources as the recommendation system.
 
 ### Board layouts
 
