@@ -71,6 +71,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<version>LATEST</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -96,11 +97,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-session-jdbc</artifactId>
-			<scope>test</scope>
-		</dependency>
-    <dependency>
-			<groupId>org.springframework.security</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
