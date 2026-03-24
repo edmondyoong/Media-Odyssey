@@ -40,7 +40,7 @@ public class AuthAdminController {
      * enabled, access is unrestricted.
      * 
      * Email address and password is randomly assigned. $EMAIL_FROM is combined with
-     * the randomly generated UUID. Password uses the same UUID.
+     * the randomly generated UUID. Password uses a different UUID.
      * 
      * @return "OK", Email, and Password in body upon success
      */
@@ -49,9 +49,8 @@ public class AuthAdminController {
     public ResponseEntity<AuthAdminApiResponse> createAdminUser() {
         if (allowAdminUserCreation.toLowerCase().equals("TRUE".toLowerCase())) {
 
-            String id = UUID.randomUUID().toString();
-            String email = id + "-" + adminEmail;
-            String password = id;
+            String email = UUID.randomUUID().toString() + "-" + adminEmail;
+            String password = UUID.randomUUID().toString();
 
             UserDto dto = new UserDto(email, password);
             authAdminService.createAdminUser(dto);
