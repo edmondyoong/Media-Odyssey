@@ -55,6 +55,7 @@ public class MovieController {
             model.addAttribute("boards", boards);
 
             return "boardsLayout/mediaDisplay/movieDisplay"; 
+            
         } catch (Exception e){
             redirectAttributes.addFlashAttribute("errorMessage", 
                 "Unable to load this movie. Please try again later.");

@@ -20,6 +20,7 @@ import com.mo.mediaodyssey.layout.services.BoardsService;
 import com.mo.mediaodyssey.layout.services.MovieService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -97,21 +98,14 @@ public class BoardsController {
     * ** Error Message: This function is actived when user clicked on a board that is already existed.
     * ** If backend cannot find a board by Id when user is able to click on it. Something is wrong with application.
     */
-   @GetMapping("/{boardId}")
-   public String viewMovieMedia(@PathVariable Long boardId, Model model) {
-        Boards board = boardsService.findBoardById(boardId)
-            .orElseThrow(() -> new RuntimeException("Server error. Please try again."));
-
-        List<BoardMedia> boardMediaList = boardMediaRepository.findByBoardId(boardId); 
-
+   @GetMapping("/display/{boardId}/movies")
+   @ResponseBody
+   public List<MovieResponse> getBoardMovies (@PathVariable Long boardId) {
+        
+        List<BoardMedia> boardMediaList = boardMediaRepository.findByBoardId(boardId);
         List<Long> mediaApiIds = boardMediaList.stream().map(BoardMedia::getMediaApiId).toList();
 
-        List<MovieResponse> movies = movieService.getMoviesByIds(mediaApiIds); 
-
-        model.addAttribute("board", board);
-        model.addAttribute("movies", movies); 
-
-        return "boardsLayout/themeBoard/boardDisplay";
+        return movieService.getMoviesByIds(mediaApiIds);
    }
    
     

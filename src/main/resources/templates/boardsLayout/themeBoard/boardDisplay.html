@@ -66,7 +66,13 @@
                 <!-- MEDIA: this section is to display the media, which is whatever user has put in the board. 
                 Aim for now: show movies -->
                 <div class="board-MEDIA-container" id="mediaContainer" style="display: none;">
-                    <div class="movie-card-display"></div>
+
+                    <!-- === Movie cards display ==== -->
+                    <div class="movie-card-display">
+                        <h1> movie </h1>
+
+                        <div class="movie-card" th:each="movie : ${movies}"></div>
+                    </div>
                 </div>
             </div>
 
@@ -75,5 +81,6 @@
 
         <script th:src="@{/layout/js/fragments.js}"></script>
         <script th:src="@{/layout/js/boardPages.js}"></script>
+
     </body>
 </html>
