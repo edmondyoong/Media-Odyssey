@@ -5,7 +5,8 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -15,6 +16,8 @@ import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.auth.repository.VerificationTokenRepository;
 import com.mo.mediaodyssey.auth.dto.ResendVerifyTokenDto;
 import com.mo.mediaodyssey.auth.dto.VerifyTokenDto;
+import com.mo.mediaodyssey.auth.exception.InvalidVerificationTokenException;
+import com.mo.mediaodyssey.auth.exception.UserAlreadyVerifiedException;
 import com.mo.mediaodyssey.auth.model.User;
 
 @Service
@@ -47,9 +50,6 @@ public class VerificationService {
         String token = UUID.randomUUID().toString();
         VerificationToken vt = new VerificationToken(token, user, tokenExpiryInMinutes);
 
-        // Save verification token
-        verificationTokenRepository.save(vt);
-
         // Build verification token email
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .build()
@@ -60,32 +60,51 @@ public class VerificationService {
 
         // Send verification token email
         emailService.sendEmail(to, subject, message);
+
+        // Save verification token
+        verificationTokenRepository.save(vt);
     }
 
     @Transactional
-    public Boolean verifyUser(VerifyTokenDto dto) {
-        String token = dto.token();
-        return verificationTokenRepository.findByToken(token)
-                .filter(item -> item.getExpiryDate().after(new Date()))
-                .map(item -> {
-                    User user = item.getUser();
-                    user.setEnabled(true);
-                    userRepository.save(user);
-                    verificationTokenRepository.delete(item);
-                    return true;
-                }).orElse(false);
+    public void verifyUser(VerifyTokenDto dto) {
+        try {
+            // Find the User if the token is valid and not expired.
+            String token = dto.token();
+            VerificationToken tokenEntity = verificationTokenRepository.findByToken(token)
+                    .filter(item -> item.getExpiryDate().after(new Date())).orElseThrow();
+            User user = tokenEntity.getUser();
+
+            // Enable the user and save this change.
+            user.setEnabled(true);
+            userRepository.save(user);
+
+            // Delete the verification token because it is no longer needed.
+            user.setVerificationToken(null);
+            verificationTokenRepository.delete(tokenEntity);
+        } catch (NoSuchElementException e) {
+            throw new InvalidVerificationTokenException("Verification token is invalid. Please try again.");
+        }
     }
 
     @Transactional
     public void resendVerification(ResendVerifyTokenDto dto) {
         try {
             User user = userRepository.findByEmail(dto.email()).orElseThrow();
-            if (user.isEnabled()) { // If User is already email verified.
-                throw new BadCredentialsException("User is already verified.");
+            if (user.isAccountNonLocked() == false) {
+                throw new LockedException("User is locked. Cannot verify locked user. Contact support.");
+            } else if (user.isEnabled()) { // If User is already email verified.
+                throw new UserAlreadyVerifiedException("User is already verified. Please log in.");
+            } else {
+                VerificationToken tokenEntity = user.getVerificationToken();
+                if (tokenEntity != null) { // If previous token exist, delete it. If not, skip deleting.
+                    user.setVerificationToken(null);
+                    verificationTokenRepository.delete(tokenEntity);
+                    verificationTokenRepository.flush();
+                }
+                this.createVerification(user);
             }
-            createVerification(user);
         } catch (NoSuchElementException e) {
-            throw new BadCredentialsException("User does not exist.");
+            throw new UsernameNotFoundException("User not found with email: " + dto.email());
         }
 
     }

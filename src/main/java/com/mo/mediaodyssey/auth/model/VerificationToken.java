@@ -5,6 +5,7 @@ import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -25,13 +26,14 @@ public class VerificationToken {
     @Column(nullable = false, unique = true)
     private String token;
 
-    // @OneToOne(targetEntity = User.class, fetch = fetchType.EAGER)
-    @OneToOne(targetEntity = User.class)
-    @JoinColumn(nullable = false, name = "user_id")
+    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false, name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Column(nullable = false)
     private Date expiryDate;
 
+    @Column(nullable = false)
     private Date calculateExpiryDate(int expiryTimeInMinutes) {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MINUTE, expiryTimeInMinutes);

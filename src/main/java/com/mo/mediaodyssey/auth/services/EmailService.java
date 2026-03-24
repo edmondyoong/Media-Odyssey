@@ -1,6 +1,7 @@
 package com.mo.mediaodyssey.auth.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import com.resend.Resend;
 import com.resend.services.emails.model.CreateEmailOptions;
 
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.DisabledException;
 
 @Service
+@Validated
 public class EmailService {
     // Inspiried by
     // https://github.com/resend/resend-examples/blob/main/java-resend-examples/spring_boot_app/src/main/java/com/resend/springboot/EmailController.java

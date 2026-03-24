@@ -45,16 +45,4 @@ public class AuthService {
         userRepository.save(user);
         verificationService.createVerification(user);
     }
-
-    @Transactional
-    public void createAdminUser(UserDto dto) {
-        Boolean userExists = userRepository.existsByEmail(dto.email());
-
-        if (userExists) {
-            throw new BadCredentialsException("User with email address " + dto.email() + " already exists.");
-        }
-        User user = new User(dto.email(), dto.email(), passwordEncoder.encode(dto.password()), true, true,
-                "ROLE_ADMIN");
-        userRepository.save(user);
-    }
 }

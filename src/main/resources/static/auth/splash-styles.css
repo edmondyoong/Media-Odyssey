@@ -1,11 +1,26 @@
-#title h1 {
-    font-family: 'Cinzel Decorative';
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk');
+
+#title {
+  font-family: "Cinzel Decorative";
+  font-style: normal;
+  text-align: center;
 }
 
-#sub-title h3 {
-    font-family: 'Space Grotesk';
+#subtitle {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  text-align: center;
 }
 
-#auth-buttons button {
-    font-family: 'Space Grotesk';
+body {
+  background: linear-gradient(125.45deg, #131419 0%, #330099 73.23%);
+}
+
+#button {
+  background-color: #29779b;
+  font-family: "Space Grotesk";
+  font-style: normal;
+  text-align: center;
+  border-radius: 100px;
 }
