@@ -2,8 +2,6 @@ package com.mo.mediaodyssey.layout.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @Controller
 public class MappingController {
@@ -29,16 +27,22 @@ public class MappingController {
     public String navToSocialTab() {
         return "boardsLayout/features/social";
     }
-
+    
     /* Temporary, social feature is in dashboard so there will be a dashboard element in sidebar.*/
     @GetMapping("/dashboardTab")
     public String navToDashboard() {
         return "users/dashboard";
     }
-
+    
     /* Bring user to the page specifically for trending feature */
+    /**
+     * Redirect old trending route to the real community controller route.
+     *
+     * This fixes the earlier issue where opening /trendingTab directly
+     * bypassed the controller logic and therefore broke filtering/sorting.
+     */
     @GetMapping("/trendingTab")
     public String navToTrendingTab() {
-        return "boardsLayout/features/trending";
+        return "redirect:/community";
     }
 }
