@@ -29,3 +29,28 @@ logoToggle.addEventListener("click", ()=>{
         if(boardContainer) boardContainer.classList.remove("sidebar-collapsed");
     }
 }); 
+
+/* === HEADER LOGIC ============
+** avatar shows box of profile + settings
+===================================
+*/
+
+const avatar = document.getElementById("avatarBox"); 
+const settingsBox = document.getElementById("settingsBox");
+
+// opens the settings box when avatar is clicked on
+avatar.addEventListener("click", function(e){
+    e.stopPropagation(); 
+    settingsBox.classList.toggle("hidden"); 
+});
+
+// settings box can be closed when users click anywhere on the page (exception the box itself)
+document.addEventListener("click", function() {
+    settingsBox.classList.add("hidden");
+});
+
+// prevents the box from closing when users clicked inside the box
+settingsBox.addEventListener("click", function(e) {
+    e.stopPropagation();
+    settingsBox.classList.remove("hidden");
+});

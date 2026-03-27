@@ -4,6 +4,7 @@
 
     <!--Home Button (returns to the landing page)-->
     <!-- Icons taken from free figma packs: https://www.figma.com/community/file/1319540334775439319/free-icon-set-by-iconstica-library-->
+    
     <a href="/">
         <img th:src="@{/layout/images/Home.svg}" alt="homeBtn" class="home-btn">
     </a>
@@ -13,9 +14,29 @@
         <input type="text" id="searchBar" class="search-bar" placeholder="What are you looking for, adventure?">
     </div>
 
-    <!-- Avatar -->
-    <div class="user">
-        <p class="username-display">username</p>
-        <img th:src="@{/layout/images/Avatar.png}" alt="Avatar" class="avatar-display">
+    <!-- User's avatar + settings drop down -->
+    <div class="user-container">
+
+        <div class="avatar-box" id="avatarBox">
+            <img th:src="@{/layout/images/avatar.svg}" alt="Avatar" class="avatar userItem">
+
+        </div>
+
+        <!-- This div will be displayed when user clicked on their avatar.
+        The elements in this box will lead user to different pages that are related to settings + account
+        These elements can be found under front-end boardsLayout -> userSide folder. -->
+        <div class="settings-box hidden" id="settingsBox">
+
+            <ul class="setting-menu">
+                <li data-setting="Profile">
+                    <a href="/userProfile" class="settings-menu-items">Profile</a>
+                </li>
+                
+                <li data-setting="Settings">
+                    <a href="/Settings" class="settings-menu-items">Settings</a>
+                </li>
+            </ul>
+
+        </div>
     </div>
 </header>

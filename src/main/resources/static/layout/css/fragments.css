@@ -120,6 +120,99 @@ header {
     z-index: 1;
 }
 
+/* AVATAR */
+.avatar-box {
+    border-radius: 50%;
+
+    background: linear-gradient(180deg, #1a1625 0%, #0f0d15 100%);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Avatar: setting box*/
+.hidden {
+    display: none;
+}
+
+.user-container {
+    position: relative;
+}
+
+.settings-box {
+    position: absolute;
+    background: linear-gradient(180deg, #1a1625 0%, #0f0d15 100%);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+    top: 70px;
+    right: 0;
+    min-width: 180px;
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    height: 120px;
+    z-index: 900;
+}
+
+.settings-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.settings-menu li {
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+/* setting menu items */
+.settings-menu-items {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    color: rgba(226, 232, 240, 0.8);
+
+    font-family: 'Space Grotesk';
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.settings-menu-items:before {
+    content: '';
+    position: absolute;
+    background: linear-gradient(180deg, #8b5cf6 0%, #a78bfa 100%);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.settings-menu-items:after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.settings-menu-items:hover {
+    color: #ffffff; 
+}
+
+.settings-menu-items:hover::before {
+    transform: scaleY(1);
+}
+
+.settings-menu-items:hover::after {
+    opacity: 1;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     header {
@@ -167,7 +260,7 @@ header {
 /* Sidebar Container */
 .side-bar {
     position: fixed;
-    top: 60px; /* Below header */
+    top: 80px; 
     left: 0;
     height: calc(100vh - 60px);
     width: 240px;
@@ -216,7 +309,7 @@ header {
 }
 
 /* Menu Item Links */
-.menu-items {
+.sidebar-menu-items {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -234,7 +327,7 @@ header {
 }
 
 /* Hover highlight bar */
-.menu-items::before {
+.sidebar-menu-items::before {
     content: '';
     position: absolute;
     left: 0;
@@ -247,7 +340,7 @@ header {
 }
 
 /* Hover background glow */
-.menu-items::after {
+.sidebar-menu-items::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -256,40 +349,40 @@ header {
     transition: opacity 0.3s ease;
 }
 
-.menu-items:hover {
+.sidebar-menu-items:hover {
     color: #ffffff;
     padding-left: 1.75rem;
 }
 
-.menu-items:hover::before {
+.sidebar-menu-items:hover::before {
     transform: scaleY(1);
 }
 
-.menu-items:hover::after {
+.sidebar-menu-items:hover::after {
     opacity: 1;
 }
 
 /* Active State */
-.features-list li.active .menu-items {
+.features-list li.active .sidebar-menu-items {
     color: #ffffff;
     background: rgba(139, 92, 246, 0.1);
 }
 
-.features-list li.active .menu-items::before {
+.features-list li.active .sidebar-menu-items::before {
     transform: scaleY(1);
     background: linear-gradient(180deg, #a78bfa 0%, #c4b5fd 100%);
 }
 
 /* Icons for menu items (using data attributes) */
-.features-list li[data-feature="dashboard"] .menu-items::after {
+.features-list li[data-feature="dashboard"] .sidebar-menu-items::after {
     /* Dashboard icon placeholder - can be replaced with actual icon */
 }
 
-.features-list li[data-feature="socialFeature"] .menu-items::after {
+.features-list li[data-feature="socialFeature"] .sidebar-menu-items::after {
     /* Community icon placeholder */
 }
 
-.features-list li[data-feature="trending"] .menu-items::after {
+.features-list li[data-feature="trending"] .sidebar-menu-items::after {
     /* Trending icon placeholder */
 }
 
