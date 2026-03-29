@@ -18,6 +18,10 @@
     <!-- User's avatar + settings drop down -->
     <div class="user-container">
 
+        <!-- Avatar's logic: 
+            Double check to see if the current user is logged in or if they have avatar or not yet. 
+            If they do, use that. If they don't, use a generel default avatar for them.    
+        -->
         <div class="avatar-box" id="avatarBox">
             <img th:src="${user != null and user.avatar_path != null ? user.avatar_path : 'https://api.dicebear.com/9.x/glass/svg?seed=none&radius=50'}" 
             alt="Avatar" class="avatar userItem">

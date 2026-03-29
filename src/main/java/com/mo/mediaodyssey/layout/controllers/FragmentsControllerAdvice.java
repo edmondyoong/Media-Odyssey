@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice
 public class FragmentsControllerAdvice {
 
+    /*
+    * This Controller works like a global controller
+    ** Purpose: Get the current logged in user's details (username, avatar_path, ...)
+    *  and send the object user to all thymeleaf pages, so the header/sidebar (which exists in all pages)
+    *  can get the object user instead of calling for user in every controllers.
+    */
+
     @ModelAttribute("user")
     public User getCurrentUser (Principal principal, Authentication authentication) {
         if(principal == null) return null; 

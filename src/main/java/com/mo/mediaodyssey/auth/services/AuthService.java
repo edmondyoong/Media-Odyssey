@@ -1,5 +1,6 @@
 package com.mo.mediaodyssey.auth.services;
 
+import com.mo.mediaodyssey.layout.config.AppConfig;
 import com.mo.mediaodyssey.layout.services.AvatarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,8 @@ import com.mo.mediaodyssey.auth.repository.UserRepository;
 @Service
 public class AuthService {
 
+    private final AppConfig appConfig;
+
     private final AvatarService avatarService;
 
     @Autowired
@@ -31,8 +34,9 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    AuthService(AvatarService avatarService) {
+    AuthService(AvatarService avatarService, AppConfig appConfig) {
         this.avatarService = avatarService;
+        this.appConfig = appConfig;
     }
 
     @Transactional
@@ -50,7 +54,9 @@ public class AuthService {
         }
         User user = new User(dto.email(), passwordEncoder.encode(dto.password()));
 
-        /* Added generated avatar for new users */
+        /* Added generated avatar for new users.
+        Logic: new users registering will have avatar_path = null. So this if calls the service to generate
+        a random profile picture for this user. */
         if (user.getAvatar_path()==null || user.getAvatar_path().isEmpty()) {
             user.setAvatar_path(avatarService.avatarGenerate(user.getId()));
         }
