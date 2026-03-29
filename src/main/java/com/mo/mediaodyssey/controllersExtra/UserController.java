@@ -1,11 +1,12 @@
 package com.mo.mediaodyssey.controllersExtra;
 
-import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.FriendRequestDTO;
 import com.mo.mediaodyssey.services.CommuService;
 import com.mo.mediaodyssey.services.FriendshipService;
 import com.mo.mediaodyssey.services.PermissionService;
+import com.mo.mediaodyssey.shared.model.User;
+
 // import com.mo.mediaodyssey.services.UserService;
 import jakarta.servlet.http.HttpSession;
 

@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.auth.services;
+package com.mo.mediaodyssey.dev.services;
 
 import com.mo.mediaodyssey.auth.dto.UserDto;
 
@@ -8,23 +8,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.authentication.BadCredentialsException;
 
-import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.layout.services.AvatarService;
+import com.mo.mediaodyssey.shared.model.User;
+import java.util.UUID;
 
 @Service
-public class AuthAdminService {
+public class DevUserService {
 
-    private final AvatarService avatarService = new AvatarService(); 
-    
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public void createAdminUser(UserDto dto) {
+    public void developmentalAccountCreation(UserDto dto, String role) {
         // Check if a User with this email address already exist.
         Boolean userExists = userRepository.existsByEmail(dto.email());
 
@@ -34,14 +32,19 @@ public class AuthAdminService {
 
         // Create the User
         User user = new User(dto.email(), dto.email(), passwordEncoder.encode(dto.password()), true, true,
-                "ROLE_ADMIN", null);
-        
-        /* Added generated avatar for new users */
-        if (user.getAvatar_path()==null || user.getAvatar_path().isEmpty()) {
-            user.setAvatar_path(avatarService.avatarGenerate(user.getId()));
-        }
+                role, AvatarService.avatarGenerate(Math.abs(UUID.randomUUID().getMostSignificantBits())));
 
         // Save the user
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void createAdminAccount(UserDto dto) {
+        this.developmentalAccountCreation(dto, "ROLE_ADMIN");
+    }
+
+    @Transactional
+    public void createUserAccount(UserDto dto) {
+        this.developmentalAccountCreation(dto, "ROLE_USER");
     }
 }

@@ -1,6 +1,5 @@
 package com.mo.mediaodyssey.controllersExtra;
 
-import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.enums.RoleType;
 import com.mo.mediaodyssey.models.CommunityRole;
@@ -9,6 +8,8 @@ import com.mo.mediaodyssey.models.Post;
 import com.mo.mediaodyssey.repositories.CommunityRoleRepository;
 import com.mo.mediaodyssey.services.CommentService;
 import com.mo.mediaodyssey.services.PostService;
+import com.mo.mediaodyssey.shared.model.User;
+
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
