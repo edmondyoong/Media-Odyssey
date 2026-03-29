@@ -10,9 +10,13 @@ import org.springframework.security.authentication.BadCredentialsException;
 
 import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
+import com.mo.mediaodyssey.layout.services.AvatarService;
 
 @Service
 public class AuthAdminService {
+
+    private final AvatarService avatarService = new AvatarService(); 
+    
     @Autowired
     private UserRepository userRepository;
 
@@ -30,7 +34,12 @@ public class AuthAdminService {
 
         // Create the User
         User user = new User(dto.email(), dto.email(), passwordEncoder.encode(dto.password()), true, true,
-                "ROLE_ADMIN");
+                "ROLE_ADMIN", null);
+        
+        /* Added generated avatar for new users */
+        if (user.getAvatar_path()==null || user.getAvatar_path().isEmpty()) {
+            user.setAvatar_path(avatarService.avatarGenerate(user.getId()));
+        }
 
         // Save the user
         userRepository.save(user);

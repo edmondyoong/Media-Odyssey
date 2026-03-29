@@ -9,8 +9,8 @@ const content = document.getElementById("mainContent");
 const formContainer = document.querySelector(".form-container");
 const boardContainer = document.querySelector(".board-container");
 
-const openLogo = "/layout/images/openLogo.svg";
-const closeLogo = "/layout/images/closeLogo.svg"; 
+const openLogo = "/layout/images/LogoSidebar/openLogo.svg";
+const closeLogo = "/layout/images/LogoSidebar/closeLogo.svg"; 
 
 logoToggle.addEventListener("click", ()=>{
     sideBar.classList.toggle("collapsed");

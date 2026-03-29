@@ -1,5 +1,6 @@
 package com.mo.mediaodyssey.auth.services;
 
+import com.mo.mediaodyssey.layout.services.AvatarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,6 +17,8 @@ import com.mo.mediaodyssey.auth.repository.UserRepository;
 @Service
 public class AuthService {
 
+    private final AvatarService avatarService;
+
     @Autowired
     private VerificationService verificationService;
 
@@ -27,6 +30,10 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    AuthService(AvatarService avatarService) {
+        this.avatarService = avatarService;
+    }
 
     @Transactional
     public Authentication loginUser(UserDto dto) {
@@ -42,6 +49,12 @@ public class AuthService {
             throw new BadCredentialsException("User with email address " + dto.email() + " already exists.");
         }
         User user = new User(dto.email(), passwordEncoder.encode(dto.password()));
+
+        /* Added generated avatar for new users */
+        if (user.getAvatar_path()==null || user.getAvatar_path().isEmpty()) {
+            user.setAvatar_path(avatarService.avatarGenerate(user.getId()));
+        }
+
         userRepository.save(user);
         verificationService.createVerification(user);
     }

@@ -97,6 +97,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
+    /* 
+    * Storing user's upload avatar
+    * users who don't set their avatar will be generated an avt from API
+    * API DiceBear ensures the seed (use userEmail) always get the same avt. But varies for each seeds.
+    */
+    private String avatar_path;
+
     // ** Relationships **
 
     @OneToOne(mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true)
@@ -115,18 +122,20 @@ public class User implements UserDetails {
         this.isEnabled = false;
         this.isAccountNonLocked = true;
         this.role = "ROLE_USER";
+        this.avatar_path = null; /* Because new users haven't uploaded any pictures (yet) */
     }
 
     // TODO: AuthService creates User in createAdminUser() using this constructor.
     // createAdminUser() is for developmental purposes only.
     public User(String email, String username, String password, boolean isEnabled, boolean isAccountNonLocked,
-            String role) {
+            String role, String avatar_path) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.isEnabled = isEnabled;
         this.isAccountNonLocked = isAccountNonLocked;
         this.role = role;
+        this.avatar_path = avatar_path;
     }
 
     public Long getId() {
@@ -200,5 +209,17 @@ public class User implements UserDetails {
 
     public void setVerificationToken(VerificationToken verificationToken) {
         this.verificationToken = verificationToken;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+
+    public String getAvatar_path() {
+        return avatar_path;
+    }
+
+    public void setAvatar_path(String avatar_path) {
+        this.avatar_path = avatar_path;
     }
 }

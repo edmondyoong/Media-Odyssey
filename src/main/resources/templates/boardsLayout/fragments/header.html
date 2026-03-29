@@ -1,6 +1,7 @@
 <header th:fragment="header">
+    
     <!--LOGO that control the side bar (fold and unfold)-->
-    <img th:src="@{/layout/images/closeLogo.svg}" alt="Logo" class="logo" id="logo">
+    <img th:src="@{/layout/images/LogoSidebar/closeLogo.svg}" alt="Logo" class="logo" id="logo">
 
     <!--Home Button (returns to the landing page)-->
     <!-- Icons taken from free figma packs: https://www.figma.com/community/file/1319540334775439319/free-icon-set-by-iconstica-library-->
@@ -18,7 +19,8 @@
     <div class="user-container">
 
         <div class="avatar-box" id="avatarBox">
-            <img th:src="@{/layout/images/avatar.svg}" alt="Avatar" class="avatar userItem">
+            <img th:src="${user != null and user.avatar_path != null ? user.avatar_path : 'https://api.dicebear.com/9.x/glass/svg?seed=none&radius=50'}" 
+            alt="Avatar" class="avatar userItem">
 
         </div>
 
@@ -27,13 +29,17 @@
         These elements can be found under front-end boardsLayout -> userSide folder. -->
         <div class="settings-box hidden" id="settingsBox">
 
-            <ul class="setting-menu">
+            <ul class="settings-menu">
                 <li data-setting="Profile">
                     <a href="/userProfile" class="settings-menu-items">Profile</a>
                 </li>
                 
                 <li data-setting="Settings">
-                    <a href="/Settings" class="settings-menu-items">Settings</a>
+                    <a href="/user/settings" class="settings-menu-items">Settings</a>
+                </li>
+
+                <li data-setting="logout">
+                    <a href="/auth/logout" class="settings-menu-items">Log out</a>
                 </li>
             </ul>
 

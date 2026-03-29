@@ -275,46 +275,48 @@ when the js runs. Testing are required to see how it works.*/
    ========================================================= */
 
 .recommendations-section {
-    margin-top: 40px;
+    margin-top: 2rem;
 }
 
 .rec-tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-    margin-left: 13px;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .rec-tab {
-    padding: 8px 20px;
-    border: none;
-    border-radius: 20px;
-    background-color: #290f67;
-    color: white;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background 0.2s;
+  padding: 0.625rem 1.25rem;
+  background: #1a1a2e;
+  border: 1px solid #2d2d5a;
+  border-radius: 25px;
+  color: #a0a0b0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .rec-tab:hover {
-    background-color: #3d1a9e;
+  background: #252545;
+  color: #ffffff;
 }
 
 .rec-tab.active {
-    background-color: #7b2dff;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-color: transparent;
+  color: #ffffff;
 }
 
 .rec-status {
-    margin-left: 13px;
-    color: #aaa;
-    font-size: 15px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
 .rec-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 0 13px;
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .rec-card {
@@ -401,7 +403,43 @@ when the js runs. Testing are required to see how it works.*/
     background-color: #1a7a4a;
 }
 
-/* DASHBOARD HTML /////////////// */ 
-.dashboardTitle {
-    margin: 13px;
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  .personal-boards-title {
+    font-size: 1.25rem;
+  }
+
+  .board-card,
+  .create-board {
+    min-width: 180px;
+    max-width: 180px;
+    height: 120px;
+  }
+
+  .scroll-nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .board-card,
+  .create-board {
+    min-width: 160px;
+    max-width: 160px;
+    height: 110px;
+  }
+
+  .rec-tabs {
+    gap: 0.5rem;
+  }
+
+  .rec-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
 }
