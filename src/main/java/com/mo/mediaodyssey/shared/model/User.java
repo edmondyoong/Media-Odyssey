@@ -1,14 +1,18 @@
-package com.mo.mediaodyssey.auth.model;
+package com.mo.mediaodyssey.shared.model;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.mo.mediaodyssey.auth.model.VerificationToken;
+import com.mo.mediaodyssey.layout.services.AvatarService;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -97,11 +101,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
-    /* 
-    * Storing user's upload avatar
-    * users who don't set their avatar will be generated an avt from API
-    * API DiceBear ensures the seed (use userEmail) always get the same avt. But varies for each seeds.
-    */
+    /*
+     * Storing user's upload avatar
+     * users who don't set their avatar will be generated an avt from API
+     * API DiceBear ensures the seed (use userEmail) always get the same avt. But
+     * varies for each seeds.
+     */
     private String avatar_path;
 
     // ** Relationships **
@@ -122,7 +127,23 @@ public class User implements UserDetails {
         this.isEnabled = false;
         this.isAccountNonLocked = true;
         this.role = "ROLE_USER";
-        this.avatar_path = null; /* Because new users haven't uploaded any pictures (yet) */
+        this.avatar_path = AvatarService.avatarGenerate(Math.abs(UUID.randomUUID().getMostSignificantBits())); /*
+                                                                                                                * Default
+                                                                                                                * value.
+                                                                                                                * Using
+                                                                                                                * randomly
+                                                                                                                * generated
+                                                                                                                * avatar
+                                                                                                                * because
+                                                                                                                * new
+                                                                                                                * users
+                                                                                                                * haven'
+                                                                                                                * t
+                                                                                                                * uploaded
+                                                                                                                * any
+                                                                                                                * pictures
+                                                                                                                * (yet)
+                                                                                                                */
     }
 
     // TODO: AuthService creates User in createAdminUser() using this constructor.

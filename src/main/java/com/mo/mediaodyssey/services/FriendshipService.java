@@ -1,11 +1,12 @@
 package com.mo.mediaodyssey.services;
 
-import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.FriendRequestDTO;
 import com.mo.mediaodyssey.models.Friendship;
 import com.mo.mediaodyssey.repositories.FriendshipRepository;
+import com.mo.mediaodyssey.shared.model.User;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +23,8 @@ public class FriendshipService {
     private final UserRepository userRepo;
 
     public FriendshipService(FriendshipRepository friendshipRepo,
-                             CommuService commuService,
-                             UserRepository userRepo) {
+            CommuService commuService,
+            UserRepository userRepo) {
         this.friendshipRepo = friendshipRepo;
         this.commuService = commuService;
         this.userRepo = userRepo;
@@ -69,10 +70,8 @@ public class FriendshipService {
         List<User> candidates = userRepo.findUsersInCommunitiesExcludingFriends(userId, communityIds);
 
         return candidates.stream()
-                .filter(u ->
-                        !friendshipRepo.existsByUserIdAndFriendId(userId.intValue(), u.getId().intValue()) &&
-                        !friendshipRepo.existsByFriendIdAndUserId(userId.intValue(), u.getId().intValue())
-                )
+                .filter(u -> !friendshipRepo.existsByUserIdAndFriendId(userId.intValue(), u.getId().intValue()) &&
+                        !friendshipRepo.existsByFriendIdAndUserId(userId.intValue(), u.getId().intValue()))
                 .toList();
     }
 }

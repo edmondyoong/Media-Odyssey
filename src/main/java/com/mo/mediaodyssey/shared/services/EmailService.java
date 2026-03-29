@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.auth.services;
+package com.mo.mediaodyssey.shared.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -29,14 +29,20 @@ public class EmailService {
 
     public void sendEmail(@NotBlank String to, @NotBlank String subject, @NotBlank String message) {
         try {
-            var params = CreateEmailOptions.builder()
-                    .from(from)
-                    .to(to)
-                    .subject(subject)
-                    .html("<p>" + message + "</p>")
-                    .build();
+            // Silently prevent sending to common test email addresses, such as email
+            // addresses containing "example" or "test".
+            // This is necessary to prevent suspension to email sending by Resend.
 
-            resend.emails().send(params);
+            if (!(to.contains("example") || to.contains("test"))) {
+                var params = CreateEmailOptions.builder()
+                        .from(from)
+                        .to(to)
+                        .subject(subject)
+                        .html("<p>" + message + "</p>")
+                        .build();
+
+                resend.emails().send(params);
+            }
         } catch (Exception e) {
             throw new DisabledException("Unable to send email");
         }
