@@ -14,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.mo.mediaodyssey.auth.model.VerificationToken;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.auth.repository.VerificationTokenRepository;
+import com.mo.mediaodyssey.shared.services.EmailService;
 import com.mo.mediaodyssey.auth.dto.ResendVerifyTokenDto;
 import com.mo.mediaodyssey.auth.dto.VerifyTokenDto;
 import com.mo.mediaodyssey.auth.exception.InvalidVerificationTokenException;
