@@ -17,7 +17,7 @@ public class GetUserService {
             return (User) authentication.getPrincipal();
         } else {
             throw new AuthenticationCredentialsNotFoundException(
-                    "Current user has not authenticated with a valid account.");
+                    "Current visitor has not authenticated with a valid account.");
         }
     }
 
@@ -26,7 +26,7 @@ public class GetUserService {
             return (User) authentication.getPrincipal();
         } else {
             throw new AuthenticationCredentialsNotFoundException(
-                    "Current user has not authenticated with a valid account.");
+                    "Current visitor has not authenticated with a valid account.");
         }
     }
 }
