@@ -71,7 +71,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<version>LATEST</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -92,7 +91,7 @@
 		<dependency>
 			<groupId>com.resend</groupId>
 			<artifactId>resend-java</artifactId>
-			<version>LATEST</version>
+			<version>4.13.0</version>
 		</dependency>
 		<!-- AWS S3 SDK v2 (use with Backblaze S3-compatible endpoint) -->
 		<dependency>

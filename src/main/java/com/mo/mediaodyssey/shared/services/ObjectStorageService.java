@@ -16,7 +16,7 @@ public class ObjectStorageService {
 
     /**
      * Service to access S3 compatible object storage solutions. Not limited to one
-     * object storage provider. Any S3 compayible object storage provider can be
+     * object storage provider. Any S3 compatible object storage provider can be
      * used.
      * 
      * For Media Odyssey, we have chosen Backblaze B2. Backblaze does not require
@@ -34,18 +34,30 @@ public class ObjectStorageService {
 
     private final S3Client s3Client;
     private final String bucket;
+    private final String endpoint;
     private final String publicUrl;
 
     public ObjectStorageService(S3Client s3Client,
-            @Value("${storage.bucket}") String bucket,
-            @Value("${storage.endpoint}") String endpoint,
+            @Value("${storage.bucket:}") String bucket,
+            @Value("${storage.endpoint:}") String endpoint,
             @Value("${storage.public-url:}") String publicUrl) {
         this.s3Client = s3Client;
         this.bucket = bucket;
+        this.endpoint = endpoint;
         this.publicUrl = publicUrl;
     }
 
+    /**
+     * Uploads a file to the object storage.
+     *
+     * @param file The file to upload.
+     * @return The URL of the uploaded file.
+     */
     public String uploadFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("No file was provided for upload.");
+        }
+
         String original = Optional.ofNullable(file.getOriginalFilename()).orElse("file");
         String objectName = UUID.randomUUID() + "-" + original.replaceAll("\\s+", "_");
 
@@ -61,6 +73,11 @@ public class ObjectStorageService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload file", e);
         }
-        return publicUrl.replaceAll("/$", "") + "/" + objectName;
+
+        if (publicUrl != null && !publicUrl.isBlank()) {
+            return publicUrl.replaceAll("/$", "") + "/" + objectName;
+        }
+
+        return endpoint.replaceAll("/$", "") + "/" + bucket + "/" + objectName;
     }
 }
