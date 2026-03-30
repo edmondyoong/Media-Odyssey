@@ -32,7 +32,7 @@ public class VerificationService {
     @Value("${spring.application.name:App}")
     private String appName;
 
-    @Value("${email.verify-token.expiry-in-minutes:}")
+    @Value("${email.verifytoken.expiry-in-minutes:}")
     private int tokenExpiryInMinutes;
 
     @Autowired
