@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/dev/auth")
 public class DevAccountController {
 
-    @Value("${DEV_MODE:FALSE}")
+    @Value("${dev.mode.enabled:FALSE}")
     private String devMode;
 
-    @Value("${EMAIL_FROM:}")
+    @Value("${dev.email.suffix:}")
     private String email;
 
     @Autowired

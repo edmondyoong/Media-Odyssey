@@ -21,7 +21,7 @@ public class DevFileController {
     @Autowired
     private ObjectStorageService objectStorageService;
 
-    @Value("${DEV_MODE:FALSE}")
+    @Value("${dev.mode.enabled:FALSE}")
     private String devMode;
 
     /**
