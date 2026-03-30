@@ -41,8 +41,7 @@ public class Media {
      * Keep it transient for now to avoid runtime SQL errors.
      *
      * TODO (later iteration):
-     * If the team decides to persist artist for songs, add the DB column first,
-     * then convert this back to a normal @Column field.
+     * After dealing with API problem, Transient will be changed or not
      */
     @Transient
     private String artist = "";

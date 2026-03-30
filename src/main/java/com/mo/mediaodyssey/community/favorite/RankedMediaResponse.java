@@ -3,13 +3,10 @@ package com.mo.mediaodyssey.community.favorite;
 /**
  * DTO used by the Community Favourites page.
  *
- * Current iteration:
- * - use totalScore internally for ranking
+ * Iteration 3:
+ * - use totalScore internally for ranking (not seen)
  * - expose displayRating for star-based UI
- *
- * Later iteration ideas:
- * - add fast-rising / trendingGrowth fields
- * - add user-submitted rating fields if needed
+ * - expose weeklyLikes for Fast-Rising section
  */
 public class RankedMediaResponse {
 
@@ -34,6 +31,12 @@ public class RankedMediaResponse {
     /** UI-only star rating derived from totalScore */
     private double displayRating;
 
+    /**
+     * Number of LIKE Interactions in the past 7 days — used by Fast-Rising section
+     */
+    private long weeklyLikes;
+
+    /** Constructor for Top 10 ranked items (weeklyLikes dafults to 0) */
     public RankedMediaResponse(String mediaApiId,
             String title,
             String artist,
@@ -48,10 +51,30 @@ public class RankedMediaResponse {
         this.imageUrl = imageUrl;
         this.totalScore = totalScore;
         this.displayRating = displayRating;
+        this.weeklyLikes = 0;
     }
 
     public String getMediaApiId() {
         return mediaApiId;
+    }
+
+    /** Constructor for Fast-Rising items */
+    public RankedMediaResponse(String mediaApiId,
+            String title,
+            String artist,
+            String mediaType,
+            String imageUrl,
+            long totalScore,
+            double displayRating,
+            long weeklyLikes) {
+        this.mediaApiId = mediaApiId;
+        this.title = title;
+        this.artist = artist;
+        this.mediaType = mediaType;
+        this.imageUrl = imageUrl;
+        this.totalScore = totalScore;
+        this.displayRating = displayRating;
+        this.weeklyLikes = weeklyLikes;
     }
 
     public String getTitle() {
@@ -76,5 +99,9 @@ public class RankedMediaResponse {
 
     public double getDisplayRating() {
         return displayRating;
+    }
+
+    public long getWeeklyLikes() {
+        return weeklyLikes;
     }
 }

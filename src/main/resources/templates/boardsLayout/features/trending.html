@@ -107,9 +107,7 @@
                 Top 5 most-liked items in the past 7 days.
                 Data comes from UserInteraction table via MediaRankingService.
 
-                TODO (later iteration):
-                Revisit this section after the weekly comparison / fast-rising logic
-                is finalized. For now, keep this section mostly unchanged.
+              
             -->
       <section class="trending-section">
         <h2>🔥 Fast-Rising This Week (Top 5)</h2>
@@ -171,9 +169,7 @@
                 - show star-based rating indicator in UI instead of raw score
                 - do not show like button on the card UI
 
-                TODO (later iteration):
-                - bring back interactive like / rating UI if needed
-                - connect optimistic UI updates once interaction display rules are finalized
+                
             -->
       <section class="ranking-section">
         <h2>🏆 Top 10 Ranked</h2>
@@ -290,10 +286,6 @@
        * Session-based: server prevents duplicate likes.
        * The actual ranking update happens asynchronously as UserInteraction
        * data accumulates — page refresh will reflect updated rankings.
-       *
-       * TODO (later iteration):
-       * If the team decides to bring back visible like buttons in the UI,
-       * this handler can be used again without major changes.
        */
       document.querySelectorAll(".like-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -322,15 +314,7 @@
     </script>
 
     <script>
-      /*
-       * TODO (later iteration):
-       * Interactive user-submitted star ratings are deferred for now.
-       * The current iteration only shows read-only displayRating stars.
-       *
-       * Keeping this block commented/preserved conceptually makes it easier
-       * to restore when dedicated rating submission is finalized.
-       */
-      /*
+      
       document.querySelectorAll(".rating-stars").forEach((group) => {
         const apiId = group.dataset.apiId;
         const mediaType = group.dataset.type;
@@ -398,7 +382,6 @@
 
         highlight(0);
       });
-      */
     </script>
 
 

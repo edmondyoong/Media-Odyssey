@@ -66,6 +66,36 @@ public class MediaRankingService {
     }
 
     /**
+     * Returns Top 5 Fast-Rising items: most LIKE interactions in the past 7
+     * days
+     * Each result is enriched with metadata from external APIs.
+     * 
+     * Row format from findTop5TrendingLikesSince:
+     * [0] mediaApiId (String)
+     * [1] mediaType (String)
+     * [2] likeCount (Long)
+     */
+    public List<RankedMediaResponse> getFastRising5() {
+        java.time.LocalDateTime since = java.time.LocalDateTime.now().minusDays(7);
+        List<Object[]> rows = userInteractionRepository.findTop5TrendingLikesSince(since);
+
+        List<RankedMediaResponse> result = new ArrayList<>();
+        for (Object[] row : rows) {
+            String mediaApiId = String.valueOf(row[0]);
+            String mediaType = normalizeMediaType(String.valueOf(row[1]));
+            long weeklyLikes = ((Number) row[2]).longValue();
+
+            RankedMediaResponse enriched = fetchMetadata(mediaApiId, mediaType, weeklyLikes);
+            if (enriched != null) {
+                result.add(new RankedMediaResponse(enriched.getMediaApiId(), enriched.getTitle(), enriched.getArtist(), enriched.getMediaType(), enriched.getImageUrl(), enriched.getTotalScore(), enriched.getDisplayRating(), weeklyLikes));
+            } else {
+                result.add(new RankedMediaResponse(mediaApiId, "Unknown", "", mediaType, "", 0L, 1.0,  weeklyLikes));
+            }
+        }
+        return result;
+    }
+
+    /**
      * Converts aggregated score rows into DTOs enriched with metadata.
      *
      * Row format:

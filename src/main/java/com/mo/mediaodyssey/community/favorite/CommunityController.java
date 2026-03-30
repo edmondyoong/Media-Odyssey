@@ -77,8 +77,7 @@ public class CommunityController {
      * Loads the Community Favourites page.
      * category: MOVIE / GAME / SONG / null
      *
-     * TODO (later iteration):
-     * Reintroduce Fast-Rising data once the weekly comparison logic is finalized.
+     * Iteration 3: Fast-Rising section now populated via getFastRising5().
      */
     @GetMapping
     public String communityPage(Model model,
@@ -92,7 +91,9 @@ public class CommunityController {
                 ? mediaRankingService.getTop10()
                 : mediaRankingService.getTop10ByMediaType(normalizedCategory);
 
+        List<RankedMediaResponse> trending = mediaRankingService.getFastRising5();
         model.addAttribute("mediaList", mediaList);
+        model.addAttribute("trending", trending);
         model.addAttribute("currentCat", normalizedCategory);
 
         return "boardsLayout/features/trending";
@@ -175,10 +176,4 @@ public class CommunityController {
                 "viewed", true,
                 "mediaApiId", mediaApiId));
     }
-
-    /**
-     * TODO (later iteration):
-     * Add a dedicated endpoint for Fast-Rising data if the section becomes
-     * independent from the main Top 10 ranking query.
-     */
 }
