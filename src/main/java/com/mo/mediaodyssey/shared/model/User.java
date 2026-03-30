@@ -101,13 +101,16 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
+    /* */
+    private String default_avatar_URL;
+
     /*
      * Storing user's upload avatar
      * users who don't set their avatar will be generated an avt from API
      * API DiceBear ensures the seed (use userEmail) always get the same avt. But
      * varies for each seeds.
      */
-    private String avatar_path;
+    private String custom_avatar_URL;
 
     // ** Relationships **
 
@@ -120,6 +123,11 @@ public class User implements UserDetails {
     }
 
     // AuthService creates User in registerUser() using this constructor.
+    /*
+    ** Logic from avatar side: when create user with email and password, 
+    *  automatically let custom_Avatar_URL is null
+    *  and default_avatar_URL (generate avatar by using a uuid) and stored it.
+    */
     public User(String email, String password) {
         this.email = email;
         this.username = email;
@@ -127,36 +135,24 @@ public class User implements UserDetails {
         this.isEnabled = false;
         this.isAccountNonLocked = true;
         this.role = "ROLE_USER";
-        this.avatar_path = AvatarService.avatarGenerate(Math.abs(UUID.randomUUID().getMostSignificantBits())); /*
-                                                                                                                * Default
-                                                                                                                * value.
-                                                                                                                * Using
-                                                                                                                * randomly
-                                                                                                                * generated
-                                                                                                                * avatar
-                                                                                                                * because
-                                                                                                                * new
-                                                                                                                * users
-                                                                                                                * haven'
-                                                                                                                * t
-                                                                                                                * uploaded
-                                                                                                                * any
-                                                                                                                * pictures
-                                                                                                                * (yet)
-                                                                                                                */
+        /* Default avatar for users who haven't uploaded any avatars + new users */
+        this.default_avatar_URL = AvatarService.avatarGenerate(Math.abs(UUID.randomUUID().getMostSignificantBits()));
+        /* their actual uploaded avatar pictures will be null until they upload */
+        this.custom_avatar_URL = null; 
     }
 
     // TODO: AuthService creates User in createAdminUser() using this constructor.
     // createAdminUser() is for developmental purposes only.
     public User(String email, String username, String password, boolean isEnabled, boolean isAccountNonLocked,
-            String role, String avatar_path) {
+            String role, String default_avatar_URL, String custom_avatar_URL) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.isEnabled = isEnabled;
         this.isAccountNonLocked = isAccountNonLocked;
         this.role = role;
-        this.avatar_path = avatar_path;
+        this.custom_avatar_URL = custom_avatar_URL;
+        this.default_avatar_URL = default_avatar_URL;
     }
 
     public Long getId() {
@@ -236,11 +232,19 @@ public class User implements UserDetails {
         return serialVersionUID;
     }
 
-    public String getAvatar_path() {
-        return avatar_path;
+    public String getCustom_avatar_URL() {
+        return custom_avatar_URL;
     }
 
-    public void setAvatar_path(String avatar_path) {
-        this.avatar_path = avatar_path;
+    public void setCustom_avatar_URL(String custom_avatar_URL) {
+        this.custom_avatar_URL = custom_avatar_URL;
+    }
+
+    public String getDefault_avatar_URL() {
+        return default_avatar_URL;
+    }
+
+    public void setDefault_avatar_URL(String default_avatar_URL) {
+        this.default_avatar_URL = default_avatar_URL;
     }
 }

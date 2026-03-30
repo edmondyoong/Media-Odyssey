@@ -23,7 +23,7 @@
             If they do, use that. If they don't, use a generel default avatar for them.    
         -->
         <div class="avatar-box" id="avatarBox">
-            <img th:src="${user != null and user.avatar_path != null ? user.avatar_path : 'https://api.dicebear.com/9.x/glass/svg?seed=none&radius=50'}" 
+            <img th:src="${user != null and user.custom_avatar_URL != null ? user.custom_avatar_URL : user.default_avatar_URL}" 
             alt="Avatar" class="avatar userItem">
 
         </div>
