@@ -34,24 +34,18 @@ public class ObjectStorageService {
 
     private final S3Client s3Client;
     private final String bucket;
-    private final String endpoint;
-    private final String publicUrl;
 
     public ObjectStorageService(S3Client s3Client,
-            @Value("${storage.bucket:}") String bucket,
-            @Value("${storage.endpoint:}") String endpoint,
-            @Value("${storage.public-url:}") String publicUrl) {
+            @Value("${storage.bucket:}") String bucket) {
         this.s3Client = s3Client;
         this.bucket = bucket;
-        this.endpoint = endpoint;
-        this.publicUrl = publicUrl;
     }
 
     /**
      * Uploads a file to the object storage.
      *
      * @param file The file to upload.
-     * @return The URL of the uploaded file.
+     * @return The key of the uploaded file.
      */
     public String uploadFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
@@ -59,12 +53,12 @@ public class ObjectStorageService {
         }
 
         String original = Optional.ofNullable(file.getOriginalFilename()).orElse("file");
-        String objectName = UUID.randomUUID() + "-" + original.replaceAll("\\s+", "_");
+        String key = UUID.randomUUID() + "-" + original.replaceAll("\\s+", "_");
 
         try (InputStream is = file.getInputStream()) {
             PutObjectRequest putReq = PutObjectRequest.builder()
                     .bucket(bucket)
-                    .key(objectName)
+                    .key(key)
                     .contentType(file.getContentType())
                     .contentLength(file.getSize())
                     .build();
@@ -74,10 +68,19 @@ public class ObjectStorageService {
             throw new RuntimeException("Failed to upload file", e);
         }
 
-        if (publicUrl != null && !publicUrl.isBlank()) {
-            return publicUrl.replaceAll("/$", "") + "/" + objectName;
+        return key;
+    }
+
+    public void deleteFile(String key) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("Key must be provided");
         }
 
-        return endpoint.replaceAll("/$", "") + "/" + bucket + "/" + objectName;
+        var deleteRequest = software.amazon.awssdk.services.s3.model.DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        s3Client.deleteObject(deleteRequest);
     }
 }

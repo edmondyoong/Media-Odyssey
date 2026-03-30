@@ -49,7 +49,7 @@ public class DevAccountController {
     public ResponseEntity<DevAccountApiResponse> createAdminAccount() {
         if (devMode.toLowerCase().equals("TRUE".toLowerCase())) {
 
-            String email = UUID.randomUUID().toString() + "-" + this.email;
+            String email = UUID.randomUUID().toString() + this.email;
             String password = UUID.randomUUID().toString();
 
             UserDto dto = new UserDto(email, password);
@@ -85,7 +85,7 @@ public class DevAccountController {
     public ResponseEntity<DevAccountApiResponse> createUserAccount() {
         if (devMode.toLowerCase().equals("TRUE".toLowerCase())) {
 
-            String email = UUID.randomUUID().toString() + "-" + this.email;
+            String email = UUID.randomUUID().toString() + this.email;
             String password = UUID.randomUUID().toString();
 
             UserDto dto = new UserDto(email, password);

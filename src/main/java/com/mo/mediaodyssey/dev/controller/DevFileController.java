@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,9 @@ public class DevFileController {
 
     @Value("${dev.mode.enabled:FALSE}")
     private String devMode;
+
+    @Value("${storage.public-url:}")
+    private String publicUrl;
 
     /**
      * API endpoint to upload a file to object storage. For developmental use only.
@@ -40,15 +44,36 @@ public class DevFileController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(DevFileApiResponse.error("DEV_FILE_DISABLED",
-                                "Developmental file upload API endpoint is disabled."));
+                                "Developmental file operation endpoint is disabled."));
             } else {
-                String url = objectStorageService.uploadFile(file);
+                String key = objectStorageService.uploadFile(file);
+                String url = publicUrl.replaceAll("/$", "") + "/" + key;
+
                 return ResponseEntity
-                        .ok(DevFileApiResponse.success("DEV_FILE_UPLOAD_SUCCESS", "File uploaded successfully.", url));
+                        .ok(DevFileApiResponse.success("DEV_FILE_UPLOAD_SUCCESS", "File uploaded successfully.", key,
+                                url));
             }
         } catch (Exception e) {
             return ResponseEntity.status(500).body(DevFileApiResponse.error("DEV_FILE_UPLOAD_ERROR",
                     "An error occurred while processing the request."));
+        }
+    }
+
+    @DeleteMapping(value = "/delete")
+    public ResponseEntity<DevFileApiResponse> deleteFile(@RequestParam("key") String key) {
+        try {
+            if (!devMode.equalsIgnoreCase("TRUE")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(DevFileApiResponse.error("DEV_FILE_DISABLED",
+                                "Developmental file operation endpoint is disabled."));
+            }
+            objectStorageService.deleteFile(key);
+            return ResponseEntity
+                    .ok(DevFileApiResponse.success("DEV_FILE_DELETE_SUCCESS", "File deleted successfully.", key, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(DevFileApiResponse.error("DEV_FILE_DELETE_ERROR",
+                    "An error occurred while deleting the file."));
         }
     }
 }
