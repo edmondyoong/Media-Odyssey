@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api/dev/file")
@@ -67,13 +68,33 @@ public class DevFileController {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(DevFileApiResponse.error("DEV_FILE_DISABLED",
                                 "Developmental file operation endpoint is disabled."));
+            } else {
+                objectStorageService.deleteFile(key);
+                return ResponseEntity
+                        .ok(DevFileApiResponse.success("DEV_FILE_DELETE_SUCCESS", "File deleted successfully.", key,
+                                null));
             }
-            objectStorageService.deleteFile(key);
-            return ResponseEntity
-                    .ok(DevFileApiResponse.success("DEV_FILE_DELETE_SUCCESS", "File deleted successfully.", key, null));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(DevFileApiResponse.error("DEV_FILE_DELETE_ERROR",
                     "An error occurred while deleting the file."));
+        }
+    }
+
+    @GetMapping(value = "/get")
+    public ResponseEntity<DevFileApiResponse> getFileRedirect(@RequestParam("key") String key) {
+        if (!devMode.equalsIgnoreCase("TRUE")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(DevFileApiResponse.error("DEV_FILE_DISABLED",
+                            "Developmental file operation endpoint is disabled."));
+        } else if (key == null || key.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(DevFileApiResponse.error("DEV_FILE_GET_ERROR", "Invalid file key provided."));
+        } else {
+            String redirectUrl = publicUrl.replaceAll("/$", "") + "/" + key.replaceAll("^/+", "");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", redirectUrl)
+                    .build();
         }
     }
 }

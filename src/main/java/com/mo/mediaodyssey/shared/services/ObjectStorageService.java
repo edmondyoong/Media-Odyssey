@@ -1,5 +1,6 @@
 package com.mo.mediaodyssey.shared.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,14 +33,14 @@ public class ObjectStorageService {
      * unlimited egress.
      */
 
-    private final S3Client s3Client;
-    private final String bucket;
+    @Autowired
+    private S3Client s3Client;
 
-    public ObjectStorageService(S3Client s3Client,
-            @Value("${storage.bucket:}") String bucket) {
-        this.s3Client = s3Client;
-        this.bucket = bucket;
-    }
+    @Value("${storage.bucket:}")
+    private String bucket;
+
+    @Value("${spring.application.name:App}")
+    private String appName;
 
     /**
      * Uploads a file to the object storage.
@@ -53,7 +54,7 @@ public class ObjectStorageService {
         }
 
         String original = Optional.ofNullable(file.getOriginalFilename()).orElse("file");
-        String key = UUID.randomUUID() + "-" + original.replaceAll("\\s+", "_");
+        String key = appName.replaceAll("\\s+", "_") + "-" + UUID.randomUUID() + "-" + original.replaceAll("\\s+", "_");
 
         try (InputStream is = file.getInputStream()) {
             PutObjectRequest putReq = PutObjectRequest.builder()
