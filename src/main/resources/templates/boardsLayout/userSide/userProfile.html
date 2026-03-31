@@ -9,6 +9,7 @@
         <title>Media Odyssey-Home</title>
         <link rel="stylesheet" th:href="@{/layout/css/global.css}">
         <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/userProfile.css}">
     </head>
     <body>
         <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
@@ -29,8 +30,39 @@
             <div class="profile-header">
 
                 <!-- Avatar is displayed on the right side as a circle, 
-                allows user to upload their own profile picture.-->
-                <div class="avatar-container"></div>
+                allows user to upload their own profile picture.
+                For new users (who haven't uploaded a profile picture yet) just displayed default avatar.
+                * This container will always display user's avatar. It will also has a box to contains avatars
+                ** (uploaded avatar + default avatar) [ONLY ONE UPLOADED AVATAR]
+                -->
+                <div class="avatar-container">
+
+                    <!--Two types to display avatar on webpage-->
+
+                    <!-- Case1: user has uploaded avatar -->
+                    <div th:if="${user.custom_avatar_URL != null}">
+                        <img th:src="${user.custom_avatar_URL}" alt="Avatar" class="avatar-display">
+                    </div>
+
+                    <!-- Case2: user hasn't uploaded avatar yet then show default avatar -->
+                    <div th:if="${user.custom_avatar_URL == null}">
+                        <img th:src="${user.default_avatar_URL}" alt="Avatar" class="avatar-display">
+                    </div>
+
+                    <!-- The avatar selection box (that stores avatars) -->
+
+                    <div class="avatars-box hidden" id="avatarsBox">
+                        <img th:if="${user.custom_avatar_URL != null}" 
+                        th:src="${user.custom_avatar_URL}" alt="Custom Avatar" class="avatar-option">
+
+                        <div th:if="${user.custom_avatar_URL == null}" class="avatar-placeholder">
+                            <span class="plus-icon">+</span>
+                        </div>
+
+                        <img th:src="${user.default_avatar_URL}" alt="Default Avatar" class="avatar-placeholder">
+                    </div>
+
+                </div>
 
                 <!-- Displayed user's info (input elements can be left empty)-->
                 <div class="user-info-box">
@@ -54,5 +86,6 @@
         </main>
 
         <script th:src="@{/layout/js/fragments.js}"></script>
+        <script th:src="@{/layout/js/userProfile.js}"></script>
     </body>
 </html>

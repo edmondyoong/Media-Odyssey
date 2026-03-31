@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <head>
+        <meta charset="UTF-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--<title th:text="${movie.title}"></title>-->
+        <title>Music Display-Media Odyssey</title>
+        <link rel="stylesheet" th:href="@{/layout/css/global.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/mediaStyle/musicDisplay.css}">
+    </head>
+    <body>
+
+        <!-- This is an html that shows the details of the music being clicked on.
+        Downside, html has not yet thought of albums-->
+
+        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
+        <div th:replace="boardsLayout/fragments/header :: header"></div>
+
+        <!-- A side bar that contains features (can be discussed). Side bar can be folded
+         Please use the MO logo to work with side bar if needed -->
+        <div th:replace="boardsLayout/fragments/sidebar :: sideBar"></div>
+
+        <!-- =====================================================================
+                main content of the page begins here 
+        ===========================================================================-->
+
+        <!-- Poster + Info -->
+        <div class="music-header">
+            <!-- Poster -->
+            <div class="poster-card">
+                <img th:src="" alt="Music Poster" id="poster-img" />
+            </div>
+
+            <!-- Music's Info: name, artist, release date. -->
+            <div class="music-info">
+                <h1 class="music-title"></h1>
+
+                <div class="music-artist"></div>
+
+                <div class="music-release-date"></div>
+            </div>
+        </div>
+
+        <!-- Music's body: show (possibly) lyrics + interactive/action panel (ratings + add to boards)-->
+        <div class="music-body">
+
+            <!-- Music's lyrics -->
+            <div class="music-lyrics"></div>
+
+            <!-- interactive/Action panel (ratings + add to boards)-->
+            <div class="actions-panel">
+
+                <!-- Star rating system -->
+                <div></div>
+
+                <!-- Add to board system (a theme boards drop down) 
+                **   More detailed version can be found on movieDisplay.html-->
+                <div class="theme-dropdown">
+                    <button type="button" class="dropdown-items"></button>
+                </div>
+
+            </div>
+        </div>
+
+        <script th:src="@{/layout/js/musicDisplay.js}"></script>
+    </body>
+</html>

@@ -7,11 +7,13 @@
         <title th:text="${movie.title}"></title>
         <link rel="stylesheet" th:href="@{/layout/css/global.css}">
         <link rel="stylesheet" th:href="@{/layout/css/fragments.css}">
-        <link rel="stylesheet" th:href="@{/layout/css/movieDisplay.css}">
+        <link rel="stylesheet" th:href="@{/layout/css/mediaStyle/movieDisplay.css}">
 
     </head>
     <body>
-        <!--This html will show when user click on any movies. A webpage that shows ....-->
+        <!--This html will show when user click on any movies. A webpage that shows the details of
+        the movie being cliked on.
+        Downside: not showing the actors/ directors/ streaming platforms yet.-->
         
        <!--header (display logo[sidebar toggle], homeReturn icon, search bar, user's name and avatar)-->
         <div th:replace="boardsLayout/fragments/header :: header"></div>
@@ -125,7 +127,7 @@
         </main>
 
         <script th:src="@{/layout/js/fragments.js}"></script>
-        <script th:src="@{/layout/js/movieDisplay.js}"></script>
+        <script th:src="@{/layout/js/mediaJS/movieDisplay.js}"></script>
 
     </body>
 </html>
