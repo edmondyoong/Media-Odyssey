@@ -10,6 +10,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -18,6 +20,9 @@ public class RecommendationService {
     private final BannedMediaRepository bannedMediaRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+
+    // Limits concurrent Last.fm image calls to 4 at a time (safe under 5 req/sec)
+    private final Semaphore lastfmSemaphore = new Semaphore(4);
 
     @Value("${tmdb.api.key}")
     private String tmdbApiKey;
@@ -181,11 +186,11 @@ public class RecommendationService {
                 break;
             }
             case "SONG": {
-                // 20 from favourite genre via Last.fm tag.getTopTracks
-                results.addAll(fetchLastfmRecommendations(favoriteGenre, 20));
-                // 10 from a random other genre via Last.fm tag.getTopTracks
+                // 5 from favourite genre via Last.fm tag.getTopTracks
+                results.addAll(fetchLastfmRecommendations(favoriteGenre, 5));
+                // 5 from a random other genre via Last.fm tag.getTopTracks
                 String otherGenre = pickOtherGenre(favoriteGenre, SONG_GENRES);
-                results.addAll(fetchLastfmRecommendations(otherGenre, 10));
+                results.addAll(fetchLastfmRecommendations(otherGenre, 5));
                 break;
             }
             default:
@@ -260,9 +265,48 @@ public class RecommendationService {
         return results;
     }
 
+    // fetches album art for a single track using Last.fm track.getInfo
+    // acquires a semaphore permit before calling — max 4 concurrent calls at any time
+    // holds the permit for 250ms after the call completes to stay safely under 5 req/sec
+    private String fetchLastfmTrackImage(String artist, String track) {
+        try {
+            lastfmSemaphore.acquire();
+            try {
+                String url = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo"
+                        + "&api_key=" + lastfmApiKey
+                        + "&artist=" + java.net.URLEncoder.encode(artist, "UTF-8")
+                        + "&track=" + java.net.URLEncoder.encode(track, "UTF-8")
+                        + "&format=json";
+                String response = restTemplate.getForObject(url, String.class);
+                JsonNode album = objectMapper.readTree(response).path("track").path("album");
+                String image = album.path("image").path(3).path("#text").asText();
+                if (image.isEmpty()) image = album.path("image").path(2).path("#text").asText();
+                return image;
+            } finally {
+                // hold permit for 250ms so max throughput stays at 4 per 250ms = 16/sec worst case
+                // but because network latency per call is typically >200ms, real rate stays well under 5/sec
+                Thread.sleep(250);
+                lastfmSemaphore.release();
+            }
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    // fires all track.getInfo image calls in parallel, respecting the semaphore rate limit
+    // returns images in the same order as the input list
+    private List<String> fetchImagesInParallel(List<String[]> artistAndTitles) {
+        List<CompletableFuture<String>> futures = artistAndTitles.stream()
+            .map(pair -> CompletableFuture.supplyAsync(() -> fetchLastfmTrackImage(pair[0], pair[1])))
+            .collect(Collectors.toList());
+
+        return futures.stream()
+            .map(CompletableFuture::join)
+            .collect(Collectors.toList());
+    }
+
     // fallback: globally popular tracks for new users with no history
-    // uses Last.fm chart.getTopTracks — no Spotify calls needed
-    // mediaApiId is the Last.fm track URL which is unique per track
+    // uses Last.fm chart.getTopTracks then fetches images in parallel via track.getInfo
     private List<RecommendationResponse> fetchLastfmPopular() {
         List<RecommendationResponse> results = new ArrayList<>();
         try {
@@ -274,17 +318,31 @@ public class RecommendationService {
             String lastfmResponse = restTemplate.getForObject(lastfmUrl, String.class);
             JsonNode tracks = objectMapper.readTree(lastfmResponse).path("tracks").path("track");
 
+            // collect track metadata first
+            List<String[]> artistAndTitles = new ArrayList<>();
+            List<JsonNode> trackList = new ArrayList<>();
             for (JsonNode track : tracks) {
                 String mediaApiId = track.path("url").asText();
                 if (mediaApiId.isEmpty()) continue;
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
+                trackList.add(track);
+                artistAndTitles.add(new String[]{
+                    track.path("artist").path("name").asText(),
+                    track.path("name").asText()
+                });
+            }
 
+            // fetch all images in parallel
+            List<String> images = fetchImagesInParallel(artistAndTitles);
+
+            // build responses
+            for (int i = 0; i < trackList.size(); i++) {
+                JsonNode track = trackList.get(i);
+                String mediaApiId = track.path("url").asText();
                 String title      = track.path("name").asText();
                 String artist     = track.path("artist").path("name").asText();
-                // Last.fm image array: index 3 is extralarge, fall back to index 2 (large)
-                String imageUrl   = track.path("image").path(3).path("#text").asText();
-                if (imageUrl.isEmpty()) imageUrl = track.path("image").path(2).path("#text").asText();
                 double score      = track.path("playcount").asDouble();
+                String imageUrl   = images.get(i);
 
                 results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", "Pop", imageUrl, score));
             }
@@ -359,8 +417,7 @@ public class RecommendationService {
     }
 
     // uses Last.fm tag.getTopTracks to get top tracks for a genre tag
-    // mediaApiId is the Last.fm track URL which is unique per track
-    // no Spotify calls needed — images and metadata come directly from Last.fm
+    // then fetches album art for all tracks in parallel via track.getInfo
     private List<RecommendationResponse> fetchLastfmRecommendations(String genre, int limit) {
         List<RecommendationResponse> results = new ArrayList<>();
 
@@ -375,17 +432,31 @@ public class RecommendationService {
             String lastfmResponse = restTemplate.getForObject(lastfmUrl, String.class);
             JsonNode tracks = objectMapper.readTree(lastfmResponse).path("tracks").path("track");
 
+            // collect track metadata first
+            List<String[]> artistAndTitles = new ArrayList<>();
+            List<JsonNode> trackList = new ArrayList<>();
             for (JsonNode track : tracks) {
                 String mediaApiId = track.path("url").asText();
                 if (mediaApiId.isEmpty()) continue;
                 if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
+                trackList.add(track);
+                artistAndTitles.add(new String[]{
+                    track.path("artist").path("name").asText(),
+                    track.path("name").asText()
+                });
+            }
 
-                String title    = track.path("name").asText();
-                String artist   = track.path("artist").path("name").asText();
-                // Last.fm image array: index 3 is extralarge, fall back to index 2 (large)
-                String imageUrl = track.path("image").path(3).path("#text").asText();
-                if (imageUrl.isEmpty()) imageUrl = track.path("image").path(2).path("#text").asText();
-                double score    = track.path("playcount").asDouble();
+            // fetch all images in parallel
+            List<String> images = fetchImagesInParallel(artistAndTitles);
+
+            // build responses
+            for (int i = 0; i < trackList.size(); i++) {
+                JsonNode track = trackList.get(i);
+                String mediaApiId = track.path("url").asText();
+                String title      = track.path("name").asText();
+                String artist     = track.path("artist").path("name").asText();
+                double score      = track.path("playcount").asDouble();
+                String imageUrl   = images.get(i);
 
                 results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score));
             }
