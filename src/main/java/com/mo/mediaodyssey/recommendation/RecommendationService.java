@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -26,12 +24,6 @@ public class RecommendationService {
 
     @Value("${rawg.api.key}")
     private String rawgApiKey;
-
-    @Value("${spotify.client.id}")
-    private String spotifyClientId;
-
-    @Value("${spotify.client.secret}")
-    private String spotifyClientSecret;
 
     @Value("${lastfm.api.key}")
     private String lastfmApiKey;
@@ -61,7 +53,7 @@ public class RecommendationService {
     }
 
     // genre tags used for Last.fm tag.getTopTracks — must be valid Last.fm tags
-    private static final List<String> SPOTIFY_GENRES = Arrays.asList(
+    private static final List<String> SONG_GENRES = Arrays.asList(
         "Pop", "Rock", "Hip-hop", "R&b", "Jazz", "Classical", "Electronic", "Country", "Reggae", "Soul"
     );
 
@@ -79,7 +71,14 @@ public class RecommendationService {
     }
 
     // saves a user interaction — userId comes from the session, not the frontend
+    // duplicate likes are blocked; duplicate views are allowed
     public void recordInteraction(Long userId, InteractionRequest request) {
+        if ("LIKE".equals(request.getInteractionType()) &&
+            userInteractionRepository.existsByUserIdAndMediaApiIdAndInteractionType(
+                userId, request.getMediaApiId(), "LIKE")) {
+            return;
+        }
+
         UserInteraction interaction = new UserInteraction();
         interaction.setUserId(userId);
         interaction.setMediaApiId(request.getMediaApiId());
@@ -134,6 +133,15 @@ public class RecommendationService {
         return others.get(0);
     }
 
+    // marks which items in a list the user has already liked
+    private void applyUserLiked(List<RecommendationResponse> results, Long userId) {
+        List<String> likedIds = userInteractionRepository.findLikedMediaApiIdsByUserId(userId);
+        Set<String> likedSet = new HashSet<>(likedIds);
+        for (RecommendationResponse rec : results) {
+            rec.setUserLiked(likedSet.contains(rec.getMediaApiId()));
+        }
+    }
+
     // main recommendation method
     // returns 20 from the user's favourite genre + 10 from a random other genre
     // falls back to popular media for new users with no interaction history
@@ -141,12 +149,15 @@ public class RecommendationService {
         String favoriteGenre = userFavoriteGenre(userId, mediaType);
 
         if (favoriteGenre == null) {
+            List<RecommendationResponse> fallback;
             switch (mediaType) {
-                case "MOVIE": return fetchTmdbPopular();
-                case "GAME":  return fetchRawgPopular();
-                case "SONG":  return fetchSpotifyPopular();
+                case "MOVIE": fallback = fetchTmdbPopular(); break;
+                case "GAME":  fallback = fetchRawgPopular(); break;
+                case "SONG":  fallback = fetchLastfmPopular(); break;
                 default:      return List.of();
             }
+            applyUserLiked(fallback, userId);
+            return fallback;
         }
 
         List<RecommendationResponse> results = new ArrayList<>();
@@ -170,17 +181,18 @@ public class RecommendationService {
                 break;
             }
             case "SONG": {
-                // 20 from favourite genre via Last.fm + Spotify search
-                results.addAll(fetchSpotifyRecommendations(favoriteGenre, 20));
-                // 10 from a random other genre via Last.fm + Spotify search
-                String otherGenre = pickOtherGenre(favoriteGenre, SPOTIFY_GENRES);
-                results.addAll(fetchSpotifyRecommendations(otherGenre, 10));
+                // 20 from favourite genre via Last.fm tag.getTopTracks
+                results.addAll(fetchLastfmRecommendations(favoriteGenre, 20));
+                // 10 from a random other genre via Last.fm tag.getTopTracks
+                String otherGenre = pickOtherGenre(favoriteGenre, SONG_GENRES);
+                results.addAll(fetchLastfmRecommendations(otherGenre, 10));
                 break;
             }
             default:
                 break;
         }
 
+        applyUserLiked(results, userId);
         return results;
     }
 
@@ -249,16 +261,13 @@ public class RecommendationService {
     }
 
     // fallback: globally popular tracks for new users with no history
-    // uses Last.fm chart.getTopTracks to get track names, then resolves each to a Spotify track
-    private List<RecommendationResponse> fetchSpotifyPopular() {
+    // uses Last.fm chart.getTopTracks — no Spotify calls needed
+    // mediaApiId is the Last.fm track URL which is unique per track
+    private List<RecommendationResponse> fetchLastfmPopular() {
         List<RecommendationResponse> results = new ArrayList<>();
         try {
-            String accessToken = getSpotifyAccessToken();
-            if (accessToken == null) return results;
-
-            // Last.fm chart.getTopTracks returns the most popular tracks globally
             String lastfmUrl = "https://ws.audioscrobbler.com/2.0/?method=chart.getTopTracks"
-                    + "&limit=20"
+                    + "&limit=10"
                     + "&api_key=" + lastfmApiKey
                     + "&format=json";
 
@@ -266,19 +275,21 @@ public class RecommendationService {
             JsonNode tracks = objectMapper.readTree(lastfmResponse).path("tracks").path("track");
 
             for (JsonNode track : tracks) {
-                String trackName  = track.path("name").asText();
-                String artistName = track.path("artist").path("name").asText();
+                String mediaApiId = track.path("url").asText();
+                if (mediaApiId.isEmpty()) continue;
+                if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
 
-                if (trackName.isEmpty() || artistName.isEmpty()) continue;
+                String title      = track.path("name").asText();
+                String artist     = track.path("artist").path("name").asText();
+                // Last.fm image array: index 3 is extralarge, fall back to index 2 (large)
+                String imageUrl   = track.path("image").path(3).path("#text").asText();
+                if (imageUrl.isEmpty()) imageUrl = track.path("image").path(2).path("#text").asText();
+                double score      = track.path("playcount").asDouble();
 
-                // resolve to Spotify track to get ID and image
-                RecommendationResponse rec = searchSpotifyTrack(trackName, artistName, "Pop", accessToken);
-                if (rec != null && !bannedMediaRepository.existsByMediaApiId(rec.getMediaApiId())) {
-                    results.add(rec);
-                }
+                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", "Pop", imageUrl, score));
             }
         } catch (Exception e) {
-            System.err.println("Spotify popular fallback error: " + e.getMessage());
+            System.err.println("Last.fm popular fallback error: " + e.getMessage());
         }
         return results;
     }
@@ -347,16 +358,13 @@ public class RecommendationService {
         return results;
     }
 
-    // uses Last.fm tag.getTopTracks to get top tracks for a genre tag,
-    // then resolves each to a Spotify track via search to get the Spotify ID and image
-    private List<RecommendationResponse> fetchSpotifyRecommendations(String genre, int limit) {
+    // uses Last.fm tag.getTopTracks to get top tracks for a genre tag
+    // mediaApiId is the Last.fm track URL which is unique per track
+    // no Spotify calls needed — images and metadata come directly from Last.fm
+    private List<RecommendationResponse> fetchLastfmRecommendations(String genre, int limit) {
         List<RecommendationResponse> results = new ArrayList<>();
 
         try {
-            String accessToken = getSpotifyAccessToken();
-            if (accessToken == null) return results;
-
-            // Last.fm tag.getTopTracks returns top tracks tagged with the given genre
             String tag = java.net.URLEncoder.encode(genre.toLowerCase(), "UTF-8");
             String lastfmUrl = "https://ws.audioscrobbler.com/2.0/?method=tag.getTopTracks"
                     + "&tag=" + tag
@@ -368,74 +376,24 @@ public class RecommendationService {
             JsonNode tracks = objectMapper.readTree(lastfmResponse).path("tracks").path("track");
 
             for (JsonNode track : tracks) {
-                String trackName  = track.path("name").asText();
-                String artistName = track.path("artist").path("name").asText();
+                String mediaApiId = track.path("url").asText();
+                if (mediaApiId.isEmpty()) continue;
+                if (bannedMediaRepository.existsByMediaApiId(mediaApiId)) continue;
 
-                if (trackName.isEmpty() || artistName.isEmpty()) continue;
+                String title    = track.path("name").asText();
+                String artist   = track.path("artist").path("name").asText();
+                // Last.fm image array: index 3 is extralarge, fall back to index 2 (large)
+                String imageUrl = track.path("image").path(3).path("#text").asText();
+                if (imageUrl.isEmpty()) imageUrl = track.path("image").path(2).path("#text").asText();
+                double score    = track.path("playcount").asDouble();
 
-                // resolve to Spotify track to get ID and image
-                RecommendationResponse rec = searchSpotifyTrack(trackName, artistName, genre, accessToken);
-                if (rec != null && !bannedMediaRepository.existsByMediaApiId(rec.getMediaApiId())) {
-                    results.add(rec);
-                }
+                results.add(new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score));
             }
         } catch (Exception e) {
-            System.err.println("Spotify recommendations error: " + e.getMessage());
+            System.err.println("Last.fm recommendations error: " + e.getMessage());
         }
 
         return results;
-    }
-
-    // searches Spotify for a specific track by name and artist
-    // returns a RecommendationResponse with the Spotify track ID and album image, or null if not found
-    private RecommendationResponse searchSpotifyTrack(String trackName, String artistName, String genre, String accessToken) {
-        try {
-            String query = java.net.URLEncoder.encode(trackName + " artist:" + artistName, "UTF-8");
-            String url = "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=1&market=US";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(accessToken);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-
-            JsonNode items = objectMapper.readTree(response.getBody()).path("tracks").path("items");
-            if (!items.isArray() || items.size() == 0) return null;
-
-            JsonNode track     = items.get(0);
-            String mediaApiId  = track.path("id").asText();
-            String title       = track.path("name").asText();
-            String artist      = track.path("artists").path(0).path("name").asText();
-            String imageUrl    = track.path("album").path("images").path(0).path("url").asText();
-            double score       = track.path("popularity").asDouble();
-
-            if (mediaApiId.isEmpty()) return null;
-
-            return new RecommendationResponse(mediaApiId, title, artist, "SONG", genre, imageUrl, score);
-        } catch (Exception e) {
-            System.err.println("Spotify track search error: " + e.getMessage());
-            return null;
-        }
-    }
-
-    // Spotify requires an OAuth access token — this gets one using client credentials
-    private String getSpotifyAccessToken() {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            headers.setBasicAuth(spotifyClientId, spotifyClientSecret);
-
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("grant_type", "client_credentials");
-
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    "https://accounts.spotify.com/api/token", request, String.class);
-
-            JsonNode root = objectMapper.readTree(response.getBody());
-            return root.path("access_token").asText();
-        } catch (Exception e) {
-            System.err.println("Spotify token error: " + e.getMessage());
-            return null;
-        }
     }
 
     // admin: ban a media item so it never appears in recommendations
