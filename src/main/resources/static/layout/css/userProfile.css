@@ -42,6 +42,27 @@
     border-color: rgba(139, 92, 246, 0.8);
 }
 
+.avatar-option{
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(139, 92, 246, 0.4);
+
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.avatar-option:hover {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.8);
+}
+
 .avatar-placeholder {
     width: 120px;
     height: 120px;

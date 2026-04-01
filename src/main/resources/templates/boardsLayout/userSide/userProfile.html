@@ -37,29 +37,40 @@
                 -->
                 <div class="avatar-container">
 
-                    <!--Two types to display avatar on webpage-->
-
-                    <!-- Case1: user has uploaded avatar -->
-                    <div th:if="${user.custom_avatar_URL != null}">
-                        <img th:src="${user.custom_avatar_URL}" alt="Avatar" class="avatar-display">
-                    </div>
-
-                    <!-- Case2: user hasn't uploaded avatar yet then show default avatar -->
-                    <div th:if="${user.custom_avatar_URL == null}">
-                        <img th:src="${user.default_avatar_URL}" alt="Avatar" class="avatar-display">
-                    </div>
+                    <!--Display avatar on webpage-->
+                    <img th:src="${user.selected_avatar_type == 'custom' 
+                    ? user.custom_avatar_URL : user.default_avatar_URL}" alt="Avatar" class="avatar-display">
 
                     <!-- The avatar selection box (that stores avatars) -->
 
                     <div class="avatars-box hidden" id="avatarsBox">
+
+                        <!-- For the custom avatar -->
                         <img th:if="${user.custom_avatar_URL != null}" 
-                        th:src="${user.custom_avatar_URL}" alt="Custom Avatar" class="avatar-option">
+                        th:src="${user.custom_avatar_URL}" alt="Custom Avatar" 
+                        class="avatar-option" data-avatar-type="custom">
 
-                        <div th:if="${user.custom_avatar_URL == null}" class="avatar-placeholder">
-                            <span class="plus-icon">+</span>
-                        </div>
+                        <!-- This element will allow user to upload image files.
+                        ** Design choice: It is determined that this element should always be presented even
+                        * after the user has uploaded anything. So both custom + default will be displayed. 
+                        * And this plus button will also be there, for simple & easy to understand design. 
+                        *
+                        *** Logic: we will only accpet: .png, .jpg, .jpeg, .svg files as uploaded avatar. 
+                        -->
+                        <form action="post" enctype="multipart/form-data">
+                            <div class="upload-avatar-box">
+                                <label for="fileUpload" class="avatar-placeholder">
+                                    <span class="plus-icon">+</span>
+                                </label>
 
-                        <img th:src="${user.default_avatar_URL}" alt="Default Avatar" class="avatar-placeholder">
+                                <input type="file" id="fileUpload" 
+                                    name="file" accept=".png, .jpg, .jpeg, .svg" style="display: none;">
+                            </div>
+                        </form> 
+
+                        <!-- For the default avatar -->
+                        <img th:src="${user.default_avatar_URL}" alt="Default Avatar" 
+                        class="avatar-option" data-avatar-type="default">
                     </div>
 
                 </div>
