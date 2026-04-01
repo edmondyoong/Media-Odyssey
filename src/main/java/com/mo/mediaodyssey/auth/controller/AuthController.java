@@ -45,6 +45,18 @@ public class AuthController {
     @Autowired
     private VerificationService verificationService;
 
+    /**
+     * Handles account login requests.
+     *
+     * @param dto      The login request data containing credentials.
+     * @param request  The HTTP request.
+     * @param response The HTTP response.
+     * @return The login response containing success status and message. Session is
+     *         managed by Spring Security, and the security context is stored in the
+     *         session upon successful authentication. Otherwise, the error status
+     *         and message is returned. Authentication exceptions are handled by
+     *         AuthExceptionHandler.
+     */
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity<AuthApiResponse> login(@Valid @RequestBody UserDto dto, HttpServletRequest request,
@@ -64,6 +76,16 @@ public class AuthController {
                 .ok(AuthApiResponse.success("AUTH_LOGIN_SUCCESS", "Login successful"));
     }
 
+    /**
+     * Handles account registration requests.
+     *
+     * @param dto The registration request data containing user details.
+     * @return The registration response containing success status and message.
+     *         Session is not created upon registration; the user must log in after
+     *         verifying their email. Otherwise, the error status and message is
+     *         returned. Authentication exceptions are handled by
+     *         AuthExceptionHandler.
+     */
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity<AuthApiResponse> register(@Valid @RequestBody UserDto dto) {
@@ -73,6 +95,14 @@ public class AuthController {
         return ResponseEntity.ok(AuthApiResponse.success("AUTH_REGISTER_SUCCESS", "Registration successful"));
     }
 
+    /**
+     * Handles email verification requests.
+     *
+     * @param token The verification token.
+     * @return Upon successful verification, the user is redirected to the login
+     *         page. Otherwise, the error status and message is returned.
+     *         Authentication exceptions are handled by AuthExceptionHandler.
+     */
     @GetMapping(value = "/verify")
     @Transactional
     public ResponseEntity<Void> verify(@Valid @RequestParam("token") String token) {
@@ -85,6 +115,14 @@ public class AuthController {
                 .build();
     }
 
+    /**
+     * Handles verification token resend requests.
+     *
+     * @param dto The resend request data containing user details.
+     * @return The resend response containing success status and message. Otherwise,
+     *         the error status and message is returned. Authentication exceptions
+     *         are handled by AuthExceptionHandler.
+     */
     @PostMapping(value = "/resend", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity<AuthApiResponse> resend(@Valid @RequestBody ResendVerifyTokenDto dto) {
@@ -93,9 +131,4 @@ public class AuthController {
         // Return OK - successfully resent
         return ResponseEntity.ok(AuthApiResponse.success("AUTH_RESEND_SUCCESS", "Verification email resent"));
     }
-
-    // TODO: Completed?
-    // AuthService, AuthController, GrantedAuthorities (Roles), Email
-    // VerificationToken in VerificationService, Frontend (Thymeleaf templates)
-
 }

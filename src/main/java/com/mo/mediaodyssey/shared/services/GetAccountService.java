@@ -9,10 +9,15 @@ import org.springframework.stereotype.Service;
 import com.mo.mediaodyssey.shared.model.User;
 
 @Service
-public class GetUserService {
+public class GetAccountService {
 
-    public User getCurrentUser() {
+    public User getCurrentAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new AuthenticationCredentialsNotFoundException(
+                    "Current visitor has not authenticated with a valid account.");
+        }
+
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             return (User) authentication.getPrincipal();
         } else {
@@ -21,7 +26,12 @@ public class GetUserService {
         }
     }
 
-    public User getCurrentUser(Authentication authentication) {
+    public User getCurrentAccount(Authentication authentication) {
+        if (authentication == null) {
+            throw new AuthenticationCredentialsNotFoundException(
+                    "Current visitor has not authenticated with a valid account.");
+        }
+
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             return (User) authentication.getPrincipal();
         } else {
