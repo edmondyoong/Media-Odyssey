@@ -21,8 +21,8 @@ public class EmailService {
     private final String from;
 
     public EmailService(
-            @Value("${RESEND_API_KEY}") String apiKey,
-            @Value("${EMAIL_FROM}") String from) {
+            @Value("${resend.api.key:}") String apiKey,
+            @Value("${email.from:}") String from) {
         this.resend = new Resend(apiKey);
         this.from = from;
     }

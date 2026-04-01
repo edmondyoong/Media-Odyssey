@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mo.mediaodyssey.auth.dto.UserDto;
-import com.mo.mediaodyssey.dev.dto.DevUserApiResponse;
+import com.mo.mediaodyssey.dev.dto.DevAccountApiResponse;
 import com.mo.mediaodyssey.dev.services.DevUserService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
  * Account creation logic for developmental use only.
  */
 @RestController
-@RequestMapping("/api/auth")
-public class DevUserController {
+@RequestMapping("/api/dev/auth")
+public class DevAccountController {
 
-    @Value("${ALLOW_DEV_ACCOUNT_CREATION:FALSE}")
-    private String allowDevAccountCreation;
+    @Value("${dev.mode.enabled:FALSE}")
+    private String devMode;
 
-    @Value("${EMAIL_FROM:null}")
+    @Value("${dev.email.suffix:}")
     private String email;
 
     @Autowired
@@ -46,25 +46,25 @@ public class DevUserController {
      */
     @GetMapping("/createAdminAccount")
     @Transactional
-    public ResponseEntity<DevUserApiResponse> createAdminAccount() {
-        if (allowDevAccountCreation.toLowerCase().equals("TRUE".toLowerCase())) {
+    public ResponseEntity<DevAccountApiResponse> createAdminAccount() {
+        if (devMode.toLowerCase().equals("TRUE".toLowerCase())) {
 
-            String email = UUID.randomUUID().toString() + "-" + this.email;
+            String email = UUID.randomUUID().toString() + this.email;
             String password = UUID.randomUUID().toString();
 
             UserDto dto = new UserDto(email, password);
             devUserService.createAdminAccount(dto);
 
             // Return OK and generated credentials in a message body
-            return ResponseEntity.ok(DevUserApiResponse.success(
-                    "AUTH_ADMIN_CREATED",
+            return ResponseEntity.ok(DevAccountApiResponse.success(
+                    "DEV_AUTH_ADMIN_CREATED",
                     "Admin account created successfully.",
                     email,
                     password));
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(DevUserApiResponse.error("AUTH_DEV_ACCOUNT_CREATION_DISABLED",
+                    .body(DevAccountApiResponse.error("DEV_AUTH_ACCOUNT_CREATION_DISABLED",
                             "Developmental account creation API endpoint is disabled."));
         }
     }
@@ -82,25 +82,25 @@ public class DevUserController {
      */
     @GetMapping("/createUserAccount")
     @Transactional
-    public ResponseEntity<DevUserApiResponse> createUserAccount() {
-        if (allowDevAccountCreation.toLowerCase().equals("TRUE".toLowerCase())) {
+    public ResponseEntity<DevAccountApiResponse> createUserAccount() {
+        if (devMode.toLowerCase().equals("TRUE".toLowerCase())) {
 
-            String email = UUID.randomUUID().toString() + "-" + this.email;
+            String email = UUID.randomUUID().toString() + this.email;
             String password = UUID.randomUUID().toString();
 
             UserDto dto = new UserDto(email, password);
             devUserService.createUserAccount(dto);
 
             // Return OK and generated credentials in a message body
-            return ResponseEntity.ok(DevUserApiResponse.success(
-                    "AUTH_USER_CREATED",
+            return ResponseEntity.ok(DevAccountApiResponse.success(
+                    "DEV_AUTH_USER_CREATED",
                     "User account created successfully.",
                     email,
                     password));
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(DevUserApiResponse.error("AUTH_DEV_ACCOUNT_CREATION_DISABLED",
+                    .body(DevAccountApiResponse.error("DEV_AUTH_ACCOUNT_CREATION_DISABLED",
                             "Developmental account creation API endpoint is disabled."));
         }
     }

@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.mo.mediaodyssey.auth.dto.AuthApiResponse;
 import com.mo.mediaodyssey.auth.exception.InvalidVerificationTokenException;
 import com.mo.mediaodyssey.auth.exception.UserAlreadyVerifiedException;
-import com.mo.mediaodyssey.dev.controller.DevUserController;
+import com.mo.mediaodyssey.dev.controller.DevAccountController;
 
-@RestControllerAdvice(basePackageClasses = { AuthController.class, DevUserController.class })
+@RestControllerAdvice(basePackageClasses = { AuthController.class, DevAccountController.class })
 public class AuthExceptionHandler {
 
         // Debugging assisted by AI.
