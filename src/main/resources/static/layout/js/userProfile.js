@@ -23,6 +23,34 @@ avatarOptions.forEach(option => {
                 "Content-Type": "application/json"
             }, 
             body: JSON.stringify({ selectedAvatarType: selectedAvatarType })
-        }); 
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to update. Try again later.");
+            }
+        }).catch(error => {
+            console.error("From updating avatar type js:", error);
+        });
+    });
+});
+
+const avatarFileInput = document.getElementById("fileUpload");
+
+avatarFileInput.addEventListener("change", () => {
+    const file = avatarFileInput.files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("/user/profile/avatar/upload", {
+        method: "POST",
+        body: formData
+
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.querySelector(".avatar-display.custom").src = data.customAvatarURL;
+        console.log("Avatar uploaded successfully:", data);
+    }).catch(error => {
+        console.error("From uploading avatar js:", error);
     });
 });
