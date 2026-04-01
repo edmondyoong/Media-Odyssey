@@ -57,16 +57,13 @@
                         *
                         *** Logic: we will only accpet: .png, .jpg, .jpeg, .svg files as uploaded avatar. 
                         -->
-                        <form action="post" enctype="multipart/form-data">
-                            <div class="upload-avatar-box">
-                                <label for="fileUpload" class="avatar-placeholder">
-                                    <span class="plus-icon">+</span>
-                                </label>
-
-                                <input type="file" id="fileUpload" 
-                                    name="file" accept=".png, .jpg, .jpeg, .svg" style="display: none;">
-                            </div>
-                        </form> 
+                        <div class="upload-avatar-box">
+                            <label for="fileUpload" class="avatar-placeholder">
+                                <span class="plus-icon">+</span>
+                            </label>
+                            <input type="file" id="fileUpload" name="file" 
+                            accept=".png, .jpg, .jpeg, .svg" style="display: none;">
+                        </div>
 
                         <!-- For the default avatar -->
                         <img th:src="${user.default_avatar_URL}" alt="Default Avatar" 

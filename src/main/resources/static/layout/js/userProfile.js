@@ -1,3 +1,13 @@
+/*===============================================================================================
+    * This JS file is responsible for handling: 
+    * 1. Avatar selection (between default and custom)
+    * 2. Avatar uploading (uploading a custom avatar to the server and update the display)
+    * 
+    * Notice: Please put this JS file at the end of userProfile.html 
+    * in order for functions to work properly.
+==============================================================================================*/
+
+/* Avatar Selection (user choose to use either default or custom avatar) */
 const avatarDisplay = document.querySelector(".avatar-display");
 const avatarOptions  = document.querySelectorAll(".avatar-option"); 
 const avatarSelectionBox = document.getElementById("avatarsBox");
@@ -33,10 +43,14 @@ avatarOptions.forEach(option => {
     });
 });
 
+/* Avatar Uploading (user upload a custom avatar to the server and update the display without reloading page) */
 const avatarFileInput = document.getElementById("fileUpload");
 
 avatarFileInput.addEventListener("change", () => {
     const file = avatarFileInput.files[0];
+
+    //prevent empty request if errors happen
+    if (!file) return;
 
     const formData = new FormData();
     formData.append("file", file);

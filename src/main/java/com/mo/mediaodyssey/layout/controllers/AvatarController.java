@@ -6,6 +6,7 @@ import com.mo.mediaodyssey.shared.services.ObjectStorageService;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,9 @@ public class AvatarController {
         * Store it so the application knows which avatar is chosen to use
         * Notice: the avatar type is either "custom" or "default.
     */ 
+
+    @Value("${storage.public-url}")
+    private String storagePublicURL;
 
     private final UserRepository userRepository;
     
@@ -50,7 +54,8 @@ public class AvatarController {
     public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file,
                                            Authentication authentication) {
         try {
-            String customAvatarURL = objectStorageService.uploadFile(file);
+            String fileKey = objectStorageService.uploadFile(file);
+            String customAvatarURL = storagePublicURL + "/" + fileKey;
 
             // When user upload a file, assume they will use custom avatar immediately. 
             User user = (User) authentication.getPrincipal();
