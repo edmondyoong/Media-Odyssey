@@ -43,12 +43,7 @@
 
                     <!-- The avatar selection box (that stores avatars) -->
 
-                    <div class="avatars-box hidden" id="avatarsBox">
-
-                        <!-- For the custom avatar -->
-                        <img th:if="${user.custom_avatar_URL != null}" 
-                        th:src="${user.custom_avatar_URL}" alt="Custom Avatar" 
-                        class="avatar-option" data-avatar-type="custom">
+                    <div class="avatar-selection-box hidden" id="avatarSelectionBox">
 
                         <!-- This element will allow user to upload image files.
                         ** Design choice: It is determined that this element should always be presented even
@@ -57,7 +52,7 @@
                         *
                         *** Logic: we will only accpet: .png, .jpg, .jpeg, .svg files as uploaded avatar. 
                         -->
-                        <div class="upload-avatar-box">
+                        <div class="upload-avatar-box" id="uploadAvatarBox">
                             <label for="fileUpload" class="avatar-placeholder">
                                 <span class="plus-icon">+</span>
                             </label>
@@ -65,9 +60,16 @@
                             accept=".png, .jpg, .jpeg, .svg" style="display: none;">
                         </div>
 
-                        <!-- For the default avatar -->
-                        <img th:src="${user.default_avatar_URL}" alt="Default Avatar" 
-                        class="avatar-option" data-avatar-type="default">
+                        <div class="stored-avatars-display" id="storedAvatarsDisplay">
+                            <!-- For the custom avatar -->
+                            <img th:if="${user.custom_avatar_URL != null}" 
+                            th:src="${user.custom_avatar_URL}" alt="Custom Avatar" 
+                            class="avatar-option" data-avatar-type="custom">
+
+                            <!-- For the default avatar -->
+                            <img th:src="${user.default_avatar_URL}" alt="Default Avatar" 
+                            class="avatar-option" data-avatar-type="default">
+                        </div>
                     </div>
 
                 </div>

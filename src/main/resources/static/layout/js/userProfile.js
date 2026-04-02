@@ -10,11 +10,21 @@
 /* Avatar Selection (user choose to use either default or custom avatar) */
 const avatarDisplay = document.querySelector(".avatar-display");
 const avatarOptions  = document.querySelectorAll(".avatar-option"); 
-const avatarSelectionBox = document.getElementById("avatarsBox");
+const avatarSelectionBox = document.getElementById("avatarSelectionBox");
 
+// The box that displays the avatar options will be toggled (open + closed) 
+// when users click on the main avatar display.
 avatarDisplay.addEventListener("click", () => {
     avatarSelectionBox.classList.toggle("hidden");
 });
+
+/*
+// The box that displays the the avatars options + upload avatar will be closed 
+// if users click anywhere outside the box.
+document.addEventListener("click", function() {
+    avatarSelectionBox.classList.add("hidden");
+}); 
+*/
 
 avatarOptions.forEach(option => {
     option.addEventListener("click", () => {
@@ -43,7 +53,7 @@ avatarOptions.forEach(option => {
     });
 });
 
-/* Avatar Uploading (user upload a custom avatar to the server and update the display without reloading page) */
+/* Avatar Uploading (user upload a custom avatar to the server and update the display) */
 const avatarFileInput = document.getElementById("fileUpload");
 
 avatarFileInput.addEventListener("change", () => {
@@ -61,10 +71,48 @@ avatarFileInput.addEventListener("change", () => {
 
     })
     .then(res => res.json())
-    .then(data => {
-        document.querySelector(".avatar-display.custom").src = data.customAvatarURL;
+    .then( data => {
+        const customAvatarURL = data.customAvatarURL;
+
         console.log("Avatar uploaded successfully:", data);
-    }).catch(error => {
+
+        // Update the main avatar display on html immediately after successful upload. 
+        avatarDisplay.src = customAvatarURL;
+
+        // find the already existing custom avatar option and update it.
+        // Logic: if exists, replace. Otherwise, show. This is by UI design choice.
+        let customAvatarOption = document.querySelector(".avatar-option[data-avatar-type='custom']");
+        if (customAvatarOption) { 
+            customAvatarOption.src = customAvatarURL;
+        } else {
+            // Create only if there has not been a custom avatar uploaded before. (most likely new users)
+            const customAvatarOption = document.createElement("img"); 
+            customAvatarOption.src = customAvatarURL;
+            customAvatarOption.alt = "Custom Avatar";
+            customAvatarOption.classList.add("avatar-option");
+            customAvatarOption.dataset.avatarType = "custom";
+
+            // add click behavior
+            customAvatarOption.addEventListener("click", () => {
+                avatarDisplay.src = customAvatarURL;
+
+                fetch("/user/profile/avatar/selectedType", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ selectedAvatarType: "custom" })
+                });
+            });
+            document.getElementById("storedAvatarsDisplay").prepend(customAvatarOption);
+        }
+    })
+    .then(data => {
+        console.log("Avatar uploaded successfully:", data);
+
+        location.reload();
+    })
+    .catch(error => {
         console.error("From uploading avatar js:", error);
     });
 });

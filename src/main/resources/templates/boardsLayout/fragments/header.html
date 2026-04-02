@@ -23,7 +23,7 @@
             If they do, use that. If they don't, use a generel default avatar for them.    
         -->
         <div class="avatar-box" id="avatarBox">
-            <img th:src="${user != null and user.custom_avatar_URL != null ? user.custom_avatar_URL : user.default_avatar_URL}" 
+            <img th:src="${user.selected_avatar_type == 'custom' ? user.custom_avatar_URL : user.default_avatar_URL}" 
             alt="Avatar" class="avatar userItem">
 
         </div>

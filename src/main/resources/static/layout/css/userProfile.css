@@ -90,7 +90,7 @@
     font-weight: bold;
 }
 
-.avatars-box {
+.avatar-selection-box {
     flex-direction: row;
     gap: 4rem;
 
