@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.mo.mediaodyssey.layout.DTO.MovieResponse;
+import com.mo.mediaodyssey.layout.DTO.MoviesTMDB.MovieResponse;
 import com.mo.mediaodyssey.layout.models.BoardMedia;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.repositories.BoardMediaRepository;
 import com.mo.mediaodyssey.layout.services.BoardsService;
-import com.mo.mediaodyssey.layout.services.MovieService;
+import com.mo.mediaodyssey.layout.services.MediaServices.MovieService;
 import com.mo.mediaodyssey.shared.model.User;
 
 import org.springframework.web.bind.annotation.RequestMapping;

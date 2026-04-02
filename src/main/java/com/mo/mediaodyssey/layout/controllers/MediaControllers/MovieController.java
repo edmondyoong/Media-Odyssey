@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.layout.controllers;
+package com.mo.mediaodyssey.layout.controllers.MediaControllers;
 
 import java.util.List;
 
@@ -6,10 +6,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
-import com.mo.mediaodyssey.layout.DTO.MovieResponse;
+import com.mo.mediaodyssey.layout.DTO.MoviesTMDB.MovieResponse;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.services.BoardsService;
-import com.mo.mediaodyssey.layout.services.MovieService;
+import com.mo.mediaodyssey.layout.services.MediaServices.MovieService;
 import com.mo.mediaodyssey.shared.model.User;
 
 import org.springframework.web.bind.annotation.GetMapping;

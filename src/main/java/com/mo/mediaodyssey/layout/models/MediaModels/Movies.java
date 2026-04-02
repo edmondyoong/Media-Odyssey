@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.layout.models;
+package com.mo.mediaodyssey.layout.models.MediaModels;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.layout.DTO;
+package com.mo.mediaodyssey.layout.DTO.MoviesTMDB;
 
 import java.util.Map;
 
