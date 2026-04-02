@@ -39,12 +39,13 @@
 
                     <!--Display avatar on webpage-->
                     <img th:src="${user.selected_avatar_type == 'custom' 
-                    ? user.custom_avatar_URL : user.default_avatar_URL}" alt="Avatar" class="avatar-display custom">
+                    ? user.custom_avatar_URL : user.default_avatar_URL}" alt="Avatar" class="avatar-display">
 
                     <!-- The avatar selection box (that stores avatars) -->
 
                     <div class="avatar-selection-box hidden" id="avatarSelectionBox">
 
+                        <div class="stored-avatars-display" id="storedAvatarsDisplay">
                         <!-- This element will allow user to upload image files.
                         ** Design choice: It is determined that this element should always be presented even
                         * after the user has uploaded anything. So both custom + default will be displayed. 
@@ -60,7 +61,7 @@
                             accept=".png, .jpg, .jpeg, .svg" style="display: none;">
                         </div>
 
-                        <div class="stored-avatars-display" id="storedAvatarsDisplay">
+
                             <!-- For the custom avatar -->
                             <img th:if="${user.custom_avatar_URL != null}" 
                             th:src="${user.custom_avatar_URL}" alt="Custom Avatar" 

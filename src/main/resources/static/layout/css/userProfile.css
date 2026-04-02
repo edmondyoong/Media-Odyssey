@@ -1,7 +1,3 @@
-.hidden {
-    display: none;
-}
-
 .profile-header {
     display: flex;
     flex-direction: row;
@@ -18,11 +14,16 @@
 }
 
 .avatar-container{
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
 
     min-width: 180px;
+}
+
+.avatar-display, .avatar-option {
+    object-fit: cover;
 }
 
 .avatar-display {
@@ -42,61 +43,79 @@
     border-color: rgba(139, 92, 246, 0.8);
 }
 
-.avatar-option{
-    width: 120px;
-    height: 120px;
+.avatar-selection-box {
+    position: absolute;
+    top: 180px; 
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    padding: 1rem;
+    width: 265px;
+
+    background: rgba(20, 20, 30, 0.85);
+    backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    border-radius: 16px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+
+    z-index: 10;
+}
+
+.stored-avatars-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.avatar-option,
+.avatar-placeholder {
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
+
+    object-fit: cover;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(139, 92, 246, 0.4);
-
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
+}
+
+.avatar-option {
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(139, 92, 246, 0.35);
 }
 
 .avatar-option:hover {
-    background: rgba(139, 92, 246, 0.1);
-    border-color: rgba(139, 92, 246, 0.8);
+    transform: scale(1.08);
+    border-color: rgba(139, 92, 246, 0.9);
 }
 
 .avatar-placeholder {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px dashed rgba(139, 92, 246, 0.4);
-
-    cursor: pointer;
-    transition: all 0.3s ease;
+    border: 2px dashed rgba(139, 92, 246, 0.5);
 }
 
 .avatar-placeholder:hover {
-    background: rgba(139, 92, 246, 0.1);
-    border-color: rgba(139, 92, 246, 0.8);
+    transform: scale(1.05);
+    border-color: rgba(139, 92, 246, 0.9);
 }
 
 .plus-icon {
-    font-size: 40px;
-    color: rgba(139, 92, 246, 0.8);
-    font-weight: bold;
+    font-size: 28px;
+    color: rgba(139, 92, 246, 0.9);
 }
 
-.avatar-selection-box {
-    flex-direction: row;
-    gap: 4rem;
-
-    background: rgba(255, 255, 255, 0.02);
-    border-color: rgba(139, 92, 246, 0.8);
-    border-radius: 16px;
+.hidden {
+    display: none;
 }
 
 /* User info box (let user chooses their username, gender, description of themselves) */ 

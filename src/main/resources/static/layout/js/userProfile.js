@@ -11,21 +11,29 @@
 const avatarDisplay = document.querySelector(".avatar-display");
 const avatarOptions  = document.querySelectorAll(".avatar-option"); 
 const avatarSelectionBox = document.getElementById("avatarSelectionBox");
+// const storedAvatarsDisplay = document.getElementById("storedAvatarsDisplay");
 
 // The box that displays the avatar options will be toggled (open + closed) 
 // when users click on the main avatar display.
-avatarDisplay.addEventListener("click", () => {
+/* Toggle when clicking avatar */
+avatarDisplay.addEventListener("click", (e) => {
+    e.stopPropagation(); // prevent bubbling to document
     avatarSelectionBox.classList.toggle("hidden");
 });
 
-/*
-// The box that displays the the avatars options + upload avatar will be closed 
-// if users click anywhere outside the box.
-document.addEventListener("click", function() {
-    avatarSelectionBox.classList.add("hidden");
-}); 
-*/
+/* Prevent clicks INSIDE box from closing it */
+avatarSelectionBox.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
 
+/* Close when clicking anywhere else */
+document.addEventListener("click", () => {
+    avatarSelectionBox.classList.add("hidden");
+});
+
+// Response when user chose which avatar to use. 
+// This will return a json body of String ("default" or "custom") to the backend, 
+// which will be used to update the database.
 avatarOptions.forEach(option => {
     option.addEventListener("click", () => {
         const selectedSrc = option.getAttribute("src");
@@ -109,8 +117,6 @@ avatarFileInput.addEventListener("change", () => {
     })
     .then(data => {
         console.log("Avatar uploaded successfully:", data);
-
-        location.reload();
     })
     .catch(error => {
         console.error("From uploading avatar js:", error);

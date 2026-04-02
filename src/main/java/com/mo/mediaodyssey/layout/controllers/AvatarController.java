@@ -43,8 +43,8 @@ public class AvatarController {
 
         User user = (User) authentication.getPrincipal();
 
+        // set the variable in the database and save it.
         user.setSelected_avatar_type(selectedAvatarType);
-
         userRepository.save(user);
 
         return ResponseEntity.ok().build();
