@@ -1,13 +1,13 @@
 .profile-header {
     display: flex;
     flex-direction: row;
-    align-items: flex-start; 
-    gap: 10rem;
+    align-items: flex-start;
 
-    margin-top: 100px; 
-    margin-left: 100px;
-    margin-right: 100px;
+    gap: 4rem;
+
+    margin: 100px auto 0 auto; 
     padding: 2rem;
+    max-width: 1000px; 
 
     background: rgba(255, 255, 255, 0.02);
     border-radius: 16px;
@@ -147,4 +147,66 @@
 .info-items:focus {
     border-color: rgba(139, 92, 246, 0.7);
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+/*
+*** Responsive break points for tablet, iphone, etc
+*/
+/* --- Tablet <= 800 */
+@media (max-width: 900px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+
+        padding: 1.5rem;
+    }
+
+    .user-info-box {
+        width: 100%;
+        max-width: 500px;
+    }
+}
+
+/* --- Mobile <= 600 */
+@media (max-width: 600px) {
+    .user-profile-container {
+        padding: 0 0.5rem;
+    }
+
+    .profile-header {
+        margin-top: 80px;
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .avatar-display {
+        width: 120px;
+        height: 120px;
+    }
+
+    .avatar-selection-box {
+        width: 216px;
+        top: 140px; 
+        padding: 0.8rem;
+    }
+
+    .avatar-option,
+    .avatar-placeholder {
+        width: 55px;
+        height: 55px;
+    }
+
+    .plus-icon {
+        font-size: 22px;
+    }
+
+    .user-info-box {
+        width: 100%;
+    }
+
+    .info-items {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.8rem;
+    }
 }
