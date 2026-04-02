@@ -55,6 +55,7 @@ avatarOptions.forEach(option => {
             if (!response.ok) {
                 throw new Error("Failed to update. Try again later.");
             }
+            location.reload();
         }).catch(error => {
             console.error("From updating avatar type js:", error);
         });
