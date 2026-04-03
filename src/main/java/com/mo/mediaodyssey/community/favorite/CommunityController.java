@@ -107,9 +107,9 @@ public class CommunityController {
      * The current UI does not show a like button, but this endpoint is kept
      * because the ranking system still uses LIKE as part of the internal score.
      */
-    @PostMapping("/like/{mediaApiId}")
+    @PostMapping("/like")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> likeMedia(@PathVariable String mediaApiId,
+    public ResponseEntity<Map<String, Object>> likeMedia(@RequestParam String mediaApiId,
             @RequestParam String mediaType,
             HttpSession session,
             Authentication auth) {
@@ -144,9 +144,9 @@ public class CommunityController {
      * Records a VIEW interaction for the specified media item.
      * Called automatically by JavaScript when the page loads.
      */
-    @PostMapping("/view/{mediaApiId}")
+    @PostMapping("/view")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> incrementView(@PathVariable String mediaApiId,
+    public ResponseEntity<Map<String, Object>> incrementView(@RequestParam String mediaApiId,
             @RequestParam String mediaType,
             HttpSession session,
             Authentication auth) {

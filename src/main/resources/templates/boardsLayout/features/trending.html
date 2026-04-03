@@ -265,7 +265,7 @@
           const mediaApiId = card.dataset.apiId;
           const mediaType = card.dataset.type;
           fetch(
-            `/community/view/${mediaApiId}?mediaType=${encodeURIComponent(mediaType)}`,
+            `/community/view?mediaApiId=${encodeURIComponent(mediaApiId)}&mediaType=${encodeURIComponent(mediaType)}`,
             { method: "POST" },
           ).catch(() => {});
         });
@@ -295,7 +295,7 @@
           const mediaApiId = btn.dataset.apiId;
           const mediaType = btn.dataset.type;
           fetch(
-            `/community/like/${mediaApiId}?mediaType=${encodeURIComponent(mediaType)}`,
+            `/community/like?mediaApiId=${encodeURIComponent(mediaApiId)}&mediaType=${encodeURIComponent(mediaType)}`,
             { method: "POST" },
           )
             .then((r) => r.json())

@@ -227,25 +227,41 @@ public class MediaRankingService {
     private RankedMediaResponse fetchLastfmMetadata(String mediaApiId, long totalScore) {
         try {
             // Last.fm track URLs follow the pattern: https://www.last.fm/music/{artist}/_/{track}
-            String path = mediaApiId.replaceFirst("https://www\\.last\\.fm/music/", "");
+            String path = mediaApiId.replaceFirst("^https://www\\.last\\.fm/music/", "");
             String[] parts = path.split("/_/", 2);
             if (parts.length < 2) return null;
 
-            String artist = URLDecoder.decode(parts[0].replace("+", " "), "UTF-8");
-            String track  = URLDecoder.decode(parts[1].replace("+", " "), "UTF-8");
+            String artist = URLDecoder.decode(parts[0], "UTF-8").replace("+", " ").trim();
+            String track  = URLDecoder.decode(parts[1], "UTF-8").replace("+", " ").trim();
 
             String url = "https://ws.audioscrobbler.com/2.0/?method=track.getInfo"
                     + "&artist=" + java.net.URLEncoder.encode(artist, "UTF-8")
                     + "&track="  + java.net.URLEncoder.encode(track, "UTF-8")
+                    + "&autocorrect=1"
                     + "&api_key=" + lastfmApiKey
                     + "&format=json";
-
 
             String response = restTemplate.getForObject(url, String.class);
             JsonNode trackNode = objectMapper.readTree(response).path("track");
 
-            String title    = trackNode.path("name").asText("Unknown");
-            String artistName = trackNode.path("artist").path("name").asText("");
+            if (trackNode.isMissingNode() || trackNode.isEmpty()) {
+                return new RankedMediaResponse(
+                        mediaApiId,
+                        track,
+                        artist,
+                        "SONG",
+                        "",
+                        totalScore,
+                        toDisplayRating(totalScore));
+            }
+
+            String title = trackNode.path("name").asText(track);
+
+            JsonNode artistNode = trackNode.path("artist");
+            String artistName = artistNode.isTextual()
+                    ? artistNode.asText(artist)
+                    : artistNode.path("name").asText(artist);
+
             // Last.fm image array: index 3 is extralarge, fall back to index 2 (large)
             String imageUrl = trackNode.path("album").path("image").path(3).path("#text").asText("");
             if (imageUrl.isEmpty()) imageUrl = trackNode.path("album").path("image").path(2).path("#text").asText("");
