@@ -1,10 +1,9 @@
 package com.mo.mediaodyssey.layout.models;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mo.mediaodyssey.auth.model.User;
+import com.mo.mediaodyssey.shared.model.User;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -17,34 +16,37 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="boards")
+@Table(name = "boards")
 public class Boards {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
+    private Long id;
 
-    private String board_name; 
-    private String board_description; 
+    private String board_name;
+    private String board_description;
     private String board_type;
 
-    // Connect to User (Determine which users own a board. A board must be owned by a user.)
+    // Connect to User (Determine which users own a board. A board must be owned by
+    // a user.)
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    //Connect to BoardMedia (store the media objects that were put in this board)
+    // Connect to BoardMedia (store the media objects that were put in this board)
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardMedia> medias = new ArrayList<>();
- 
 
-    public Boards(){}
-    public Boards (Long id, String board_name, String board_description, String board_type, User user, List<BoardMedia> medias) {
-        this.id = id; 
+    public Boards() {
+    }
+
+    public Boards(Long id, String board_name, String board_description, String board_type, User user,
+            List<BoardMedia> medias) {
+        this.id = id;
         this.board_name = board_name;
-        this.board_description = board_description; 
-        this.board_type = board_type; 
-        this.user = user; 
+        this.board_description = board_description;
+        this.board_type = board_type;
+        this.user = user;
         this.medias = medias;
     }
 
@@ -80,23 +82,23 @@ public class Boards {
         this.board_type = board_type;
     }
 
-    //=========== FOR USER CONNECTION ===========
+    // =========== FOR USER CONNECTION ===========
 
-    public User getUser(){
+    public User getUser() {
         return user;
     }
 
-    public void setUser (User user){
-        this.user = user; 
+    public void setUser(User user) {
+        this.user = user;
     }
-    
-    //=========== For BoardMedia Connection ========
+
+    // =========== For BoardMedia Connection ========
     public List<BoardMedia> getMedias() {
         return medias;
     }
+
     public void setMedias(List<BoardMedia> medias) {
         this.medias = medias;
     }
 
-    
 }

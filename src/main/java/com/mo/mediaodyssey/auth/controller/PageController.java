@@ -7,8 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
+import com.mo.mediaodyssey.shared.model.User;
 
 @Controller
 public class PageController {

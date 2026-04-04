@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,11 +15,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.mo.mediaodyssey.auth.model.VerificationToken;
 import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.auth.repository.VerificationTokenRepository;
+import com.mo.mediaodyssey.shared.model.User;
+import com.mo.mediaodyssey.shared.services.EmailService;
 import com.mo.mediaodyssey.auth.dto.ResendVerifyTokenDto;
 import com.mo.mediaodyssey.auth.dto.VerifyTokenDto;
 import com.mo.mediaodyssey.auth.exception.InvalidVerificationTokenException;
 import com.mo.mediaodyssey.auth.exception.UserAlreadyVerifiedException;
-import com.mo.mediaodyssey.auth.model.User;
 
 @Service
 public class VerificationService {
@@ -27,22 +29,20 @@ public class VerificationService {
     // Debugging assisted by AI
 
     // Expiry length determined by environment variable. Default: 60 minutes
-    private final int tokenExpiryInMinutes;
-    private final VerificationTokenRepository verificationTokenRepository;
-    private final UserRepository userRepository;
-    private final EmailService emailService;
-
-    @Value("${APP_NAME:App}")
+    @Value("${spring.application.name:App}")
     private String appName;
 
-    public VerificationService(VerificationTokenRepository verificationTokenRepository,
-            @Value("${VERIFY_TOKEN_EXPIRY_IN_MINUTES:60}") int tokenExpiryInMinutes, UserRepository userRepository,
-            EmailService emailService) {
-        this.tokenExpiryInMinutes = tokenExpiryInMinutes;
-        this.verificationTokenRepository = verificationTokenRepository;
-        this.userRepository = userRepository;
-        this.emailService = emailService;
-    }
+    @Value("${email.verifytoken.expiry-in-minutes:}")
+    private int tokenExpiryInMinutes;
+
+    @Autowired
+    private VerificationTokenRepository verificationTokenRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public void createVerification(User user) {

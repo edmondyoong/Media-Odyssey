@@ -1,8 +1,9 @@
 package com.mo.mediaodyssey.controllersExtra;
 
-import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.services.CommentService;
 import com.mo.mediaodyssey.services.CommuService;
+import com.mo.mediaodyssey.shared.model.User;
+
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;

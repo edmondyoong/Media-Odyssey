@@ -7,10 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.mo.mediaodyssey.auth.model.User;
-import com.mo.mediaodyssey.auth.repository.UserRepository;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.services.BoardsService;
+import com.mo.mediaodyssey.shared.model.User;
 
 @Controller
 public class homeController {
@@ -18,28 +17,29 @@ public class homeController {
     /* After users logged in, they will be direct to homePage.html */
 
     private final BoardsService boardsService;
-    private final UserRepository userRepository;
 
-    public homeController(BoardsService boardsService, UserRepository userRepository) {
+    public homeController(BoardsService boardsService) {
         this.boardsService = boardsService;
-        this.userRepository = userRepository; 
     }
 
-    /* 
-    * homePage Mapping: 
-    *** In the case of not finding any boards (this will always happen for new users): 
-    ** homePage.html will not displayed any theme boards in "Jounreys you have joined".
-    *
-    * * Logic: This application does not include any unique username, it focuses on email. 
-    *   Therefore, authentication.getName() will return user's email.
-    */
+    /*
+     * homePage Mapping:
+     *** In the case of not finding any boards (this will always happen for new
+     * users):
+     ** homePage.html will not displayed any theme boards in
+     * "Jounreys you have joined".
+     *
+     * * Logic: This application does not include any unique username, it focuses on
+     * email.
+     * Therefore, authentication.getName() will return user's email.
+     */
     @GetMapping("/")
     public String home(Model model, Authentication authentication) {
 
         User user = (User) authentication.getPrincipal();
 
-        List<Boards> boards = boardsService.findBoardsByUser(user); 
-        
+        List<Boards> boards = boardsService.findBoardsByUser(user);
+
         model.addAttribute("boards", boards);
 
         return "boardsLayout/homePage";
