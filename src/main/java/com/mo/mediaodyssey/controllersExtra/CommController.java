@@ -1,12 +1,13 @@
 package com.mo.mediaodyssey.controllersExtra;
 
-import com.mo.mediaodyssey.auth.model.User;
 import com.mo.mediaodyssey.models.Community;
 import com.mo.mediaodyssey.models.DTO.CommunityDTO;
 import com.mo.mediaodyssey.models.DTO.CommunityMemberDTO;
 import com.mo.mediaodyssey.models.DTO.PostDTO;
 import com.mo.mediaodyssey.services.CommuService;
 import com.mo.mediaodyssey.services.PostService;
+import com.mo.mediaodyssey.shared.model.User;
+
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;

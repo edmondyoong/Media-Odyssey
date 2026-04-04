@@ -3,6 +3,8 @@ package com.mo.mediaodyssey.auth.model;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.mo.mediaodyssey.shared.model.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

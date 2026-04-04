@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.layout.DTO;
+package com.mo.mediaodyssey.layout.DTO.MoviesTMDB;
 
 public class Genres {
     private Long id; 

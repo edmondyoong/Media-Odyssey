@@ -228,7 +228,7 @@ public class MediaRankingService {
         String upper = value.trim().toUpperCase();
         return switch (upper) {
             case "MOVIE", "MOVIES" -> "MOVIE";
-            case "GAME", "GAMES" -> "GAME";
+            case "GAME", "GAMES"   -> "GAME";
             case "SONG", "SONGS", "MUSIC" -> "SONG";
             default -> upper;
         };

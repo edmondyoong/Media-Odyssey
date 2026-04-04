@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.layout.services;
+package com.mo.mediaodyssey.layout.services.MediaServices;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.mo.mediaodyssey.layout.DTO.MovieResponse;
+import com.mo.mediaodyssey.layout.DTO.MoviesTMDB.MovieResponse;
 
 @Service
 public class MovieService {
