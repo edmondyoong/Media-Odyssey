@@ -204,9 +204,9 @@ function renderCards(items) {
 
     /*
         *** This <div> HTML will be modified so user can click on them and be brought to HTML that displays
-        **  details information of the meta they clicked on. 
+        **  details information of the meta they clicked on.
         ** Logic: Media display Controller will have the path /mediaView/mediaType/mediaId
-        *  This ensures the type of media being cliked on and its id. (nice =])
+        *  This ensures the type of media being clicked on and its id. (nice =])
         *
         *** Only movie is being worked on right now.
     */
@@ -214,13 +214,18 @@ function renderCards(items) {
     items.forEach(item => {
         const card = document.createElement("a");
         card.className = "rec-card";
+        if (item.mediaType === 'SONG') {
+            card.classList.add('song-card');
+        }
         card.dataset.mediaApiId = item.mediaApiId;
         card.dataset.mediaType  = item.mediaType;
         card.dataset.genre      = item.genre;
 
-        const img = item.imageUrl && item.imageUrl !== "null"
-            ? `<img class="rec-img" src="${item.imageUrl}" alt="${item.title}" onerror="this.style.display='none'">`
-            : `<div class="rec-img rec-img-placeholder">No Image</div>`;
+        const img = item.mediaType === 'SONG'
+            ? ''
+            : item.imageUrl && item.imageUrl !== "null"
+                ? `<img class="rec-img" src="${item.imageUrl}" alt="${item.title}" onerror="this.style.display='none'">`
+                : `<div class="rec-img rec-img-placeholder">No Image</div>`;
 
         // Intercept click: record VIEW interaction then navigate
         const mediaType = item.mediaType.toLowerCase();
@@ -238,10 +243,10 @@ function renderCards(items) {
             ${img}
             <div class="rec-info">
                 <p class="rec-title">${item.title}</p>
-                <p class="rec-meta">${item.genre} · ${item.mediaType === 'SONG' ? item.artist : 'score: ' + item.score.toFixed(1)}</p>
+                <p class="rec-meta">${item.genre}${item.mediaType === 'SONG' && item.artist ? ' · ' + item.artist : ''}</p>
             </div>
             <div class="rec-actions">
-                <button class="rec-btn like-btn" onclick="recordInteraction(this, 'LIKE')">♡ Like</button>
+                <button class="rec-btn like-btn" onclick="toggleLike(this)">♡ Like</button>
             </div>
         `;
 
@@ -250,14 +255,64 @@ function renderCards(items) {
             const likeBtn = card.querySelector(".like-btn");
             likeBtn.textContent = "❤ Liked!";
             likeBtn.classList.add("liked");
-            likeBtn.disabled = true;
+            likeBtn.dataset.liked = "true";
         }
 
         cardsEl.appendChild(card);
     });
 }
 
-// POST a VIEW or LIKE interaction to the backend
+// Toggle like/unlike on a rec card
+async function toggleLike(btn) {
+    const card      = btn.closest(".rec-card");
+    const mediaApiId = card.dataset.mediaApiId;
+    const mediaType  = card.dataset.mediaType;
+    const genre      = card.dataset.genre;
+    const isLiked    = btn.dataset.liked === "true";
+
+    if (isLiked) {
+        // Unlike
+        try {
+            const res = await fetch(`/api/recommendations/interactions/like?mediaApiId=${encodeURIComponent(mediaApiId)}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                btn.textContent = "♡ Like";
+                btn.classList.remove("liked");
+                btn.dataset.liked = "false";
+            } else {
+                console.warn("Unlike failed:", res.status);
+            }
+        } catch (err) {
+            console.error("Unlike error:", err);
+        }
+    } else {
+        // Like
+        try {
+            const res = await fetch("/api/recommendations/interactions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mediaApiId,
+                    interactionType: "LIKE",
+                    mediaType,
+                    genres: [genre]
+                })
+            });
+            if (res.ok) {
+                btn.textContent = "❤ Liked!";
+                btn.classList.add("liked");
+                btn.dataset.liked = "true";
+            } else {
+                console.warn("Like failed:", res.status);
+            }
+        } catch (err) {
+            console.error("Like error:", err);
+        }
+    }
+}
+
+// POST a VIEW interaction to the backend
 async function recordInteraction(btnOrCard, interactionType) {
     const card = btnOrCard.classList.contains("rec-card")
         ? btnOrCard
@@ -279,13 +334,7 @@ async function recordInteraction(btnOrCard, interactionType) {
             })
         });
 
-        if (res.ok) {
-            if (interactionType === "LIKE") {
-                btnOrCard.textContent = "❤ Liked!";
-                btnOrCard.classList.add("liked");
-                btnOrCard.disabled = true;
-            }
-        } else {
+        if (!res.ok) {
             console.warn("Interaction failed:", res.status);
         }
     } catch (err) {

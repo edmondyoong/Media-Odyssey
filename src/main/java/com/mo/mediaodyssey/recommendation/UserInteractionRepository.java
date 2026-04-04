@@ -1,9 +1,11 @@
 package com.mo.mediaodyssey.recommendation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +24,12 @@ public interface UserInteractionRepository extends JpaRepository<UserInteraction
     // Get all mediaApiIds that a user has liked
     @Query("SELECT ui.mediaApiId FROM UserInteraction ui WHERE ui.userId = :userId AND ui.interactionType = 'LIKE'")
     List<String> findLikedMediaApiIdsByUserId(@Param("userId") Long userId);
+
+    // Delete a LIKE interaction for a user + media item (used for unlike)
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM UserInteraction ui WHERE ui.userId = :userId AND ui.mediaApiId = :mediaApiId AND ui.interactionType = 'LIKE'")
+    void deleteLikeByUserIdAndMediaApiId(@Param("userId") Long userId, @Param("mediaApiId") String mediaApiId);
 
     // ── Community Favourites Ranking Queries ──────────────────────────────────
 

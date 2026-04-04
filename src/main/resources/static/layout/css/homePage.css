@@ -404,6 +404,14 @@ when the js runs. Testing are required to see how it works.*/
     background-color: #1a7a4a;
 }
 
+/* DASHBOARD HTML /////////////// */ 
+.dashboardTitle {
+    margin: 13px;
+}
+
+.rec-card .rec-img-placeholder {
+    display: none;
+}
 /* ===== Responsive Design ===== */
 @media (max-width: 768px) {
   .main-content {
