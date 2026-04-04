@@ -3,17 +3,12 @@ package com.mo.mediaodyssey.community.favorite;
 /**
  * DTO used by the Community Favourites page.
  *
- * Current iteration:
- * - use totalScore internally for ranking
- * - expose displayRating for star-based UI
- *
- * Later iteration ideas:
- * - add fast-rising / trendingGrowth fields
- * - add user-submitted rating fields if needed
+ * Popularity Score = views * 1 + likes * 10
+ * Likes and views are exposed separately for display.
  */
 public class RankedMediaResponse {
 
-    /** External API id (TMDB / RAWG / Spotify) */
+    /** External API id (TMDB / RAWG / Last.fm URL) */
     private String mediaApiId;
 
     /** Display title */
@@ -28,26 +23,59 @@ public class RankedMediaResponse {
     /** Poster / thumbnail / album image */
     private String imageUrl;
 
-    /** Internal score = views * 1 + likes * 10 */
+    /** Popularity score = views * 1 + likes * 10 */
     private long totalScore;
 
-    /** UI-only star rating derived from totalScore */
-    private double displayRating;
+    /** Number of LIKE interactions */
+    private long likes;
 
+    /** Number of VIEW interactions */
+    private long views;
+
+    /**
+     * Number of LIKE interactions in the past 7 days — used by Fast-Rising section.
+     */
+    private long weeklyLikes;
+
+    /** Constructor for Top 10 ranked items */
     public RankedMediaResponse(String mediaApiId,
             String title,
             String artist,
             String mediaType,
             String imageUrl,
             long totalScore,
-            double displayRating) {
+            long likes,
+            long views) {
         this.mediaApiId = mediaApiId;
         this.title = title;
         this.artist = artist;
         this.mediaType = mediaType;
         this.imageUrl = imageUrl;
         this.totalScore = totalScore;
-        this.displayRating = displayRating;
+        this.likes = likes;
+        this.views = views;
+        this.weeklyLikes = 0;
+    }
+
+    /** Constructor for Fast-Rising items */
+    public RankedMediaResponse(String mediaApiId,
+            String title,
+            String artist,
+            String mediaType,
+            String imageUrl,
+            long totalScore,
+            long likes,
+            long views,
+            long weeklyLikes) {
+        this.mediaApiId = mediaApiId;
+        this.title = title;
+        this.artist = artist;
+        this.mediaType = mediaType;
+        this.imageUrl = imageUrl;
+        this.totalScore = totalScore;
+        this.likes = likes;
+        this.views = views;
+        this.weeklyLikes = weeklyLikes;
     }
 
     public String getMediaApiId() {
@@ -74,7 +102,15 @@ public class RankedMediaResponse {
         return totalScore;
     }
 
-    public double getDisplayRating() {
-        return displayRating;
+    public long getLikes() {
+        return likes;
+    }
+
+    public long getViews() {
+        return views;
+    }
+
+    public long getWeeklyLikes() {
+        return weeklyLikes;
     }
 }

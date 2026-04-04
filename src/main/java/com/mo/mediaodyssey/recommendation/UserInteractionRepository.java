@@ -34,21 +34,21 @@ public interface UserInteractionRepository extends JpaRepository<UserInteraction
      * on the Community Favourites page.
      *
      * Returns a list of Object[] where:
-     *   [0] = mediaApiId  (String)
-     *   [1] = mediaType   (String) — "MOVIE", "GAME", or "SONG"
-     *   [2] = totalScore  (Long)
+     * [0] = mediaApiId (String)
+     * [1] = mediaType (String) — "MOVIE", "GAME", or "SONG"
+     * [2] = totalScore (Long)
      */
     @Query("""
-        SELECT ui.mediaApiId, ui.mediaType,
-               SUM(CASE ui.interactionType
-                   WHEN 'LIKE' THEN 10
-                   WHEN 'VIEW' THEN 1
-                   ELSE 0 END) AS totalScore
-        FROM UserInteraction ui
-        GROUP BY ui.mediaApiId, ui.mediaType
-        ORDER BY totalScore DESC
-        LIMIT 10
-    """)
+                SELECT ui.mediaApiId, ui.mediaType,
+                       SUM(CASE ui.interactionType
+                           WHEN 'LIKE' THEN 10
+                           WHEN 'VIEW' THEN 1
+                           ELSE 0 END) AS totalScore
+                FROM UserInteraction ui
+                GROUP BY ui.mediaApiId, ui.mediaType
+                ORDER BY totalScore DESC
+                LIMIT 10
+            """)
     List<Object[]> findTop10ByScore();
 
     /**
@@ -58,17 +58,17 @@ public interface UserInteractionRepository extends JpaRepository<UserInteraction
      * @param mediaType one of "MOVIE", "GAME", or "SONG"
      */
     @Query("""
-        SELECT ui.mediaApiId, ui.mediaType,
-               SUM(CASE ui.interactionType
-                   WHEN 'LIKE' THEN 10
-                   WHEN 'VIEW' THEN 1
-                   ELSE 0 END) AS totalScore
-        FROM UserInteraction ui
-        WHERE ui.mediaType = :mediaType
-        GROUP BY ui.mediaApiId, ui.mediaType
-        ORDER BY totalScore DESC
-        LIMIT 10
-    """)
+                SELECT ui.mediaApiId, ui.mediaType,
+                       SUM(CASE ui.interactionType
+                           WHEN 'LIKE' THEN 10
+                           WHEN 'VIEW' THEN 1
+                           ELSE 0 END) AS totalScore
+                FROM UserInteraction ui
+                WHERE ui.mediaType = :mediaType
+                GROUP BY ui.mediaApiId, ui.mediaType
+                ORDER BY totalScore DESC
+                LIMIT 10
+            """)
     List<Object[]> findTop10ByScoreAndMediaType(@Param("mediaType") String mediaType);
 
     /**
@@ -76,18 +76,62 @@ public interface UserInteractionRepository extends JpaRepository<UserInteraction
      * Used for the trending section on the Community Favourites page.
      *
      * Returns a list of Object[] where:
-     *   [0] = mediaApiId  (String)
-     *   [1] = mediaType   (String)
-     *   [2] = likeCount   (Long)
+     * [0] = mediaApiId (String)
+     * [1] = mediaType (String)
+     * [2] = likeCount (Long)
      */
     @Query("""
-        SELECT ui.mediaApiId, ui.mediaType, COUNT(ui) AS likeCount
-        FROM UserInteraction ui
-        WHERE ui.interactionType = 'LIKE'
-        AND ui.timestamp >= :since
-        GROUP BY ui.mediaApiId, ui.mediaType
-        ORDER BY likeCount DESC
-        LIMIT 5
-    """)
+                SELECT ui.mediaApiId, ui.mediaType, COUNT(ui) AS likeCount
+                FROM UserInteraction ui
+                WHERE ui.interactionType = 'LIKE'
+                AND ui.timestamp >= :since
+                GROUP BY ui.mediaApiId, ui.mediaType
+                ORDER BY likeCount DESC
+                LIMIT 5
+            """)
     List<Object[]> findTop5TrendingLikesSince(@Param("since") java.time.LocalDateTime since);
+
+    /**
+     * Returns likes and views count separately per mediaApiId for Top 10 ranking.
+     *
+     * Returns a list of Object[] where:
+     * [0] = mediaApiId (String)
+     * [1] = mediaType (String)
+     * [2] = totalScore (Long)
+     * [3] = likeCount (Long)
+     * [4] = viewCount (Long)
+     */
+    @Query("""
+                SELECT ui.mediaApiId, ui.mediaType,
+                       SUM(CASE ui.interactionType
+                           WHEN 'LIKE' THEN 10
+                           WHEN 'VIEW' THEN 1
+                           ELSE 0 END) AS totalScore,
+                       SUM(CASE WHEN ui.interactionType = 'LIKE' THEN 1 ELSE 0 END) AS likeCount,
+                       SUM(CASE WHEN ui.interactionType = 'VIEW' THEN 1 ELSE 0 END) AS viewCount
+                FROM UserInteraction ui
+                GROUP BY ui.mediaApiId, ui.mediaType
+                ORDER BY totalScore DESC
+                LIMIT 10
+            """)
+    List<Object[]> findTop10ByScoreWithCounts();
+
+    /**
+     * Same as findTop10ByScoreWithCounts but filtered to a specific media type.
+     */
+    @Query("""
+                SELECT ui.mediaApiId, ui.mediaType,
+                       SUM(CASE ui.interactionType
+                           WHEN 'LIKE' THEN 10
+                           WHEN 'VIEW' THEN 1
+                           ELSE 0 END) AS totalScore,
+                       SUM(CASE WHEN ui.interactionType = 'LIKE' THEN 1 ELSE 0 END) AS likeCount,
+                       SUM(CASE WHEN ui.interactionType = 'VIEW' THEN 1 ELSE 0 END) AS viewCount
+                FROM UserInteraction ui
+                WHERE ui.mediaType = :mediaType
+                GROUP BY ui.mediaApiId, ui.mediaType
+                ORDER BY totalScore DESC
+                LIMIT 10
+            """)
+    List<Object[]> findTop10ByScoreWithCountsAndMediaType(@Param("mediaType") String mediaType);
 }
