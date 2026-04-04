@@ -10,32 +10,9 @@
 
     <style>
       /* Added for current iteration:
-         show star-based rating indicator in Top 10 cards
+         show popularity score in Top 10 cards
          while keeping the rest of the page structure mostly unchanged. */
-      .display-rating {
-        margin-top: 8px;
-      }
-
-      .display-rating .stars {
-        font-size: 1.1rem;
-        letter-spacing: 2px;
-        line-height: 1;
-      }
-
-      .display-rating .filled {
-        color: #f5b301;
-      }
-
-      .display-rating .empty {
-        color: #cfcfcf;
-      }
-
-      .display-rating .rating-text {
-        display: inline-block;
-        margin-left: 6px;
-        font-size: 0.9rem;
-        color: #666;
-      }
+      
     </style>
   </head>
   <body>
@@ -49,6 +26,14 @@
 
     <main class="main-content">
       <h1>Community Favourites</h1>
+
+      <!-- ── Score explanation ──────────────────────────────────────── -->
+      <!-- Tells users how the Popularity Score is calculated -->
+      <div class="score-info">
+        ⭐ <strong>Popularity Score</strong> = views × 1 + likes × 10.
+        The more the community interacts, the higher the score.
+        <strong>Fast-Rising</strong> shows the top 5 most-liked items in the past 7 days.
+      </div>
 
       <!-- ── Category Tabs ──────────────────────────────────────────── -->
       <!--
@@ -166,7 +151,7 @@
 
                 Current iteration:
                 - keep internal score for sorting
-                - show star-based rating indicator in UI instead of raw score
+                - show popularity score in UI (views * 1 + likes * 10)
                 - do not show like button on the card UI
 
                 
@@ -208,20 +193,14 @@
               <em th:text="'[' + ${m.mediaType} + ']'">[Type]</em>
             </div>
 
-            <!-- Added: read-only star rating display derived from backend score -->
-            <!-- Requires m.displayRating from RankedMediaResponse / MediaRankingService -->
-            <div
-              class="display-rating"
-              th:with="rounded=${T(java.lang.Math).round(m.displayRating)}"
-            >
-              <div class="stars">
-                <span th:classappend="${rounded >= 1} ? 'filled' : 'empty'">★</span>
-                <span th:classappend="${rounded >= 2} ? 'filled' : 'empty'">★</span>
-                <span th:classappend="${rounded >= 3} ? 'filled' : 'empty'">★</span>
-                <span th:classappend="${rounded >= 4} ? 'filled' : 'empty'">★</span>
-                <span th:classappend="${rounded >= 5} ? 'filled' : 'empty'">★</span>
-                <span class="rating-text" th:text="${m.displayRating} + ' / 5'">4.0 / 5</span>
-              </div>
+            <!-- Added: popularity score display derived from community interactions -->
+            <!-- Requires m.totalScore, m.likes, m.views from RankedMediaResponse / MediaRankingService -->
+            <div class="popularity-score">
+              ⭐ Popularity Score: <span class="score-number" th:text="${m.totalScore}">0</span>
+              <span class="score-detail">
+                <span th:text="${m.likes}">0</span> likes ·
+                <span th:text="${m.views}">0</span> views
+              </span>
             </div>
 
             <!--
