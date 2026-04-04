@@ -2,6 +2,8 @@ package com.mo.mediaodyssey.layout.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 public class MappingController {
@@ -30,9 +32,15 @@ public class MappingController {
      *
      * This fixes the earlier issue where opening /trendingTab directly
      * bypassed the controller logic and therefore broke filtering/sorting.
-     */
+    */
     @GetMapping("/trendingTab")
     public String navToTrendingTab() {
         return "redirect:/community";
     }
+
+    @GetMapping("/userProfile")
+    public String navToUserProfile() {
+        return "boardsLayout/userSide/userProfile";
+    }
+    
 }

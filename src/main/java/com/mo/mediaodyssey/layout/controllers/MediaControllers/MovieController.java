@@ -1,4 +1,4 @@
-package com.mo.mediaodyssey.layout.controllers;
+package com.mo.mediaodyssey.layout.controllers.MediaControllers;
 
 import java.util.List;
 
@@ -6,61 +6,60 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
-import com.mo.mediaodyssey.auth.model.User;
-import com.mo.mediaodyssey.layout.DTO.MovieResponse;
+import com.mo.mediaodyssey.layout.DTO.MoviesTMDB.MovieResponse;
 import com.mo.mediaodyssey.layout.models.Boards;
 import com.mo.mediaodyssey.layout.services.BoardsService;
-import com.mo.mediaodyssey.layout.services.MovieService;
+import com.mo.mediaodyssey.layout.services.MediaServices.MovieService;
+import com.mo.mediaodyssey.shared.model.User;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
 
 @Controller
 @RequestMapping("/mediaView")
 public class MovieController {
 
-    private final MovieService movieService; 
+    private final MovieService movieService;
     private final BoardsService boardsService;
 
-    public MovieController (MovieService movieService, BoardsService boardsService) {
-        this.movieService = movieService; 
-        this.boardsService = boardsService; 
+    public MovieController(MovieService movieService, BoardsService boardsService) {
+        this.movieService = movieService;
+        this.boardsService = boardsService;
     }
 
     /*
-    * *** This function will fetch the movie's id from homePage.js (mediaApiId)
-    * **  Call TMDB to get the details of the movie to set up movieDisplay.html
-    * 
-    * **  User and Boards are use for adding media into theme board logic.
-    * **  All the boards created by the current logged in user will be fetched every user clicked in any movie.
-    * **  This way, their boards will be displayed in the drop down box in the page. 
-    * **  => Allow users to add media into their created theme-boards.
-    */
+     * *** This function will fetch the movie's id from homePage.js (mediaApiId)
+     * ** Call TMDB to get the details of the movie to set up movieDisplay.html
+     * 
+     * ** User and Boards are use for adding media into theme board logic.
+     * ** All the boards created by the current logged in user will be fetched every
+     * user clicked in any movie.
+     * ** This way, their boards will be displayed in the drop down box in the page.
+     * ** => Allow users to add media into their created theme-boards.
+     */
     @GetMapping("/movie/{id}")
-    public String getMovie(@PathVariable Long id, 
-                        Model model, RedirectAttributes redirectAttributes, Authentication authentication) {
+    public String getMovie(@PathVariable Long id,
+            Model model, RedirectAttributes redirectAttributes, Authentication authentication) {
 
         try {
-            //Get the movie (1 object)
+            // Get the movie (1 object)
             MovieResponse movie = movieService.getMovieById(id);
 
-            //Identify the User in order to get all their boards
+            // Identify the User in order to get all their boards
             User user = (User) authentication.getPrincipal();
             // Use user to find all the boards that htis user created
             List<Boards> boards = boardsService.findBoardsByUser(user);
 
-            model.addAttribute("movie", movie); 
+            model.addAttribute("movie", movie);
             model.addAttribute("boards", boards);
 
-            return "boardsLayout/mediaDisplay/movieDisplay"; 
+            return "boardsLayout/mediaDisplay/movieDisplay";
 
-        } catch (Exception e){
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Unable to load this movie. Please try again later.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Unable to load this movie. Please try again later.");
             return "redirect:/";
         }
     }
@@ -76,8 +75,5 @@ public class MovieController {
         redirectAttributes.addFlashAttribute("errorMessage", "Coming soon :)");
         return "redirect:/";
     }
-    
-    
-    
-    
+
 }

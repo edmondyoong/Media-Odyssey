@@ -6,23 +6,25 @@
 
             <!-- Navigates over to dashboard.html (name can be changed) -->
             <li data-feature="dashboard">
-                <a href="/dashboardTab" class="menu-items">Dashboard</a>
+                <a href="/dashboardTab" class="sidebar-menu-items">Dashboard</a>
             </li>
 
             <!-- Navigates over to social.html (name can be changed)-->
             <li data-feature="socialFeature">
-                <a href="/socialTab" class="menu-items">Community</a>
+                <a href="/socialTab" class="sidebar-menu-items">Community</a>
             </li>
 
             <!-- Navigates over to trending.html (name can be changed)-->
             <li data-feature="trending">
-                <a href="/trendingTab" class="menu-items">Trending</a>
-            </li>
-
-            <li data-feature="logout">
-                <a href="/auth/logout" class="menu-items">Log out</a>
+                <a href="/trendingTab" class="sidebar-menu-items">Trending</a>
             </li>
 
         </ul>
+
+        <!-- This footer in the sidebar will be at the botton of the side bar. 
+        This is to navigate to user profile + log out -->
+        <div class="sidebar-footer">
+            <a href="/auth/logout" class="sidebar-menu-items">Log out</a>
+        </div>
     </div>
 </aside>

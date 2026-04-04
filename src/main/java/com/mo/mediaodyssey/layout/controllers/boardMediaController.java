@@ -1,19 +1,13 @@
 package com.mo.mediaodyssey.layout.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mo.mediaodyssey.layout.models.BoardMedia;
-import com.mo.mediaodyssey.layout.models.Boards;
-import com.mo.mediaodyssey.layout.repositories.BoardMediaRepository;
-import com.mo.mediaodyssey.layout.repositories.BoardsRepository;
 import com.mo.mediaodyssey.layout.services.BoardMediaService;
 
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,11 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/boards")
 public class boardMediaController {
     
-    private final BoardMediaRepository boardMediaRepository; 
     private final BoardMediaService boardMediaService;
 
-    public boardMediaController (BoardMediaRepository boardMediaRepository, BoardMediaService boardMediaService) {
-        this.boardMediaRepository = boardMediaRepository; 
+    public boardMediaController (BoardMediaService boardMediaService) {
         this.boardMediaService = boardMediaService;
     }
 
