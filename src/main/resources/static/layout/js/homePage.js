@@ -243,7 +243,7 @@ function renderCards(items) {
             ${img}
             <div class="rec-info">
                 <p class="rec-title">${item.title}</p>
-                <p class="rec-meta">${item.genre} · ${item.mediaType === 'SONG' ? item.artist : 'score: ' + item.score.toFixed(1)}</p>
+                <p class="rec-meta">${item.genre}${item.mediaType === 'SONG' && item.artist ? ' · ' + item.artist : ''}</p>
             </div>
             <div class="rec-actions">
                 <button class="rec-btn like-btn" onclick="toggleLike(this)">♡ Like</button>
