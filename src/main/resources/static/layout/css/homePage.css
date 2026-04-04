@@ -406,3 +406,7 @@ when the js runs. Testing are required to see how it works.*/
 .dashboardTitle {
     margin: 13px;
 }
+
+.rec-card .rec-img-placeholder {
+    display: none;
+}

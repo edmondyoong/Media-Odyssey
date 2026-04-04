@@ -214,13 +214,18 @@ function renderCards(items) {
     items.forEach(item => {
         const card = document.createElement("a");
         card.className = "rec-card";
+        if (item.mediaType === 'SONG') {
+          card.classList.add('song-card');
+        }
         card.dataset.mediaApiId = item.mediaApiId;
         card.dataset.mediaType  = item.mediaType;
         card.dataset.genre      = item.genre;
 
-        const img = item.imageUrl && item.imageUrl !== "null"
-            ? `<img class="rec-img" src="${item.imageUrl}" alt="${item.title}" onerror="this.style.display='none'">`
-            : `<div class="rec-img rec-img-placeholder">No Image</div>`;
+        const img = item.mediaType === 'SONG'
+            ? ''
+            : item.imageUrl && item.imageUrl !== "null"
+                ? `<img class="rec-img" src="${item.imageUrl}" alt="${item.title}" onerror="this.style.display='none'">`
+                : `<div class="rec-img rec-img-placeholder">No Image</div>`;
 
         // Intercept click: record VIEW interaction then navigate
         const mediaType = item.mediaType.toLowerCase();
