@@ -38,6 +38,15 @@ public class RecommendationController {
         return ResponseEntity.ok().build();
     }
 
+    // DELETE /api/recommendations/interactions/like?mediaApiId=123
+    @DeleteMapping("/interactions/like")
+    public ResponseEntity<Void> unlikeMedia(@RequestParam String mediaApiId,
+                                             Authentication auth) {
+        Long userId = getUserIdFromSession(auth);
+        recommendationService.unlikeMedia(userId, mediaApiId);
+        return ResponseEntity.ok().build();
+    }
+
     // GET /api/recommendations?mediaType=MOVIE
     @GetMapping
     public ResponseEntity<List<RecommendationResponse>> getRecommendations(@RequestParam String mediaType,
